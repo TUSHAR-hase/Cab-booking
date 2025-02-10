@@ -1,0 +1,52 @@
+import mongoose from "mongoose"
+
+const addressSchema = new mongoose.Schema({
+    area: {
+        type: String,
+        required: true
+    },
+    district: {
+        type: String,
+        required: true
+    },
+    pincode: {
+        type: Number,
+        min: 6,
+        max: 6,
+        required: true,
+    },
+    longitude: {
+        type: Number,
+    },
+    latitude: {
+        type: Number
+    }
+});
+
+const hotelSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    address: {
+        type: addressSchema,  // Corrected here to use 'type'
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    hotelImages: [
+        {
+            type: String
+        }
+    ],
+    isApproved: {
+        type: Boolean,
+        default: false
+    }
+}, { timestamps: true });
+
+const Hotel = mongoose.model("Hotel", hotelSchema);
+
+export default Hotel;

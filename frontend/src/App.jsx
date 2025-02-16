@@ -7,6 +7,10 @@ import Footer from './Components/Footer.jsx';
 import FlightSearch from "./Pages/Flight/FlightSearch.jsx";
 import FlightDetails from "./Pages/Flight/FlightDetails.jsx";
 import FlightReviewPage from "./Pages/Flight/FlightReview.jsx";
+import HotelSearch from "./Pages/Hotel/HotelSearch.jsx";
+import HotelDetails from "./Pages/Hotel/HotelDetails.jsx";
+import HotelReviewPage from "./Pages/Hotel/HotelReviews.jsx";
+
 
 function App() {
 
@@ -17,8 +21,12 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/booking/flight" element={<FlightSearch />} />
-        <Route path="/booking/flightdeatils" element={<FlightDetails />} />
+        <Route path="/booking/flightdetails" element={<FlightDetails />} />
         <Route path="/booking/flightreview" element={<FlightReviewPage />} />
+        <Route path="/booking/hotel" element={<HotelSearch />} />
+        <Route path="/booking/hoteldetails" element={<HotelDetails />} />
+        <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
+
       </Routes>
       <Footer />
     </Router>

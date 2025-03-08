@@ -10,11 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@mantine/core": "^7.16.3",
     "@mantine/hooks": "^7.16.3",
+    "@mui/material": "^6.4.6",
     "@tabler/icons-react": "^3.30.0",
     "@tailwindcss/vite": "^4.0.5",
+    "axios": "^1.8.1",
     "framer-motion": "^12.4.2",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-datepicker": "^8.0.0",

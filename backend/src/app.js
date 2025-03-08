@@ -1,6 +1,8 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import { userRouter } from "./routes/main/userRoutes.js";
+
 // import "./services/deadlineCron.js"
 const app = express()
 app.use(cors({
@@ -12,9 +14,11 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }))
 app.use(express.static("public"))
 app.use(cookieParser());
 
+app.use("/api/user", userRouter)
 
 app.get("/", (req, res) => {
-    res.send("Welcome to the backend")
+    res.send("Welcome to the backend");
 })
+
 
 export { app }

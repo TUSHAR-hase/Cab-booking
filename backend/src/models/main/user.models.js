@@ -21,10 +21,19 @@ const userSchema = new mongoose.Schema({
     otp: {
         type: Number,
     },
+    isVerifiedOtp: {
+        type: Boolean,
+        default: false
+    },
     type: {
         type: String,
         enum: ["customer", "admin", "hotelOwner", "cabOwner", "flightOwner"],
         default: "customer"
+    },
+
+    passowrd: {
+        type: String,
+        required: true,
     },
 
 }, { timestamps: true })

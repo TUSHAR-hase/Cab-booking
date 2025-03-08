@@ -10,6 +10,9 @@ import FlightReviewPage from "./Pages/Flight/FlightReview.jsx";
 import HotelSearch from "./Pages/Hotel/HotelSearch.jsx";
 import HotelDetails from "./Pages/Hotel/HotelDetails.jsx";
 import HotelReviewPage from "./Pages/Hotel/HotelReviews.jsx";
+import Register from "./Pages/Main/Register.jsx";
+import OtpPage from "./Pages/Main/Otp.jsx";
+import Login from "./Pages/Main/Login.jsx";
 
 
 function App() {
@@ -20,6 +23,9 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register/>} />
+        <Route path="/login" element={<Login/>} />
+        <Route path="/otp/:email" element={<OtpPage/>} />
         <Route path="/booking/flight" element={<FlightSearch />} />
         <Route path="/booking/flightdetails" element={<FlightDetails />} />
         <Route path="/booking/flightreview" element={<FlightReviewPage />} />

@@ -1,9 +1,15 @@
 import mongoose from "mongoose";
 
 const hotelOwnerSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+    name: {
+        type: String,
+        required: true
+    }, email: {
+        type: String,
+        required: true
+    }, password: {
+        type: String,
+        requird: true
     }, bussinessName: {
         type: String,
         required: true
@@ -12,6 +18,12 @@ const hotelOwnerSchema = new mongoose.Schema({
         required: true
     },
     isApproved: {
+        type: Boolean,
+        default: false
+    }, otp: {
+        type: Number
+    },
+    isVerifiedOtp: {
         type: Boolean,
         default: false
     }

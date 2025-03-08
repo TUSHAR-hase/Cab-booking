@@ -22,18 +22,18 @@ const HotelOwnerRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { name, email, password, businessName, businessRegNo } = formData;
-  
+
     if (!name || !email || !password || !businessName || !businessRegNo) {
       setError("All fields are required");
       return;
     }
-  
+
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/hotelowner/register`,
+        `${import.meta.env.VITE_API_URL}/api/hotel/owner/register`,
         formData
       );
-  
+
       if (response.data.statusCode === 201) {
         navigate(`/verify/${email}`); // Redirect to OTP verification page
       } else {
@@ -43,12 +43,12 @@ const HotelOwnerRegister = () => {
       setError("Error occurred during registration");
     }
   };
-  
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">
       <div className="bg-black border-2 border-red-500 rounded-xl p-8 max-w-md w-full text-center shadow-red-500 shadow-lg">
-        
+
         {/* Hotel Icon */}
         <FaHotel className="text-red-500 text-7xl mx-auto mb-4" />
 
@@ -129,7 +129,15 @@ const HotelOwnerRegister = () => {
               className="w-full bg-black text-white focus:outline-none"
             />
           </div>
-
+          <p className="text-center text-gray-400 mt-4">
+            Already have an account?{" "}
+            <a
+              href="http://localhost:5173/login/hotel"
+              className="text-red-500 hover:underline"
+            >
+              Login here
+            </a>
+          </p>
           {/* Register Button */}
           <button
             onClick={handleSubmit}

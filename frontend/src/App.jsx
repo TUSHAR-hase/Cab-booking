@@ -60,9 +60,10 @@ function App() {
           <Route path="/booking/userdashboard" element={<UserDashboard />} />
           <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
           <Route path="/booking/confirmbooking" element={<ConfirmBooking />} />
-          <Route path="/ridersignup" element={<RiderSignup />} />
-          <Route path="/riderlogin" element={<Riderlogin />} />
+          <Route path="/booking/ridersignup" element={<RiderSignup />} />
+          <Route path="/booking/riderlogin" element={<Riderlogin />} />
           <Route path="/forgetpassword" element={<ForgotPassword />} />
+          <Route path="/RiderOtp:verified" element={<RiderOtp/>}/>
         </Routes>
         <Footer />
       </Router>

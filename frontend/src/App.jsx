@@ -1,9 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import './index.css';
-import Home from './Pages/Home.jsx';
-import Navbar from './Components/Navbar.jsx';
-import Footer from './Components/Footer.jsx';
+import "./index.css";
+import Home from "./Pages/Home.jsx";
+import Navbar from "./Components/Navbar.jsx";
+import Footer from "./Components/Footer.jsx";
 import FlightSearch from "./Pages/Flight/FlightSearch.jsx";
 import FlightDetails from "./Pages/Flight/FlightDetails.jsx";
 import FlightReviewPage from "./Pages/Flight/FlightReview.jsx";
@@ -17,31 +17,57 @@ import AirlineOwnerRegistration from "./Pages/Flight/AirLineRegistartion.jsx";
 import HotelOwnerRegister from "./Pages/Hotel/HotelOwnerRegister.jsx";
 import HotelOwnerVerify from "./Pages/Hotel/HotelOwnerVerify.jsx";
 
-function App() {
+import CabDetails from "./Pages/Cab/CabDetails.jsx";
+import CabReviewPage from "./Pages/Cab/CabReview.jsx";
+import AddingCab from "./Pages/Cab/AddingCab.jsx";
+import UserDashboard from "./Pages/Cab/UserDashboard.jsx";
+import RiderDashboard from "./Pages/Cab/Rider/RiderDashbord.jsx";
+import Riderlogin from "./Pages/Cab/Rider/Riderlogin.jsx";
+import ConfirmBooking from "./Pages/Cab/ConfrimBooking";
+import RiderSignup from "./Pages/Cab/Rider/RiderSignup.jsx";
+import ForgotPassword from "./Pages/Cab/ForgetPassword.jsx";
 
+function App() {
   return (
     <>
       <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register/>} />
-        <Route path="/login" element={<Login/>} />
-        <Route path="/otp/:email" element={<OtpPage/>} />
-        <Route path="/booking/flight" element={<FlightSearch />} />
-        <Route path="/booking/flightdetails" element={<FlightDetails />} />
-        <Route path="/booking/flightreview" element={<FlightReviewPage />} />
-        <Route path="/booking/hotel" element={<HotelSearch />} />
-        <Route path="/booking/hoteldetails" element={<HotelDetails />} />
-        <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
-        <Route path="/register/airline" element={<AirlineOwnerRegistration/>} />
-        <Route path="/register/hotel" element={<HotelOwnerRegister/>} />
-        <Route path="/verify/:email" element={<HotelOwnerVerify/>} />
-      </Routes>
-      <Footer />
-    </Router>
+        <Navbar />
+        <Routes>
+          {/* Flight */}
+
+          <Route path="/" element={<Home />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/otp/:email" element={<OtpPage />} />
+          <Route path="/booking/flight" element={<FlightSearch />} />
+          <Route path="/booking/flightdetails" element={<FlightDetails />} />
+          <Route path="/booking/flightreview" element={<FlightReviewPage />} />
+
+          {/* Hotel */}
+
+          <Route path="/booking/hotel" element={<HotelSearch />} />
+          <Route path="/booking/hoteldetails" element={<HotelDetails />} />
+          <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
+          <Route path="/register/airline"element={<AirlineOwnerRegistration />}/>
+          <Route path="/register/hotel" element={<HotelOwnerRegister />} />
+          <Route path="/verify/:email" element={<HotelOwnerVerify />} />
+
+          {/* Cab */}
+
+          <Route path="/booking/cab" element={<CabDetails />} />
+          <Route path="/booking/cabreview" element={<CabReviewPage />} />
+          <Route path="/booking/addingcab" element={<AddingCab />} />
+          <Route path="/booking/userdashboard" element={<UserDashboard />} />
+          <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
+          <Route path="/booking/confirmbooking" element={<ConfirmBooking />} />
+          <Route path="/ridersignup" element={<RiderSignup />} />
+          <Route path="/riderlogin" element={<Riderlogin />} />
+          <Route path="/forgetpassword" element={<ForgotPassword />} />
+        </Routes>
+        <Footer />
+      </Router>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

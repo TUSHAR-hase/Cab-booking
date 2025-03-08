@@ -16,30 +16,31 @@ import Login from "./Pages/Main/Login.jsx";
 import AirlineOwnerRegistration from "./Pages/Flight/AirLineRegistartion.jsx";
 import HotelOwnerRegister from "./Pages/Hotel/HotelOwnerRegister.jsx";
 import HotelOwnerVerify from "./Pages/Hotel/HotelOwnerVerify.jsx";
-
+import HotelOwnerLogin from "./Pages/Hotel/HotelOwnerLogin.jsx";
 function App() {
 
   return (
     <>
       <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register/>} />
-        <Route path="/login" element={<Login/>} />
-        <Route path="/otp/:email" element={<OtpPage/>} />
-        <Route path="/booking/flight" element={<FlightSearch />} />
-        <Route path="/booking/flightdetails" element={<FlightDetails />} />
-        <Route path="/booking/flightreview" element={<FlightReviewPage />} />
-        <Route path="/booking/hotel" element={<HotelSearch />} />
-        <Route path="/booking/hoteldetails" element={<HotelDetails />} />
-        <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
-        <Route path="/register/airline" element={<AirlineOwnerRegistration/>} />
-        <Route path="/register/hotel" element={<HotelOwnerRegister/>} />
-        <Route path="/verify/:email" element={<HotelOwnerVerify/>} />
-      </Routes>
-      <Footer />
-    </Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/otp/:email" element={<OtpPage />} />
+          <Route path="/booking/flight" element={<FlightSearch />} />
+          <Route path="/booking/flightdetails" element={<FlightDetails />} />
+          <Route path="/booking/flightreview" element={<FlightReviewPage />} />
+          <Route path="/booking/hotel" element={<HotelSearch />} />
+          <Route path="/booking/hoteldetails" element={<HotelDetails />} />
+          <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
+          <Route path="/register/airline" element={<AirlineOwnerRegistration />} />
+          <Route path="/register/hotel" element={<HotelOwnerRegister />} />
+          <Route path="/login/hotel" element={< HotelOwnerLogin />} />
+          <Route path="/verify/:email" element={<HotelOwnerVerify />} />
+        </Routes>
+        <Footer />
+      </Router>
     </>
   )
 }

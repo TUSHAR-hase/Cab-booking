@@ -33,7 +33,7 @@ const VerifyHotelOwnerOtp = () => {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/hotelowner/verify-otp`,
+        `${import.meta.env.VITE_API_URL}/api/hotel/owner/verify-otp`,
         { email, otp: parseInt(otpValue) }
       );
 

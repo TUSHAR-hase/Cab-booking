@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { KeyRound } from 'lucide-react';
 
 const OtpPage = () => {
     const { email } = useParams();
@@ -67,8 +67,9 @@ const OtpPage = () => {
 
                 <button
                     onClick={handleSubmit}
-                    className="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-lg py-2 rounded-lg transition-all"
+                    className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold text-lg py-2 rounded-lg transition-all"
                 >
+                    <KeyRound size={22} />
                     Submit OTP
                 </button>
             </div>

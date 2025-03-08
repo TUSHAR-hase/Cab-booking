@@ -14,7 +14,7 @@ import Register from "./Pages/Main/Register.jsx";
 import OtpPage from "./Pages/Main/Otp.jsx";
 import Login from "./Pages/Main/Login.jsx";
 import AirlineOwnerRegistration from "./Pages/Flight/AirLineRegistartion.jsx";
-
+import HotelOwnerRegister from "./Pages/Hotel/HotelOwnerRegister.jsx";
 
 function App() {
 
@@ -34,7 +34,7 @@ function App() {
         <Route path="/booking/hoteldetails" element={<HotelDetails />} />
         <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
         <Route path="/register/airline" element={<AirlineOwnerRegistration/>} />
-
+        <Route path="/register/hotel" element={<HotelOwnerRegister/>} />
       </Routes>
       <Footer />
     </Router>

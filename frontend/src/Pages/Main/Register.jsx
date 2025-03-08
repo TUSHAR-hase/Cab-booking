@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { User, Mail, Lock, Phone, Users } from "lucide-react";
+import { User, Mail, Lock, Phone, Users, UserPlus } from "lucide-react";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -103,8 +103,9 @@ const Register = () => {
           {/* Register Button */}
           <button
             onClick={handleSubmit}
-            className="w-full flex items-center justify-center bg-red-500 text-white font-semibold px-5 py-2 sm:py-3 rounded-lg hover:bg-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg text-base sm:text-lg"
+            className="w-full flex items-center justify-center gap-2 bg-red-500 text-white font-semibold px-5 py-2 sm:py-3 rounded-lg hover:bg-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg text-base sm:text-lg"
           >
+            <UserPlus size={22} />
             Register
           </button>
         </div>

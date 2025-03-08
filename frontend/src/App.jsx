@@ -15,6 +15,7 @@ import OtpPage from "./Pages/Main/Otp.jsx";
 import Login from "./Pages/Main/Login.jsx";
 import AirlineOwnerRegistration from "./Pages/Flight/AirLineRegistartion.jsx";
 import HotelOwnerRegister from "./Pages/Hotel/HotelOwnerRegister.jsx";
+import HotelOwnerVerify from "./Pages/Hotel/HotelOwnerVerify.jsx";
 
 function App() {
 
@@ -35,6 +36,7 @@ function App() {
         <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
         <Route path="/register/airline" element={<AirlineOwnerRegistration/>} />
         <Route path="/register/hotel" element={<HotelOwnerRegister/>} />
+        <Route path="/verify/:email" element={<HotelOwnerVerify/>} />
       </Routes>
       <Footer />
     </Router>

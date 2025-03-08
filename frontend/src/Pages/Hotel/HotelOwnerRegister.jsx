@@ -22,20 +22,20 @@ const HotelOwnerRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { name, email, password, businessName, businessRegNo } = formData;
-
+  
     if (!name || !email || !password || !businessName || !businessRegNo) {
       setError("All fields are required");
       return;
     }
-
+  
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/hotelowner/register`,
         formData
       );
-
+  
       if (response.data.statusCode === 201) {
-        navigate("/otp/" + email);
+        navigate(`/verify/${email}`); // Redirect to OTP verification page
       } else {
         setError(response.data.message);
       }
@@ -43,6 +43,7 @@ const HotelOwnerRegister = () => {
       setError("Error occurred during registration");
     }
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">

@@ -1,6 +1,6 @@
 import React,{useEffect} from 'react';
 import { motion } from 'framer-motion';
-import { FaPlaneDeparture, FaHotel, FaCarAlt,FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa';
+import { FaPlaneDeparture, FaHotel, FaCarAlt,FaMapMarkerAlt, FaArrowRight, FaCar, FaPlane } from 'react-icons/fa';
 
 const Home = () => {
   useEffect(() => {
@@ -10,7 +10,11 @@ const Home = () => {
     document.head.appendChild(link);
   }, []);
   
-  
+  const registrationOptions = [
+    { id: 1, name: "Hotel Owner", icon: FaHotel, link: "/register/hotel" },
+    { id: 2, name: "Cab Driver", icon: FaCar, link: "/register/cab" },
+    { id: 3, name: "Airline Owner", icon: FaPlane, link: "/register/airline" },
+  ];
   const options = [
     { id: 1, name: "Hotels", icon: FaHotel },
     { id: 2, name: "Flights", icon: FaPlaneDeparture },
@@ -196,6 +200,40 @@ const Home = () => {
                 className="mt-4 sm:mt-6 inline-block bg-red-500 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-base sm:text-lg font-medium tracking-wide hover:bg-red-700 transition-colors duration-300"
               >
                 Search {option.name}
+              </a>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+
+    <div className="py-20 text-white text-center font-[Poppins] bg-cover bg-center px-4 sm:px-6 md:px-8">
+      <div className="bg-black/60 py-16 px-6 sm:px-8 md:px-12 rounded-xl">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-red-500 mb-12 tracking-wider uppercase">
+          Register Your Business
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 px-4 sm:px-6 md:px-10">
+          {registrationOptions.map((option) => (
+            <motion.div
+              key={option.id}
+              className="bg-black/40 backdrop-blur-lg p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl transform transition-all duration-500 hover:scale-105 hover:shadow-2xl bg-opacity-90"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            >
+              <option.icon className="mx-auto h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 text-red-500 mb-4 sm:mb-6 transition-transform duration-500 hover:rotate-12" />
+              <h3 className="text-xl sm:text-2xl font-semibold mb-2 text-gray-200">
+                {option.name}
+              </h3>
+              <p className="mt-2 text-gray-400 text-base sm:text-lg">
+                Join our platform as a {option.name.toLowerCase()} and expand your reach.
+              </p>
+              <a
+                href={option.link}
+                className="mt-4 sm:mt-6 inline-block bg-red-500 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-base sm:text-lg font-medium tracking-wide hover:bg-red-700 transition-colors duration-300"
+              >
+                Register Now
               </a>
             </motion.div>
           ))}

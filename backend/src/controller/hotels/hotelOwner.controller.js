@@ -185,31 +185,44 @@ const verifyOtp = asyncHandler(async (req, res) => {
 const logineHotelOwner = asyncHandler(async (req, res) => {
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASSWORD;
-    const { email, password } = req.body;
-    // console.log(req.body);
 
+    //getting data  from body
+    const { email, password } = req.body;
+
+
+    //validation
     if (!email || !password) {
         throw new ApiError(400, "Both email and password are required");
     }
-    const hotelOwner = await HotelOwner.findOne({ email: email });
-    const otp = Math.floor(Math.random() * 10000);
 
+    //find hotelOwner
+    const hotelOwner = await HotelOwner.findOne({ email: email });
+
+    //check that hotelOwner exists?
     if (!hotelOwner) {
         return res.status(404).json(new ApiResponse(404, null, "User not found"));
     }
-    // console.log(hotelOwner, "hotelOwner");
+
+    const otp = Math.floor(Math.random() * 10000);
+
+    // check if the password is correct
     const isMatch = await bcrypt.compare(password, hotelOwner?.password);
 
+    //if it doesn't match then return error
     if (!isMatch) {
         return res
             .status(401)
             .json(new ApiResponse(401, null, "Invalid credentials"));
     }
 
+
+    //if it is correct then check if is verified
     if (!hotelOwner.isVerifiedOtp) {
+        // if not then send the mail and do verification 
         hotelOwner.otp = otp;
         await hotelOwner.save();
-        // Create a transporter object using the default SMTP transport (Gmail in this case)
+
+
         const transporter = nodemailer.createTransport({
             service: "gmail", // You can also use SMTP server details directly
             auth: {
@@ -297,12 +310,15 @@ const logineHotelOwner = asyncHandler(async (req, res) => {
             }
         });
 
+        //return the respones that hotel owner is not verified
         return res
             .status(400)
             .json(new ApiResponse(400, null, "User not verified"));
     }
 
-    const token = jwt.sign({ hotelOwner }, process.env.SECRET_KEY);
+
+    //if it is verified then sign with jwt token and sent the response 
+    const token = jwt.sign({ _id: hotelOwner._id, hotel_owner: true }, process.env.SECRET_KEY);
 
     res.status(200).json(new ApiResponse(200, token, "Login successful"));
 });

@@ -48,7 +48,7 @@ function App() {
           <Route path="/booking/hotel" element={<HotelSearch />} />
           <Route path="/booking/hoteldetails" element={<HotelDetails />} />
           <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
-          <Route path="/register/airline"element={<AirlineOwnerRegistration />}/>
+          <Route path="/register/airline" element={<AirlineOwnerRegistration />} />
           <Route path="/register/hotel" element={<HotelOwnerRegister />} />
           <Route path="/verify/:email" element={<HotelOwnerVerify />} />
 
@@ -63,7 +63,7 @@ function App() {
           <Route path="/booking/ridersignup" element={<RiderSignup />} />
           <Route path="/booking/riderlogin" element={<Riderlogin />} />
           <Route path="/forgetpassword" element={<ForgotPassword />} />
-          <Route path="/RiderOtp:verified" element={<RiderOtp/>}/>
+          {/* <Route path="/RiderOtp:verified" element={<RiderOtp />} /> */}
         </Routes>
         <Footer />
       </Router>

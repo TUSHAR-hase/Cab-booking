@@ -14,8 +14,11 @@ import Register from "./Pages/Main/Register.jsx";
 import OtpPage from "./Pages/Main/Otp.jsx";
 import Login from "./Pages/Main/Login.jsx";
 import AirlineOwnerRegistration from "./Pages/Flight/AirLineRegistartion.jsx";
-import HotelOwnerRegister from "./Pages/Hotel/HotelOwnerRegister.jsx";
-import HotelOwnerVerify from "./Pages/Hotel/HotelOwnerVerify.jsx";
+import HotelOwnerRegister from "./Pages/Hotel/Owner/HotelOwnerRegister.jsx";
+import HotelOwnerVerify from "./Pages/Hotel/Owner/HotelOwnerVerify.jsx";
+import HotelOwnerLogin from "./Pages/Hotel/Owner/HotelOwnerLogin.jsx";
+import HotelAdd from "./Pages/Hotel/Owner/HotelAdd.jsx";
+import RoomRegister from "./Pages/Hotel/Owner/RoomRegister.jsx";
 
 import CabDetails from "./Pages/Cab/CabDetails.jsx";
 import CabReviewPage from "./Pages/Cab/CabReview.jsx";
@@ -49,8 +52,11 @@ function App() {
           <Route path="/booking/hoteldetails" element={<HotelDetails />} />
           <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
           <Route path="/register/airline"element={<AirlineOwnerRegistration />}/>
-          <Route path="/register/hotel" element={<HotelOwnerRegister />} />
+          <Route path="/register/hotel/owner" element={<HotelOwnerRegister />} />
+          <Route path="/login/hotel" element={<HotelOwnerLogin />} />
           <Route path="/verify/:email" element={<HotelOwnerVerify />} />
+          <Route path="/register/hotel" element={<HotelAdd />} />
+          <Route path="/register/room" element={<RoomRegister />} />
 
           {/* Cab */}
 
@@ -63,7 +69,7 @@ function App() {
           <Route path="/booking/ridersignup" element={<RiderSignup />} />
           <Route path="/booking/riderlogin" element={<Riderlogin />} />
           <Route path="/forgetpassword" element={<ForgotPassword />} />
-          <Route path="/RiderOtp:verified" element={<RiderOtp/>}/>
+          {/* <Route path="/RiderOtp:verified" element={<RiderOtp/>}/> */}
         </Routes>
         <Footer />
       </Router>

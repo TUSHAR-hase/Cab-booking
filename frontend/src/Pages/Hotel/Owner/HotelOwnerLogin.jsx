@@ -13,31 +13,26 @@ const HotelOwnerLogin = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage(""); // Clear previous errors
-
         if (!email || !password) {
             setErrorMessage("Both email and password are required.");
             return;
         }
 
         try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/hotel/owner/login`, 
-                { email, password }
-            );
-
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/hotel/owner/login`, { email, password });
             if (response.data.message === "Login successful") {
                 Cookies.set("token", response.data.data);
-                window.location.href = "http://localhost:5173/"; // Temporary redirect to landing page
+                window.location.href = "http://localhost:5173/"; //temporary navigate to landing page // Redirect to hotel owner dashboard
             }
         } catch (error) {
-            if (error.response && error.response.data.message === "User not verified") {
-                navigate(`/verify/${email}`);
+            if (error.response.data.message === "User not verified") {
+                navigate("/otp/" + email);
             } else {
                 setErrorMessage("Enter valid credentials");
                 alert("Enter valid credentials");
             }
         }
+        setErrorMessage("");
     };
 
     return (
@@ -52,7 +47,6 @@ const HotelOwnerLogin = () => {
                     Hotel Owner Login
                 </h1>
                 <div className="space-y-6">
-                    {/* Email Input */}
                     <div className="flex items-center bg-black border border-red-500 rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-red-500 hover:shadow-lg hover:shadow-red-500 transition duration-300">
                         <Mail size={24} className="text-red-500 mr-3" />
                         <input
@@ -63,8 +57,6 @@ const HotelOwnerLogin = () => {
                             className="w-full bg-transparent text-white focus:outline-none text-lg"
                         />
                     </div>
-
-                    {/* Password Input */}
                     <div className="flex items-center bg-black border border-red-500 rounded-lg px-4 py-3 focus-within:ring-2 focus-within:ring-red-500 hover:shadow-lg hover:shadow-red-500 transition duration-300">
                         <Lock size={24} className="text-red-500 mr-3" />
                         <input
@@ -75,11 +67,7 @@ const HotelOwnerLogin = () => {
                             className="w-full bg-transparent text-white focus:outline-none text-lg"
                         />
                     </div>
-
-                    {/* Error Message */}
                     {errorMessage && <p className="text-red-500 text-center">{errorMessage}</p>}
-
-                    {/* Login Button */}
                     <button
                         onClick={handleSubmit}
                         className="w-full flex items-center justify-center gap-2 bg-red-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg text-lg"
@@ -94,4 +82,3 @@ const HotelOwnerLogin = () => {
 };
 
 export default HotelOwnerLogin;
-

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Trash, Plus, Hash, Bed, DollarSign, CheckCircle, Image as RoomImages, Users, Info } from "lucide-react";
 
-const RoomRegister = () => {
+const RoomAdd = () => {
   const [formData, setFormData] = useState({
     hotel_id: "",
     room_type: "",
@@ -138,4 +138,4 @@ const RoomRegister = () => {
   );
 };
 
-export default RoomRegister;
+export default RoomAdd;

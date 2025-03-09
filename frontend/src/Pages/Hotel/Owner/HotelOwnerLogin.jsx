@@ -13,7 +13,6 @@ const HotelOwnerLogin = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!email || !password) {
             setErrorMessage("Both email and password are required.");
             return;

@@ -71,7 +71,7 @@ function App() {
 
         {/* Hotel Owner */}
         <Route path="/hotelowner/dashboard" element={<HotelAdminPanel />}>
-          <Route path="" element={<HotelDashboard />} />
+          <Route path="hotel" element={<HotelDashboard />} />
           <Route path="room" element={<RoomDashboard />} />
         </Route>
 

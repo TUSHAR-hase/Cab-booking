@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, Clock, XCircle, Star, Trophy, Target } from "lucide-react";
+import { CheckCircle, Clock, XCircle, Star, Trophy, Target,Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ActionButtons = ({ onConfirm, onCancel, onComplete }) => (
   <div className="mt-4 flex justify-end gap-2">
@@ -56,6 +57,7 @@ const BookingCard = ({ booking, statusColor, actions }) => (
 );
 
 const RiderDashboard = () => {
+  const navigate=useNavigate();
   const [requestBookings, setRequestBookings] = useState([
     { id: 1, rider: "John Doe", from: "Connaught Place", to: "Airport", status: "pending", image: "https://randomuser.me/api/portraits/men/1.jpg" },
     { id: 2, rider: "Alice Smith", from: "Dwarka", to: "Noida", status: "pending", image: "https://randomuser.me/api/portraits/women/2.jpg" },
@@ -81,7 +83,15 @@ const RiderDashboard = () => {
       <motion.h1 className="text-5xl font-extrabold text-center text-red-500 mb-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         Rider Dashboard
       </motion.h1>
-
+      <motion.button
+          className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-all flex items-center gap-2"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() =>navigate("/booking/addingcab") }
+        >
+          <Plus size={20} />
+          Add Vehicle
+        </motion.button>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[{ title: "Request Bookings", icon: <Clock size={28} />, color: "text-yellow-500", list: requestBookings, setList: setRequestBookings, statusColor: "border-red-500", actions: (id) => (
           <ActionButtons onCancel={() => moveBooking(id, requestBookings, setRequestBookings, [], () => {})} onConfirm={() => moveBooking(id, requestBookings, setRequestBookings, confirmedBookings, setConfirmedBookings, "confirmed")} />

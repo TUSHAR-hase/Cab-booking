@@ -2,7 +2,8 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import { userRouter } from "./routes/main/userRoutes.js";
-
+import vehicleapi from "./routes/Cabs/vehicle_routes.js"
+import Riderapi from "./routes/Cabs/Rider_routes.js"
 // import "./services/deadlineCron.js"
 const app = express()
 app.use(cors({
@@ -15,6 +16,8 @@ app.use(express.static("public"))
 app.use(cookieParser());
 
 app.use("/api/user", userRouter)
+app.use("/api/Rv/vehicle",vehicleapi)
+app.use("/api/Rv/Rider",Riderapi)
 
 app.get("/", (req, res) => {
     res.send("Welcome to the backend");

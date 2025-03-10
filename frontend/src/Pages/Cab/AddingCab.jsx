@@ -2,66 +2,69 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Car, Tag, FileText, DollarSign, CreditCard, Calendar } from "lucide-react";
-
-const InputField = ({ icon: Icon, type, name, placeholder, value, onChange, required }) => (
-  <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">
-    <Icon size={24} className="text-red-500" />
-    <input
-      type={type}
-      name={name}
-      placeholder={placeholder}
-      className="w-full bg-transparent text-white outline-none placeholder-gray-400"
-      value={value}
-      onChange={onChange}
-      required={required}
-      aria-label={placeholder}
-      aria-required={required}
-    />
-  </div>
-);
+import { BASE_URL } from "../../../config";
 
 const AddVehicle = () => {
   const navigate = useNavigate();
   const [vehicle, setVehicle] = useState({
-    carType: "",
-    model: "",
-    registrationNumber: "",
-    pricePerKm: "",
-    insuranceExpiry: "",
+    vehicle_type: "",
+    vehicle_model: "",
+    vehicle_number: "",
+    perKm_price: "",
+    seating_capacity: "",
     description: "",
   });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setVehicle((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setVehicle({ ...vehicle, [e.target.name]: e.target.value });
   };
 
-  const validateInputs = () => {
-    const { carType, model, registrationNumber, pricePerKm } = vehicle;
-    if (!carType || !model || !registrationNumber || !pricePerKm) {
-      alert("Please fill all required fields!");
-      return false;
-    }
-
-    // Validate registration number format (basic example)
-    const regNumPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
-    if (!regNumPattern.test(registrationNumber)) {
-      alert("Invalid registration number format!");
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateInputs()) return;
 
+    if (
+      !vehicle.vehicle_type ||
+      !vehicle.vehicle_model ||
+      !vehicle.vehicle_number ||
+      !vehicle.perKm_price ||
+      !vehicle.seating_capacity
+    ) {
+      alert("Please fill all required fields!");
+      return;
+    }
     setLoading(true);
+ try {
+  const res = await fetch(`${BASE_URL}/api/Rv/vehicle/createvehicle`, {
+    method:"POST",
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(vehicle )
+
+  });
+  console.log("Full Response:", res);
+  if (!res.ok) {
+    throw new Error(`HTTP error! Status: ${res.status}`);
+  }
+  const data = await res.json();
+
+  console.log("Response Data:", data);
+  if (data) {
+    
     setTimeout(() => {
       alert("Vehicle added successfully!");
-      navigate("/my-vehicles");
+      navigate("/cabdetail");
     }, 2000);
+  }
+ } catch (e) {
+  console.log(e)
+ }finally {
+  setLoading(false); // Ensure loading is turned off after the request
+}
+    // console.log(data);
+    
+
   };
 
   return (
@@ -77,21 +80,72 @@ const AddVehicle = () => {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <InputField icon={Car} type="text" name="carType" placeholder="Car Type (e.g., Sedan, SUV)" value={vehicle.carType} onChange={handleChange} required />
-          <InputField icon={Tag} type="text" name="model" placeholder="Model (e.g., Toyota Innova)" value={vehicle.model} onChange={handleChange} required />
-          <InputField icon={CreditCard} type="text" name="registrationNumber" placeholder="Registration Number" value={vehicle.registrationNumber} onChange={handleChange} required />
-          <InputField icon={DollarSign} type="number" name="pricePerKm" placeholder="Price per km" value={vehicle.pricePerKm} onChange={handleChange} required />
+          {/* Car Type */}
+          <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">
+            <Car size={24} className="text-red-500" />
+            <input
+              type="text"
+              name="vehicle_type"
+              placeholder="Car Type (e.g., Sedan, SUV, Hatchback)"
+              className="w-full bg-transparent text-white outline-none placeholder-gray-400"
+              value={vehicle.vehicle_type}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          {/* Insurance Expiry */}
+          {/* Model */}
+          <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">
+            <Tag size={24} className="text-red-500" />
+            <input
+              type="text"
+              name="vehicle_model"
+              placeholder="model(2000,2005,2015...etc)"
+              className="w-full bg-transparent text-white outline-none placeholder-gray-400"
+              value={vehicle.vehicle_model}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {/* Registration Number */}
+          <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">
+            <CreditCard size={24} className="text-red-500" />
+            <input
+              type="text"
+              name="vehicle_number"
+              placeholder="Enter Vehicle Number"
+              className="w-full bg-transparent text-white outline-none placeholder-gray-400"
+              value={vehicle.vehicle_number}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {/* Price per km */}
+          <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">
+            <DollarSign size={24} className="text-red-500" />
+            <input
+              type="text"
+              name="perKm_price"
+              placeholder="Price per km"
+              className="w-full bg-transparent text-white outline-none placeholder-gray-400"
+              value={vehicle.perKm_price}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {/* Insurance Expiry Date */}
           <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">
             <Calendar size={24} className="text-red-500" />
             <input
-              type="date"
-              name="insuranceExpiry"
+              type="string"
+              name="seating_capacity"
+              placeholder="Enter seat-capacity"
               className="w-full bg-transparent text-white outline-none placeholder-gray-400"
-              value={vehicle.insuranceExpiry}
+              value={vehicle.seating_capacity}
               onChange={handleChange}
-              aria-label="Insurance Expiry Date"
             />
           </div>
 
@@ -104,11 +158,10 @@ const AddVehicle = () => {
               className="w-full bg-transparent text-white outline-none placeholder-gray-400 resize-none h-20"
               value={vehicle.description}
               onChange={handleChange}
-              aria-label="Additional details"
             />
           </div>
 
-          {/* Submit Button */}
+          {/* Submit Button (Only element with hover effects) */}
           <motion.button
             type="submit"
             disabled={loading}

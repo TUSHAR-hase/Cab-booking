@@ -16,7 +16,7 @@ import Login from "./Pages/Main/Login.jsx";
 import AirlineOwnerRegistration from "./Pages/Flight/AirLineRegistartion.jsx";
 import HotelOwnerRegister from "./Pages/Hotel/HotelOwnerRegister.jsx";
 import HotelOwnerVerify from "./Pages/Hotel/HotelOwnerVerify.jsx";
-
+import OtpVerified from "./Pages/Cab/Rider/RiderOtpVerified.jsx";
 import CabDetails from "./Pages/Cab/CabDetails.jsx";
 import CabReviewPage from "./Pages/Cab/CabReview.jsx";
 import AddingCab from "./Pages/Cab/AddingCab.jsx";
@@ -61,9 +61,11 @@ function App() {
           <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
           <Route path="/booking/confirmbooking" element={<ConfirmBooking />} />
           <Route path="/booking/ridersignup" element={<RiderSignup />} />
-          <Route path="/booking/riderlogin" element={<Riderlogin />} />
+          <Route path="/booking/riderlogin/:email/:id" element={<Riderlogin />} />
           <Route path="/forgetpassword" element={<ForgotPassword />} />
-          <Route path="/RiderOtp:verified" element={<RiderOtp/>}/>
+          <Route path="/otp/:email" element={<OtpVerified/>} />
+
+          {/* <Route path="/RiderOtp:verified" element={<RiderOtp/>}/> */}
         </Routes>
         <Footer />
       </Router>

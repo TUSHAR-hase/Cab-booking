@@ -6,6 +6,7 @@ import { BASE_URL } from "../../../config";
 
 const AddVehicle = () => {
   const navigate = useNavigate();
+  const rider_id=localStorage.getItem("Rider")
   const [vehicle, setVehicle] = useState({
     vehicle_type: "",
     vehicle_model: "",
@@ -13,6 +14,7 @@ const AddVehicle = () => {
     perKm_price: "",
     seating_capacity: "",
     description: "",
+    Rider_id:rider_id
   });
   const [loading, setLoading] = useState(false);
 
@@ -54,7 +56,7 @@ const AddVehicle = () => {
     
     setTimeout(() => {
       alert("Vehicle added successfully!");
-      navigate("/cabdetail");
+      navigate("/booking/riderdashboard/"+rider_id);
     }, 2000);
   }
  } catch (e) {

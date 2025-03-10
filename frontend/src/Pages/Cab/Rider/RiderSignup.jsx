@@ -50,7 +50,7 @@ export default function RiderSignup() {
         setTimeout(() => {
           alert("Rider add successfully!");
 
-    navigate("/booking/riderlogin"+"/"+formData.email+"/"+formData._id);
+    navigate("/booking/riderlogin"+"/"+formData.email+"/"+data.user._id);
          
         }, 2000);
       }

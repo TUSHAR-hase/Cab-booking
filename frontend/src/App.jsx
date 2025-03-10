@@ -83,7 +83,7 @@ function App() {
           <Route path="/booking/cabreview" element={<CabReviewPage />} />
           <Route path="/booking/addingcab" element={<AddingCab />} />
           <Route path="/booking/userdashboard" element={<UserDashboard />} />
-          <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
+          <Route path="/booking/riderdashboard/:id" element={<RiderDashboard />} />
           <Route path="/booking/confirmbooking" element={<ConfirmBooking />} />
           <Route path="/booking/ridersignup" element={<RiderSignup />} />
           <Route path="/booking/riderlogin/:email/:id" element={<Riderlogin />} />

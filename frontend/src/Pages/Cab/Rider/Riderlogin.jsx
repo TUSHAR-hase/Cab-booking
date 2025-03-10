@@ -39,7 +39,8 @@ const Login = () => {
         if (res.ok) {
           Cookies.set("token", response.token);
           localStorage.setItem("Rider",id)
-          navigate("/booking/riderdashboard"); // Login success hone par dashboard bhejna
+          // localStorage.getItem()
+          navigate("/booking/riderdashboard"+"/"+id); // Login success hone par dashboard bhejna
         } else {
           setErrorMessage(response.message || "Login failed");
         }

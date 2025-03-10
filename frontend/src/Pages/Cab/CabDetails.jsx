@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Users, X } from "lucide-react";
 import CarRentalUI from "./CarRentalUI";
@@ -12,6 +12,7 @@ const CabDetails = () => {
   const [modelFilter, setModelFilter] = useState("");
   const [selectedCab, setSelectedCab] = useState(null); // State for selected cab
 const [dummyCabs,setdummyCabs]=useState([])
+const nevigate=useNavigate();
   
  
 
@@ -126,7 +127,7 @@ console.log(dummyCabs)
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCabs.map((cab) => (
                 <motion.div
-                  key={cab.id}
+                  key={cab._id}
                   initial={{ scale: 0.95 }}
                   animate={{ scale: 1 }}
                   className="bg-gray-800 p-6 rounded-xl hover:bg-gray-700/50 transition-all"
@@ -196,7 +197,9 @@ console.log(dummyCabs)
               <p className="text-red-400 font-bold">
                 Price: ₹{selectedCab.perkmprice} per km
               </p>
-              <button className="bg-red-500 text-white px-4 py-2 rounded">
+              <button 
+              onClick={()=>nevigate("/booking/confirmbooking")}
+              className="bg-red-500 text-white px-4 py-2 rounded">
                 Confirm
               </button>
             </div>

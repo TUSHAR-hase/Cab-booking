@@ -1,13 +1,12 @@
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import {  useNavigate,useLocation } from "react-router-dom";
 import { Hotel, Bed, LogOut } from "lucide-react";
 import HotelDashboard from "./HotelDashboard.jsx";
 import RoomDashboard from "./RoomDashboard.jsx";
 
 const AdminPanel = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-
+  const navigate = useNavigate();
   return (
     <div className="flex h-screen w-screen bg-black text-white">
       {/* Sidebar */}
@@ -22,7 +21,7 @@ const AdminPanel = () => {
           <ul className="space-y-2">
             <li>
               <button
-                onClick={() => navigate("/hotelowner/dashboard")}
+                onClick={() => navigate("/hotelowner/dashboard/hotel")}
                 className={`w-full flex items-center py-3 px-4 rounded-lg ${
                   location.pathname === "/admin/hotels" ? "bg-red-500 text-black" : "hover:bg-red-500 hover:text-black"
                 } transition-all duration-200`}
@@ -59,7 +58,7 @@ const AdminPanel = () => {
 
       {/* Main Content */}
       <div className="flex-grow p-6">
-        {location.pathname === "/hotelowner/dashboard" ? <HotelDashboard /> : <RoomDashboard />}
+        {location.pathname === "/hotelowner/dashboard/hotel" ? <HotelDashboard /> : <RoomDashboard />}
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import Cookies from "js-cookie";
+import logo from "../assets/logo.png"
 
 
 const Navbar = () => {
@@ -50,7 +51,7 @@ const Navbar = () => {
           to="/"
           className="text-xl font-bold text-red-500 hover:scale-110 transition-transform duration-300"
         >
-          BrandLogo
+          <img src={logo} alt="Logo" className="w-35 " />
         </Link>
       </motion.div>
 

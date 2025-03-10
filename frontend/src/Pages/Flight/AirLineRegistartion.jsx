@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { FaPlane, FaUserTie, FaTicketAlt, FaChair } from "react-icons/fa";
+import { FaPlane, FaUserTie, FaTicketAlt,FaUser } from "react-icons/fa";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AirlineOwnerRegistration = () => {
+  const navigate = useNavigate();
   useEffect(() => {
     const link = document.createElement("link");
     link.href =
@@ -12,18 +15,33 @@ const AirlineOwnerRegistration = () => {
   }, []);
 
   const [formData, setFormData] = useState({
-    flightName: "",
+    name: "",
+    email: "",
+    password: "",
+    mobile: "",
+    gender: "",
     airlineName: "",
-    seats: "",
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log("Form Submitted:", formData);
+
+    try {
+      const response= await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/flightadmin/register`,
+        formData
+      );
+
+      if (response.data.statusCode === 201) {
+        navigate("/flight/otp/" + formData.email);
+      }
+    } catch (error) {
+      console.log(error.response);
+    }
   };
 
   return (
@@ -45,19 +63,111 @@ const AirlineOwnerRegistration = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Flight Name */}
+            {/* Name */}
             <div>
               <label className="block text-white text-lg font-semibold mb-1">
-                Flight Name
+                Name
+              </label>
+              <div className="flex items-center bg-black border-2 border-red-500 rounded-lg px-4 py-3">
+                <FaUser className="text-red-500 text-xl mr-3" />
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter Name"
+                  className="w-full bg-transparent text-white focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-white text-lg font-semibold mb-1">
+                Email
+              </label>
+              <div className="flex items-center bg-black border-2 border-red-500 rounded-lg px-4 py-3">
+                <FaUser className="text-red-500 text-xl mr-3" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter Email"
+                  className="w-full bg-transparent text-white focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* PAssword */}
+            <div>
+              <label className="block text-white text-lg font-semibold mb-1">
+                Password
               </label>
               <div className="flex items-center bg-black border-2 border-red-500 rounded-lg px-4 py-3">
                 <FaTicketAlt className="text-red-500 text-xl mr-3" />
                 <input
-                  type="text"
-                  name="flightName"
-                  value={formData.flightName}
+                  type="password"
+                  name="password"
+                  value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter Flight Name"
+                  placeholder="Enter Password"
+                  className="w-full bg-transparent text-white focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Gender */}
+            <div>
+              <label className="block text-white text-lg font-semibold mb-1">
+                Gender
+              </label>
+              <div className="flex items-center bg-black border-2 border-red-500 rounded-lg px-4 py-3">
+                <FaUser className="text-red-500 text-xl mr-3" />
+                <div className="flex space-x-4">
+                  <label className="flex items-center text-white">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={formData.gender === "male"}
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    Male
+                  </label>
+                  <label className="flex items-center text-white">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={formData.gender === "female"}
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    Female
+                  </label>
+                </div>
+              </div>
+            </div>
+
+
+            {/* PAssword */}
+            <div>
+              <label className="block text-white text-lg font-semibold mb-1">
+                Mobile
+              </label>
+              <div className="flex items-center bg-black border-2 border-red-500 rounded-lg px-4 py-3">
+                <FaTicketAlt className="text-red-500 text-xl mr-3" />
+                <input
+                  type="number"
+                  name="mobile"
+                  value={formData.mobile}
+                  onChange={handleChange}
+                  placeholder="Enter Mobile"
                   className="w-full bg-transparent text-white focus:outline-none"
                   required
                 />
@@ -77,26 +187,6 @@ const AirlineOwnerRegistration = () => {
                   value={formData.airlineName}
                   onChange={handleChange}
                   placeholder="Enter Airline Name"
-                  className="w-full bg-transparent text-white focus:outline-none"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Seats */}
-            <div>
-              <label className="block text-white text-lg font-semibold mb-1">
-                Number of Seats
-              </label>
-              <div className="flex items-center bg-black border-2 border-red-500 rounded-lg px-4 py-3">
-                <FaChair className="text-red-500 text-xl mr-3" />
-                <input
-                  type="number"
-                  name="seats"
-                  value={formData.seats}
-                  onChange={handleChange}
-                  placeholder="Enter Number of Seats"
-                  min="1"
                   className="w-full bg-transparent text-white focus:outline-none"
                   required
                 />

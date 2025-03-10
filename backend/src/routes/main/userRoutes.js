@@ -8,4 +8,4 @@ userRouter.route("/verify-otp").post(verifyOtp);
 userRouter.route("/login").post(loginUser);
 
 
-export  {userRouter};
+export { userRouter };

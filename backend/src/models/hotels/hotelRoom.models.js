@@ -5,15 +5,15 @@ const hotelRoomSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Hotel",
     },
-    roomType: {
+    room_type: {
         type: String,
         required: true
     },
-    roomPricePerDay: {
+    room_price_per_day: {
         type: Number,
         required: true
     },
-    roomImages: [
+    room_images: [
         {
             type: String
         }
@@ -27,7 +27,15 @@ const hotelRoomSchema = new mongoose.Schema({
         {
             type: String
         }
-    ]
+    ],
+    max_occupancy: {
+        type: Number,
+        required: true
+    },
+    room_number: {
+        type: String,
+        required: true
+    }
 }, { timestamps: true });
 
 export const HotelRoom = mongoose.model("HotelRoom", hotelRoomSchema);

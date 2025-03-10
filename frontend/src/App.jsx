@@ -26,6 +26,7 @@ import Riderlogin from "./Pages/Cab/Rider/Riderlogin.jsx";
 import ConfirmBooking from "./Pages/Cab/ConfrimBooking";
 import RiderSignup from "./Pages/Cab/Rider/RiderSignup.jsx";
 import ForgotPassword from "./Pages/Cab/ForgetPassword.jsx";
+import FLightOtpPage from "./Pages/Flight/Otp.jsx";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/otp/:email" element={<OtpPage />} />
+          <Route path="/flight/otp/:email" element={<FLightOtpPage />} />
           <Route path="/booking/flight" element={<FlightSearch />} />
           <Route path="/booking/flightdetails" element={<FlightDetails />} />
           <Route path="/booking/flightreview" element={<FlightReviewPage />} />
@@ -63,7 +65,7 @@ function App() {
           <Route path="/booking/ridersignup" element={<RiderSignup />} />
           <Route path="/booking/riderlogin" element={<Riderlogin />} />
           <Route path="/forgetpassword" element={<ForgotPassword />} />
-          <Route path="/RiderOtp:verified" element={<RiderOtp/>}/>
+          {/* <Route path="/RiderOtp:verified" element={<RiderOtp/>}/> */}
         </Routes>
         <Footer />
       </Router>

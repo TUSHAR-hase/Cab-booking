@@ -11,12 +11,12 @@ const Register = () => {
   const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [type, setType] = useState("customer");
+  const type="customer";
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !gender || !contact || !email || !password || !type) {
+    if (!name || !gender || !contact || !email || !password) {
       setError("All fields are required");
       return;
     }
@@ -81,17 +81,6 @@ const Register = () => {
           <div className="flex items-center bg-black border border-red-500 rounded-lg px-4 py-2 sm:py-3">
             <Mail size={22} className="text-red-500 mr-3" />
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-transparent text-white focus:outline-none text-base sm:text-lg" />
-          </div>
-
-          {/* User Type */}
-          <div className="flex items-center bg-black border border-red-500 rounded-lg px-4 py-2 sm:py-3">
-            <User size={22} className="text-red-500 mr-3" />
-            <select value={type} onChange={(e) => setType(e.target.value)} className="w-full bg-black text-gray-400 focus:outline-none text-base sm:text-lg">
-              <option value="customer" className="bg-black text-white">Customer</option>
-              <option value="hotelOwner" className="bg-black text-white">Hotel Owner</option>
-              <option value="cabOwner" className="bg-black text-white">Cab Owner</option>
-              <option value="flightOwner" className="bg-black text-white">Flight Owner</option>
-            </select>
           </div>
 
           {/* Password */}

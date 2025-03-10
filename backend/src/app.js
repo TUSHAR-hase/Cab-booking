@@ -18,6 +18,13 @@ app.use(cookieParser());
 app.use("/api/user", userRouter);
 app.use("/api/flightadmin",flightRouter);
 
+
+//------------HOTEL ROUTES-------------------------------------
+
+import { hotelOwnerRouter } from "./routes/hotels/hotelOwner.routes.js"
+app.use("/api/hotel/owner", hotelOwnerRouter)
+
+// ------------------------------------------------------------
 app.get("/", (req, res) => {
     res.send("Welcome to the backend");
 })

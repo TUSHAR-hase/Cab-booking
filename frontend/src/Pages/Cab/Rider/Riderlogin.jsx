@@ -1,6 +1,55 @@
-import React from "react";
 
+import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { Mail, Lock, LogIn } from "lucide-react";
+import { BASE_URL } from "../../../../config";
 const Login = () => {
+    const navigate = useNavigate();
+    const {id}=useParams()
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+  
+   
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      console.log("signin");
+    
+      if (!email || !password) {
+        setErrorMessage("Both email and password are required.");
+        return;
+      }
+    
+      try {
+        const res = await fetch(`${BASE_URL}/api/Rv/Rider/loginRider`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+    
+        const response = await res.json();
+    
+        console.log("API Response:", response);
+    
+        if (res.ok) {
+          Cookies.set("token", response.token);
+          localStorage.setItem("Rider",id)
+          navigate("/booking/riderdashboard"); // Login success hone par dashboard bhejna
+        } else {
+          setErrorMessage(response.message || "Login failed");
+        }
+      } catch (error) {
+        console.error("Login request error:", error);
+        setErrorMessage("Something went wrong. Please try again.");
+      }
+    };
+    
+  
   return (
     <div className="h-screen w-full overflow-hidden bg-cover bg-center flex items-center justify-center relative" 
          style={{ backgroundImage: "url('https://cdn.vectorstock.com/i/1000v/79/88/taxi-car-front-view-in-dark-background-vector-43697988.avif')" }}>
@@ -20,12 +69,15 @@ const Login = () => {
             <input
               type="email"
               id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent 
                        peer focus:outline-none focus:border-red-400 transition-colors"
               placeholder="Email"
             />
             <label 
               htmlFor="email"
+              
               className="absolute left-4 -top-2.5 px-1 text-white/80 text-sm transition-all
                          peer-placeholder-shown:text-base peer-placeholder-shown:top-3.5
                          peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-red-300 bg-transparent"
@@ -39,6 +91,8 @@ const Login = () => {
             <input
               type="password"
               id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-transparent 
                        peer focus:outline-none focus:border-red-400 transition-colors"
               placeholder="Password"
@@ -56,6 +110,7 @@ const Login = () => {
           {/* Animated Submit Button */}
           <button
             type="submit"
+            onClick={handleSubmit}
             className="w-full py-3.5 bg-gradient-to-r from-red-500 to-red-600 rounded-lg text-white font-semibold
                       transform transition-all hover:scale-[1.02] hover:from-red-600 hover:to-red-700
                       active:scale-95 shadow-lg hover:shadow-red-500/20"
@@ -76,32 +131,7 @@ const Login = () => {
         </div>
 
         {/* Social Login Divider */}
-        {/* <div className="relative mt-8"> */}
-          {/* <div className="absolute inset-0 flex items-center"> */}
-            {/* <div className="w-full border-t border-white/20"></div> */}
-          {/* </div> */}
-          {/* <div className="relative flex justify-center text-sm"> */}
-            {/* <span className="px-2 bg-transparent text-white/50">Or continue with</span> */}
-          {/* </div> */}
-        {/* </div> */}
-
-        {/* Social Login Buttons */}
-        {/*<div className="mt-6 grid grid-cols-2 gap-3">
-          <button className="flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white/10 
-                           border border-white/10 rounded-lg text-white transition-all">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              {/* Google SVG icon */}
-            {/*</svg>
-            Google
-          </button>
-          <button className="flex items-center justify-center gap-2 py-2.5 bg-white/5 hover:bg-white/10 
-                           border border-white/10 rounded-lg text-white transition-all">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              {/* GitHub SVG icon */}
-            {/*</svg>
-            GitHub
-          </button>
-        </div>*/}
+     
       </div>
     </div>
   );

@@ -2,8 +2,9 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import { userRouter } from "./routes/main/userRoutes.js";
+import vehicleapi from "./routes/Cabs/vehicle_routes.js"
+import Riderapi from "./routes/Cabs/Rider_routes.js"
 import { flightRouter } from "./routes/flight/flight.route.js";
-
 // import "./services/deadlineCron.js"
 const app = express()
 app.use(cors({
@@ -15,7 +16,13 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }))
 app.use(express.static("public"))
 app.use(cookieParser());
 
-app.use("/api/user", userRouter);
+app.use("/api/user", userRouter)
+
+//------------CAB ROUTES-------------------------------------
+app.use("/api/Rv/vehicle",vehicleapi)
+app.use("/api/Rv/Rider",Riderapi)
+
+//------------FLIGHT ROUTES-------------------------------------
 app.use("/api/flightadmin",flightRouter);
 
 

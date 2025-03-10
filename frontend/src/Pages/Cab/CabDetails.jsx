@@ -1,52 +1,39 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Users, X } from "lucide-react";
 import CarRentalUI from "./CarRentalUI";
+import { BASE_URL } from "../../../config";
+
 
 const CabDetails = () => {
   const [searchParams] = useSearchParams();
   const [seatFilter, setSeatFilter] = useState("");
   const [modelFilter, setModelFilter] = useState("");
   const [selectedCab, setSelectedCab] = useState(null); // State for selected cab
+const [dummyCabs,setdummyCabs]=useState([])
+  
+ 
 
-  const dummyCabs = useMemo(
-    () => [
-      {
-        id: 1,
-        cabName: "Sedan - XYZ123",
-        perkmprice: 12,
-        type: "Sedan",
-        totalSeats: 4,
-        driver: "John Doe",
-        rating: 4.8,
-      },
-      {
-        id: 2,
-        cabName: "SUV - ABC456",
-        perkmprice: 15,
-        type: "SUV",
-        totalSeats: 6,
-        driver: "Alice Smith",
-        rating: 4.5,
-      },
-      {
-        id: 3,
-        cabName: "Hatchback - LMN789",
-        perkmprice: 10,
-        type: "Hatchback",
-        totalSeats: 4,
-        driver: "Michael Brown",
-        rating: 4.2,
-      },
-    ],
-    []
-  );
-
+useEffect(()=>{
+  const fetchCabs = async () => {
+    try {
+      let response = await fetch(`${BASE_URL}/api/Rv/vehicle/getallvehicle`);
+      let data = await response.json();
+      setdummyCabs(data); 
+      console.log(dummyCabs)
+      // Directly setting the array
+    } catch (error) {
+      console.error("Error fetching cabs:", error);
+    }
+  };
+  fetchCabs();
+},[])
+console.log(dummyCabs)
   const filteredCabs = useMemo(
     () =>
       dummyCabs.filter((cab) => {
-        const seatMatch = !seatFilter || cab.totalSeats >= parseInt(seatFilter);
+        const seatMatch = !seatFilter || cab.seating_capacity >= parseInt(seatFilter);
         const modelMatch =
           !modelFilter ||
           cab.type.toLowerCase().includes(modelFilter.toLowerCase());
@@ -146,18 +133,18 @@ const CabDetails = () => {
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-xl font-bold">{cab.cabName}</h3>
-                      <p className="text-red-400 text-sm mt-1">{cab.type}</p>
+                      <h3 className="text-xl font-bold">{cab.vehicle_number}</h3>
+                      <p className="text-red-400 text-sm mt-1">{cab.vehicle_type}</p>
                     </div>
                     <p className="text-red-500 font-bold text-xl">
-                      ₹{cab.perkmprice.toLocaleString("en-IN")}
+                      ₹{cab.perKm_price.toLocaleString("en-IN")}
                     </p>
                   </div>
 
                   <div className="flex justify-between text-sm text-gray-400">
                     <div className="flex items-center gap-2">
                       <Users size={18} />
-                      <span>{cab.totalSeats} Seats</span>
+                      <span>{cab.seating_capacity} Seats</span>
                     </div>
 
                     {/* Book Button - Opens Popover */}
@@ -200,10 +187,10 @@ const CabDetails = () => {
                 <X size={20} />
               </button>
             </div>
-            <p className="text-gray-300">Cab Name: {selectedCab.cabName}</p>
-            <p className="text-gray-300">Type: {selectedCab.type}</p>
-            <p className="text-gray-300">Seats: {selectedCab.totalSeats}</p>
-            <p className="text-gray-300">Driver: {selectedCab.driver}</p>
+            <p className="text-gray-300">Cab Name: {selectedCab.vehicle_number}</p>
+            <p className="text-gray-300">Type: {selectedCab.vehicle_type}</p>
+            <p className="text-gray-300">Seats: {selectedCab.seating_capacity}</p>
+            {/* <p className="text-gray-300">Driver: {selectedCab}</p> */}
             <p className="text-gray-300">Rating: ⭐ {selectedCab.rating}</p>
             <div className="flex justify-between items-center mt-3">
               <p className="text-red-400 font-bold">

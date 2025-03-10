@@ -14,6 +14,7 @@ import Register from "./Pages/Main/Register.jsx";
 import OtpPage from "./Pages/Main/Otp.jsx";
 import Login from "./Pages/Main/Login.jsx";
 import AirlineOwnerRegistration from "./Pages/Flight/AirLineRegistartion.jsx";
+import OtpVerified from "./Pages/Cab/Rider/RiderOtpVerified.jsx";
 import HotelOwnerRegister from "./Pages/Hotel/Owner/HotelOwnerRegister.jsx";
 import HotelOwnerVerify from "./Pages/Hotel/Owner/HotelOwnerVerify.jsx";
 import HotelOwnerLogin from "./Pages/Hotel/Owner/HotelOwnerLogin.jsx";
@@ -22,6 +23,7 @@ import RoomAdd from "./Pages/Hotel/Owner//Dashboard/RoomAdd.jsx";
 import HotelAdminPanel from "./Pages/Hotel/Owner/Dashboard/AdminPanel.jsx";
 import HotelDashboard from "./Pages/Hotel/Owner/Dashboard/HotelDashboard.jsx";
 import RoomDashboard from "./Pages/Hotel/Owner/Dashboard/RoomDashboard.jsx";
+
 
 import CabDetails from "./Pages/Cab/CabDetails.jsx";
 import CabReviewPage from "./Pages/Cab/CabReview.jsx";
@@ -78,16 +80,16 @@ function App() {
 
         {/* Cab */}
         <Route path="/booking/cab" element={<CabDetails />} />
-        <Route path="/booking/cabreview" element={<CabReviewPage />} />
-        <Route path="/booking/addingcab" element={<AddingCab />} />
-        <Route path="/booking/userdashboard" element={<UserDashboard />} />
-        <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
-        <Route path="/booking/confirmbooking" element={<ConfirmBooking />} />
-        <Route path="/booking/ridersignup" element={<RiderSignup />} />
-        <Route path="/booking/riderlogin" element={<Riderlogin />} />
-        <Route path="/forgetpassword" element={<ForgotPassword />} />
+          <Route path="/booking/cabreview" element={<CabReviewPage />} />
+          <Route path="/booking/addingcab" element={<AddingCab />} />
+          <Route path="/booking/userdashboard" element={<UserDashboard />} />
+          <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
+          <Route path="/booking/confirmbooking" element={<ConfirmBooking />} />
+          <Route path="/booking/ridersignup" element={<RiderSignup />} />
+          <Route path="/booking/riderlogin/:email/:id" element={<Riderlogin />} />
+          <Route path="/forgetpassword" element={<ForgotPassword />} />
+          <Route path="/otp/:email" element={<OtpVerified/>} />
       </Routes>
-
       {/* Show Footer only if not on admin routes */}
       {!isAdminRoute && (
         <Footer />

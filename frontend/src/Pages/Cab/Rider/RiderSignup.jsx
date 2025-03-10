@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { BASE_URL } from "../../../../config";
 
 export default function RiderSignup() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
+    address: "",
     password: "",
-    confirmPassword: "",
-    vehicleNumber: "",
-    vehicleModel: "",
+    conformpassword: "",
+    licence_number: "",
+    
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -18,19 +20,47 @@ export default function RiderSignup() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     setError("");
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.conformpassword) {
       setError("Passwords do not match");
       return;
     }
     console.log("Signup submitted:", formData);
 
-    // Add form submission logic here (API call, etc.)
+    try {
+      const res = await fetch(`${BASE_URL}/api/Rv/Rider/createRider`, {
+        method:"POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    
+      });
+      console.log("Full Response:", res);
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+      const data = await res.json();
+    
+      console.log("Response Data:", data);
+      if (data) {
+        // localStorage.setItem("")
+        setTimeout(() => {
+          alert("Rider add successfully!");
 
-    // Redirect to login page after successful signup
-    navigate("/booking/riderlogin");
+    navigate("/booking/riderlogin"+"/"+formData.email+"/"+formData._id);
+         
+        }, 2000);
+      }
+     } catch (e) {
+      console.log(e)
+     }finally {
+     
+    }
+        
+    
   };
 
   return (

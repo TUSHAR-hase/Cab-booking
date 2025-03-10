@@ -89,7 +89,7 @@ function App() {
 
       {/* Show Footer only if not on admin routes */}
       {!isAdminRoute && (
-          <Footer />      
+        <Footer />
       )}
     </>
   );

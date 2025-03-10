@@ -24,12 +24,16 @@ const addressSchema = new mongoose.Schema({
 });
 
 const hotelSchema = new mongoose.Schema({
+    hotel_owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "HotelOwner",
+    },
     name: {
         type: String,
         required: true,
     },
     address: {
-        type: addressSchema,  // Corrected here to use 'type'
+        type: addressSchema,
         required: true
     },
     description: {

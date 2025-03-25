@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 
 const vehicleSchema=new mongoose.Schema({
-    vehicle_number: { type: String, required: true},
+    vehicle_number: { type: String,unique:true, required: true},
       Rider_id:{type:mongoose.Schema.Types.ObjectId,ref:"Rider",require:true},
     vehicle_type: { type: String, required: true }, // Sedan, SUV, etc.
     seating_capacity: { type: String,require:true  },

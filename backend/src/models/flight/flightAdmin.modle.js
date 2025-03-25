@@ -3,7 +3,10 @@ import mongoose from "mongoose";
 // User Schema
 const FlightAdminSchema = new mongoose.Schema({
     full_name: String,
-    email: String,
+    email: { 
+        type: String,
+        unique: true
+    },
     password: String,
     mobile: Number,
     gender: String,

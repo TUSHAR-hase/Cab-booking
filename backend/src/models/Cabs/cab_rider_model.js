@@ -4,9 +4,9 @@ import mongoose from "mongoose";
 const RiderSchema=new mongoose.Schema({
     name:{type:String,require:true},
     licence_number:{type:String,require:true,unique:true},
-   email:{type:String,require:true},
+   email:{type:String,unique:true,require:true},
    address:{type:String,require:true},
-   phone:{type:String,require:true},
+   phone:{type:String,unique:true,require:true},
    password:{type:String,require:true},
    conformpassword:{type:String,require:true},
  

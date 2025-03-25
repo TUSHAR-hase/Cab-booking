@@ -1,8 +1,10 @@
 import React,{useEffect} from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from "react-router-dom";
 import { FaPlaneDeparture, FaHotel, FaCarAlt,FaMapMarkerAlt, FaArrowRight, FaCar, FaPlane } from 'react-icons/fa';
 
 const Home = () => {
+  const navigate = useNavigate();
   useEffect(() => {
     const link = document.createElement("link");
     link.href = "https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap";
@@ -81,6 +83,7 @@ const Home = () => {
         className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 sm:px-10 py-3 sm:py-4 rounded-full text-lg shadow-lg transition-all transform hover:scale-110 hover:shadow-red-500/50 flex items-center"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/login")}
       >
         Explore Now <FaArrowRight className="ml-3 text-xl" />
       </motion.button>

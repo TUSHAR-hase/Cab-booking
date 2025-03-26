@@ -1,8 +1,10 @@
 import React,{useEffect} from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from "react-router-dom";
 import { FaPlaneDeparture, FaHotel, FaCarAlt,FaMapMarkerAlt, FaArrowRight, FaCar, FaPlane } from 'react-icons/fa';
 
 const Home = () => {
+  const navigate = useNavigate();
   useEffect(() => {
     const link = document.createElement("link");
     link.href = "https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap";
@@ -11,14 +13,14 @@ const Home = () => {
   }, []);
   
   const registrationOptions = [
-    { id: 1, name: "Hotel Owner", icon: FaHotel, link: "/register/hotel" },
-    { id: 2, name: "Cab Driver", icon: FaCar, link: "booking/ridersignup" },
-    { id: 3, name: "Airline Owner", icon: FaPlane, link: "/register/airline" },
+    { id: 1, name: "Hotel Owner", icon: FaHotel, link: "/register/hotel/owner" },
+    { id: 2, name: "Airline Owner", icon: FaPlane, link: "/register/airline" },
+    { id: 3, name: "Cab Driver", icon: FaCar, link: "/booking/ridersignup" },
   ];
   const options = [
-    { id: 1, name: "Hotels", icon: FaHotel },
-    { id: 2, name: "Flights", icon: FaPlaneDeparture },
-    { id: 3, name: "Car Rentals", icon: FaCarAlt },
+    { id: 1, name: "Hotels", icon: FaHotel , link: "/booking/hotel" },
+    { id: 2, name: "Flights", icon: FaPlaneDeparture , link: "/booking/flight" },
+    { id: 3, name: "Car Rentals", icon: FaCarAlt , link: "/booking/cab" },
   ];
 
   const stats = [
@@ -81,6 +83,7 @@ const Home = () => {
         className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8 sm:px-10 py-3 sm:py-4 rounded-full text-lg shadow-lg transition-all transform hover:scale-110 hover:shadow-red-500/50 flex items-center"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/login")}
       >
         Explore Now <FaArrowRight className="ml-3 text-xl" />
       </motion.button>
@@ -196,7 +199,7 @@ const Home = () => {
               <h3 className="text-xl sm:text-2xl font-semibold mb-2 text-gray-200">{option.name}</h3>
               <p className="mt-2 text-gray-400 text-base sm:text-lg">Find the best {option.name.toLowerCase()} for your trip.</p>
               <a 
-                href="#" 
+                href={option.link} 
                 className="mt-4 sm:mt-6 inline-block bg-red-500 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-base sm:text-lg font-medium tracking-wide hover:bg-red-700 transition-colors duration-300"
               >
                 Search {option.name}

@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser"
 import { userRouter } from "./routes/main/userRoutes.js";
 import vehicleapi from "./routes/Cabs/vehicle_routes.js"
 import Riderapi from "./routes/Cabs/Rider_routes.js"
+import booking from "./routes/Cabs/booking.js"
 import { flightRouter } from "./routes/flight/flight.route.js";
 // import "./services/deadlineCron.js"
 const app = express()
@@ -20,6 +21,7 @@ app.use("/api/user", userRouter)
 
 //------------CAB ROUTES-------------------------------------
 app.use("/api/Rv/vehicle",vehicleapi)
+app.use("/api/Rv/booking",booking)
 app.use("/api/Rv/Rider",Riderapi)
 
 //------------FLIGHT ROUTES-------------------------------------

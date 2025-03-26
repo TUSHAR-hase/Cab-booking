@@ -12,7 +12,7 @@ const Home = () => {
   
   const registrationOptions = [
     { id: 1, name: "Hotel Owner", icon: FaHotel, link: "/register/hotel" },
-    { id: 2, name: "Cab Driver", icon: FaCar, link: "/register/cab" },
+    { id: 2, name: "Cab Driver", icon: FaCar, link: "booking/ridersignup" },
     { id: 3, name: "Airline Owner", icon: FaPlane, link: "/register/airline" },
   ];
   const options = [

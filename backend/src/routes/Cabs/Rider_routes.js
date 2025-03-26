@@ -8,7 +8,8 @@ router.put("/updateRider/:id",update_Rider)
 router.delete("/delateRider/:id",delate_Rider)
 router.post("/createRider",add_rider)
 router.post("/loginRider",loginrider)
-router.post("/verify-otp",verifyOtp)
+router.post("/otp-veriyfy",verifyOtp)
+
 
 
 

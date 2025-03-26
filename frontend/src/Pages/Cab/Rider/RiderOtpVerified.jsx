@@ -6,10 +6,9 @@ import { KeyRound } from 'lucide-react';
 import { BASE_URL } from '../../../../config';
 
 const OtpVerified = () => {
-  const navigate = useNavigate();
   const { email } = useParams();
   const [otp, setOtp] = useState(['', '', '', '']);
-
+const nevigate=useNavigate()
   const handleChange = (e, index) => {
     const value = e.target.value;
     if (/[^0-9]/.test(value)) return; // Allow only numeric input
@@ -29,16 +28,22 @@ const OtpVerified = () => {
     if (otpValue.length === 4) {
       otpValue = parseInt(otpValue);
       try {
-        const response = await axios.post(`${BASE_URL}/api/Rv/Rider/verify-otp`,
-          { email, otp: otpValue },
-          { headers: { 'Content-Type': 'application/json' } }
-        );
+        const response = await fetch(`${BASE_URL}/api/v1/auth/otp-veriyfy`,
+          {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, otp: otpValue })
+          }
+        )
+        const data = await response.json();
+        console.log(data)
+        if (data.message === "User verified successfully") {
 
-        if (response.data.message === "User verified successfully") {
-          Cookies.set('token', response.data.data);
-          navigate("/booking/riderdashboard")
+       nevigate("/login")
         }
-        alert(response.data.message);
+        alert(data.message);
       } catch (error) {
         console.error('Error occurred:', error.response || error);
         alert(error.response.data.message);
@@ -47,43 +52,35 @@ const OtpVerified = () => {
       alert('Please enter a 4-digit OTP');
     }
   };
+ 
   return (
-    <div className="h-screen w-full overflow-hidden bg-cover bg-center flex items-center justify-center relative"
-      style={{ backgroundImage: "url('https://cdn.vectorstock.com/i/1000v/79/88/taxi-car-front-view-in-dark-background-vector-43697988.avif')" }}>
+    <div className="min-h-screen flex items-center justify-center  text-white p-4">
+        <div className=" border-2 border-blue-500 rounded-xl p-6 max-w-sm w-full text-center shadow-blue-500 shadow-md">
+            <h2 className="text-2xl font-bold uppercase tracking-wide text-blue-500 mb-4">Enter OTP</h2>
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div className="flex justify-center gap-2 mb-4">
+                {otp.map((digit, index) => (
+                    <input
+                        key={index}
+                        id={`otp-input-${index}`}
+                        value={digit}
+                        onChange={(e) => handleChange(e, index)}
+                        maxLength={1}
+                        className="w-12 h-12  text-black text-center text-2xl border border-blue-500 rounded-lg focus:outline-none focus:border-blue-600 transition-all"
+                    />
+                ))}
+            </div>
 
-      {/* Glass-morphism OTP verified container */}
-      <div className="relative z-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 w-96 shadow-2xl transition-all hover:shadow-3xl">
-        <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
-          OTP Verified
-        </h2>
-
-        <p className="text-white/70 text-center mb-6">Your OTP has been successfully verified. You can now proceed.</p>
-
-        {/* Proceed Button */}
-        <button
-          onClick={handleSubmit}
-          className="w-full py-3.5 bg-gradient-to-r from-green-500 to-green-600 rounded-lg text-white font-semibold
-                    transform transition-all hover:scale-[1.02] hover:from-green-600 hover:to-green-700
-                    active:scale-95 shadow-lg hover:shadow-green-500/20"
-        >
-          Proceed
-        </button>
-
-        {/* Back to Home */}
-        <div className="mt-6 flex justify-center text-sm">
-          <button
-            onClick={handleSubmit}
-            className="text-white/70 hover:text-green-300 transition-colors"
-          >
-            Back to Home
-          </button>
+            <button
+                onClick={handleSubmit}
+                className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-white-600 text-white font-bold text-lg py-2 rounded-lg transition-all"
+            >
+                <KeyRound size={22} />
+                Submit OTP
+            </button>
         </div>
-      </div>
     </div>
-  );
+);
 };
 
 export default OtpVerified;

@@ -22,7 +22,10 @@ const Login = () => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/login`, { email, password });
       if (response.data.message === "Login successful") {
+        console.log(response.data)
+        alert("")
         Cookies.set("token", response.data.data);
+        localStorage.setItem("token",response.data.data)
         window.location.href = "http://localhost:5173/";
       }
     } catch (error) {

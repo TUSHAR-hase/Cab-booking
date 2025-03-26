@@ -35,6 +35,7 @@ const Navbar = () => {
   
   const handleLogout = () => {
     Cookies.remove("token");
+    localStorage.removeItem("token")
     setIsLoggedIn(false);
   };
 

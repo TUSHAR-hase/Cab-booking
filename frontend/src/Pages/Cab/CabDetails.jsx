@@ -13,7 +13,16 @@ const CabDetails = () => {
   const [selectedCab, setSelectedCab] = useState(null); // State for selected cab
 const [dummyCabs,setdummyCabs]=useState([])
 const nevigate=useNavigate();
-  
+  const chackUserlogin=(id)=>{
+    const token =localStorage.getItem("token");
+    if(token){
+      nevigate(`/booking/confirmbooking/${id}`)
+    }
+    else{
+      alert("You Have No Account Redirect Login..")
+      nevigate("/login")
+    }
+  }
  
 
 useEffect(()=>{
@@ -37,7 +46,7 @@ console.log(dummyCabs)
         const seatMatch = !seatFilter || cab.seating_capacity >= parseInt(seatFilter);
         const modelMatch =
           !modelFilter ||
-          cab.type.toLowerCase().includes(modelFilter.toLowerCase());
+          cab.vehicle_type.toLowerCase().includes(modelFilter.toLowerCase());
         return seatMatch && modelMatch;
       }),
     [seatFilter, modelFilter, dummyCabs]
@@ -198,7 +207,7 @@ console.log(dummyCabs)
                 Price: ₹{selectedCab.perkmprice} per km
               </p>
               <button 
-              onClick={()=>nevigate("/booking/confirmbooking")}
+              onClick={()=>chackUserlogin(selectedCab._id)}
               className="bg-red-500 text-white px-4 py-2 rounded">
                 Confirm
               </button>

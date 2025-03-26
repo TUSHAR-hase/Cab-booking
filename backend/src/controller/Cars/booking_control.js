@@ -3,13 +3,26 @@ import { booking } from "../../models/Cabs/cab_booking_model.js";
 
 export const create_booking = async (res, resp) => {
     try {
-        const newbooking = new booking(res.body);
+        const { from, to, pickupTime, vehicalid, rider_id, userId } = res.body
+        const newbooking = new booking({
+            user_id: userId,
+            vehicle_id: vehicalid,
+            Rider_id: rider_id,
+            source_location: {
+                address:from
+            },
+            destination_location: {
+                address:to
+            },
+            pickup_time: pickupTime
+        });
         const seved_booking = await newbooking.save();
-     console.log(`seved booking${seved_booking}`)
-     return resp.status(201).json({ 
-        message: "booking added successfully!", 
-        booking: newbooking 
-    });
+       
+            console.log(`seved booking${seved_booking}`)
+        return resp.status(201).json({
+            message: "booking added successfully!",
+            booking: newbooking
+        });
     } catch (error) {
         console.log(error)
     }

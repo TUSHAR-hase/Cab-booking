@@ -48,9 +48,10 @@ export default function RiderSignup() {
       if (data) {
         // localStorage.setItem("")
         setTimeout(() => {
-          alert("Rider add successfully!");
+          alert("Otp sent on Email ");
+      navigate("/otp/"+formData.email); 
 
-    navigate("/booking/riderlogin"+"/"+formData.email+"/"+data.user._id);
+    // navigate("/booking/riderlogin"+"/"+formData.email+"/"+data.user._id);
          
         }, 2000);
       }

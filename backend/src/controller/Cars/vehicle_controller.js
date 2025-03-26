@@ -28,12 +28,12 @@ export const getvehicleByid = async (res, resp) => {
     try {
         const vehicle = await Vehicle.findById(res.params.id)
         if (!vehicle) {
-            res.status(500).json({ message: "vehicle not found" })
+            resp.status(500).json({ message: "vehicle not found" })
         } else {
-            res.status(200).json(vehicle)
+            resp.status(200).json(vehicle)
         }
     } catch (error) {
-        res.status(500).json(error)
+        resp.status(500).json(error)
 
     }
 }

@@ -82,13 +82,13 @@ function App() {
         <Route path="/booking/cab" element={<CabDetails />} />
           <Route path="/booking/cabreview" element={<CabReviewPage />} />
           <Route path="/booking/addingcab" element={<AddingCab />} />
-          <Route path="/booking/userdashboard" element={<UserDashboard />} />
-          <Route path="/booking/riderdashboard/:id" element={<RiderDashboard />} />
+          <Route path="/userdashboard" element={<UserDashboard />} />
+          <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
           <Route path="/booking/confirmbooking/:id" element={<ConfirmBooking />} />
           <Route path="/booking/ridersignup" element={<RiderSignup />} />
-          <Route path="/booking/riderlogin/:email/:id" element={<Riderlogin />} />
+          <Route path="/booking/riderlogin" element={<Riderlogin />} />
           <Route path="/forgetpassword" element={<ForgotPassword />} />
-          <Route path="/otp/:email" element={<OtpVerified/>} />
+          <Route path="/otprider/:email" element={<OtpVerified/>} />
       </Routes>
       {/* Show Footer only if not on admin routes */}
       {!isAdminRoute && (

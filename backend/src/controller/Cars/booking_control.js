@@ -27,6 +27,80 @@ export const create_booking = async (res, resp) => {
         console.log(error)
     }
 }
+export const acceptBooking = async (req, resp) => {
+    try {
+        const { id } = req.params;
+        console.log("Received booking ID:", req.params.id); 
+
+        if (!id) {
+            return resp.status(400).json({ message: "Booking ID is required" });
+        }
+
+        const updatedBooking = await booking.findByIdAndUpdate(
+            id,
+            { status: "accepted" },  
+            { new: true }
+        );
+
+        if (!updatedBooking) {
+            return resp.status(404).json({ message: "Booking not found" });
+        }
+
+        resp.status(200).json({ message: "Booking accepted", booking: updatedBooking });
+    } catch (error) {
+        console.error("Error accepting booking:", error);
+        resp.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
+export const complateBooking = async (req, resp) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return resp.status(400).json({ message: "Booking ID is required" });
+        }
+
+        const updatedBooking = await booking.findByIdAndUpdate(
+            id,
+            { status: "completed" },  
+            { new: true }
+        );
+
+        if (!updatedBooking) {
+            return resp.status(404).json({ message: "Booking not found" });
+        }
+
+        resp.status(200).json({ message: "Booking complated", booking: updatedBooking });
+    } catch (error) {
+        console.error("Error compalted booking:", error);
+        resp.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
+export const rejectBooking = async (req, resp) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return resp.status(400).json({ message: "Booking ID is required" });
+        }
+
+        const updatedBooking = await booking.findByIdAndUpdate(
+            id,
+            { status: "rejected" },  
+            { new: true }
+        );
+
+        if (!updatedBooking) {
+            return resp.status(404).json({ message: "Booking not found" });
+        }
+
+        resp.status(200).json({ message: "Booking rejected", booking: updatedBooking });
+    } catch (error) {
+        console.error("Error rejecting booking:", error);
+        resp.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
+
 export const getbooking = async (req, res) => {
     try {
         const bookings = await booking.find();
@@ -38,19 +112,27 @@ export const getbooking = async (req, res) => {
 
     }
 }
-export const getbookingByid = async (res, resp) => {
+export const getbookingByid = async (req, resp) => {
     try {
-        const bookings = await booking.findById(res.params.id)
-        if (!bookings) {
-            res.status(500).json({ message: "booking not found" })
-        } else {
-            res.status(200).json(bookings)
+        if (!req.params.id) {
+            return resp.status(400).json({ message: "Rider ID is required" });
         }
-    } catch (error) {
-        res.status(500).json(error)
 
+        const bookings = await booking.find({ Rider_id: req.params.id })
+            .populate("user_id", "name contact") 
+            .populate("vehicle_id", "vehicle_number vehicle_type"); 
+
+        if (!bookings || bookings.length === 0) {
+            return resp.status(404).json({ message: "Booking not found" });
+        }
+
+        resp.status(200).json(bookings);
+    } catch (error) {
+        console.error("Error fetching bookings:", error); 
+        resp.status(500).json({ message: "Internal Server Error", error: error.message });
     }
-}
+};
+
 export const update_booking = async (res, resp) => {
     try {
         const updatebooking = await booking.findByIdAndUpdate(res.params.id, res.body, { new: true })

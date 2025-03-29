@@ -37,21 +37,41 @@ export const getvehicleByid = async (res, resp) => {
 
     }
 }
+export const getvehicleByriderid = async (req, resp) => {
+    try {
+        // console.log("Received Rider ID:", req.params.id); 
+        if (!req.params.id) {
+            return resp.status(400).json({ message: "Rider ID is required" });
+        }
+
+        const vehicle = await Vehicle.find({ Rider_id: req.params.id });
+        if (!vehicle) {
+            return resp.status(404).json({ message: "Vehicle not found" });
+        }
+
+        resp.status(200).json(vehicle);
+    } catch (error) {
+        console.error("Error fetching vehicle:", error);
+        resp.status(500).json({ message: "Server error", error });
+    }
+};
+
+
 export const update_vehicle = async (res, resp) => {
     try {
         const updatevehicle = await Vehicle.findByIdAndUpdate(res.params.id, res.body, { new: true })
-        if (!updatevehicle) return res.status(404).json({ message: "Vehicle not found" });
-        res.status(200).json(updatevehicle);
+        if (!updatevehicle) return resp.status(404).json({ message: "Vehicle not found" });
+        resp.status(200).json(updatevehicle);
     } catch (error) {
-        res.status(500).json(error)
+        resp.status(500).json(error)
     }
 }
 export const delate_vehicle = async (res, resp) => {
     try {
         const delatevehicle = await Vehicle.findByIdAndDelete(res.params.id)
-        if (!delatevehicle) return res.status(404).json({ message: "Vehicle not found" });
-        res.status(200).json({ message: "Vehicle deleted successfully" });
+        if (!delatevehicle) return resp.status(404).json({ message: "Vehicle not found" });
+        resp.status(200).json({ message: "Vehicle deleted successfully" });
     } catch (error) {
-        res.status(500).json(error)
+        resp.status(500).json(error)
     }
 }

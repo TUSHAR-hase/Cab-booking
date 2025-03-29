@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Car, Tag, FileText, DollarSign, CreditCard, Calendar } from "lucide-react";
 import { BASE_URL } from "../../../config";
+import { jwtDecode } from "jwt-decode"; 
 
 const AddVehicle = () => {
   const navigate = useNavigate();
-  const rider_id=localStorage.getItem("Rider")
+  const [rider_id,setriderid]=useState()
+
+  
+  console.log(rider_id)
   const [vehicle, setVehicle] = useState({
     vehicle_type: "",
     vehicle_model: "",
@@ -14,10 +18,27 @@ const AddVehicle = () => {
     perKm_price: "",
     seating_capacity: "",
     description: "",
-    Rider_id:rider_id
+    Rider_id:null
   });
   const [loading, setLoading] = useState(false);
-
+  useEffect(() => {
+    const token = localStorage.getItem("ridertoken");  
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        console.log("Decoded Token:", decoded);
+        setriderid(decoded.id);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (rider_id) {
+      setVehicle((prev) => ({ ...prev, Rider_id: rider_id }));
+    }
+  }, [rider_id]); 
   const handleChange = (e) => {
     setVehicle({ ...vehicle, [e.target.name]: e.target.value });
   };
@@ -56,7 +77,7 @@ const AddVehicle = () => {
     
     setTimeout(() => {
       alert("Vehicle added successfully!");
-      navigate("/booking/riderdashboard/"+rider_id);
+      navigate("/booking/riderdashboard/");
     }, 2000);
   }
  } catch (e) {

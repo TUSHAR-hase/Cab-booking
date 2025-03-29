@@ -1,8 +1,10 @@
 import { User } from "../../models/main/user.models.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import nodemailer from "nodemailer";
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcrypt';
+
 import jwt from "jsonwebtoken";
+import { booking } from "../../models/Cabs/cab_booking_model.js";
 
 const registerUser = async (req, res) => {
   const smtpUser = process.env.SMTP_USER;
@@ -105,7 +107,7 @@ const registerUser = async (req, res) => {
     otp,
     type,
     isVerifiedOtp: false,
-    passowrd: hashedPAssword,
+    password:hashedPAssword
   });
 
   res
@@ -156,8 +158,11 @@ const loginUser = async (req, res) => {
 
   
 
-  const isMatch = await bcrypt.compare(password, user.passowrd);
+  const isMatch = await bcrypt.compare(password, user.password);
+  // console.log(user.passowrd)
+  console.log(password)
 
+console.log(isMatch)
   if (!isMatch) {
     return res
       .status(401)
@@ -265,3 +270,24 @@ const loginUser = async (req, res) => {
 };
 
 export { registerUser, verifyOtp, loginUser };
+export const getbookingByid = async (req, resp) => {
+    try {
+        if (!req.params.id) {
+            return resp.status(400).json({ message: "user ID is required" });
+        }
+
+        const bookings = await booking.find({ user_id: req.params.id })
+            .populate("Rider_id", "phone") 
+
+            .populate("vehicle_id", "vehicle_number vehicle_type"); 
+
+        if (!bookings || bookings.length === 0) {
+            return resp.status(404).json({ message: "Booking not found" });
+        }
+
+        resp.status(200).json(bookings);
+    } catch (error) {
+        console.error("Error fetching bookings:", error); 
+        resp.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};

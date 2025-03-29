@@ -49,7 +49,7 @@ export default function RiderSignup() {
         // localStorage.setItem("")
         setTimeout(() => {
           alert("Otp sent on Email ");
-      navigate("/otp/"+formData.email); 
+      navigate("/otprider/"+formData.email); 
 
     // navigate("/booking/riderlogin"+"/"+formData.email+"/"+data.user._id);
          

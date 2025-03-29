@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BASE_URL } from "../../../config";
 import { jwtDecode } from "jwt-decode"; 
+import axios from "axios";
 const ConfirmBookingPage = () => {
   const {id}=useParams()
   console.log(id)
@@ -10,17 +11,26 @@ const ConfirmBookingPage = () => {
   const [pickupTime, setPickupTime] = useState("");
   // const [user_id,setuserid]=useState()
   const [vehicalid,setVehicle]=useState()
+  const [loading, setLoading] = useState(false);
   const [rider_id,setRider]=useState()
   const [userId, setUserId] = useState("");
+  const [username,setusername]=useState()
+  const [useremail,setuseremail]=useState()
+  const [usercontect,setusercontect]=useState()
+ const[amount,setammount]=useState()
+
   const navigate = useNavigate();
 
 useEffect(() => {
-  const token = localStorage.getItem("token");  // Get token from local storage
+  const token = localStorage.getItem("token");  
   if (token) {
     try {
       const decoded = jwtDecode(token);
-      // console.log(decoded) // Decode JWT token
+      console.log(decoded) 
     setUserId(decoded.user._id)
+    setusercontect(decoded.user.contact)
+    setusername(decoded.user.name)
+    setuseremail(decoded.user.email)
     } catch (error) {
       console.error("Error decoding token:", error);
     }
@@ -33,14 +43,70 @@ const hendecardetail=async()=>{
   console.log(data)
   setRider(data.Rider_id)
   setVehicle(id)
+  setammount(data.perKm_price)
 }
+
+useEffect(() => {
+  const script = document.createElement("script");
+  script.src = "https://checkout.razorpay.com/v1/checkout.js";
+  script.async = true;
+  script.onload = () => console.log("Razorpay script loaded");
+  document.body.appendChild(script);
+}, []);
+const loadRazorpay = async () => {
+  setLoading(true);
+
+
+  try {
+    // Call backend to create an order
+    const { data } = await axios.post(`${BASE_URL}/create-order`, { amount: 500 });
+console.log(data)
+    if (!data.success) throw new Error("Failed to create order");
+
+    const options = {
+      key: "rzp_test_Y8cefy5g53d5Se", // Get from Razorpay
+      amount: "1",
+      currency: "INR",
+      order_id: data.order.id,
+      name: "Booking Hub",
+      description: "Payment for Booking",
+      handler: async (response) => {
+        // Verify Payment Signature
+        const verifyRes = await axios.post(`${BASE_URL}/verify-payment`, response);
+        if (verifyRes.data.success) {
+          alert("Payment Successful!");
+        } else {
+          alert("Payment Verification Failed!");
+        }
+      },
+      prefill: {
+        name: username,
+        email: useremail,
+        contact: usercontect,
+      },
+      theme: {
+        color: "#3399cc",
+      },
+    };
+    console.log(window.Razorpay);
+
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
+  } catch (error) {
+    console.log(error);
+    alert(error.message);
+  }
+
+  setLoading(false);
+};
+
   const handleProceedToPayment = async() => {
     if (!from || !to || !pickupTime) {
       alert("Please fill in all required fields");
       return;
     }
    try {
-    const res=fetch(`${BASE_URL}/api/Rv/booking/createbooking`,{
+    const res=await fetch(`${BASE_URL}/api/Rv/booking/createbooking`,{
       method:"POST",
       headers: {
         'Content-Type': 'application/json',
@@ -58,9 +124,11 @@ const hendecardetail=async()=>{
     if (data) {
       
       setTimeout(() => {
-        alert("Vehicle added successfully!");
-        navigate("/");
+        alert("GO to Payment PAGE...!");
+       
       }, 2000);
+      loadRazorpay();
+
     }
    } catch (error) {
     console.log(error)

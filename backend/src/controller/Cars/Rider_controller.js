@@ -1,19 +1,9 @@
 
 import { Rider } from "../../models/Cabs/cab_rider_model.js";
 import nodemailer from "nodemailer";
-
-
 import express from 'express';
 import bcrypt from 'bcrypt';
-
-
-
-
 import {ApiResponse} from "../../utils/apiResponse.js"
-
-
-
-
 import jwt from "jsonwebtoken";
 const genarate_token =user=>{ 
   return jwt.sign({ id:user._id,role:user.role}, process.env.SECRET_KEY, {
@@ -176,12 +166,13 @@ export const delate_Rider = async (req, res) => {
     }
 }
 
-const verifyOtp = async (req, res) => {
+export const verifyOtp = async (req, res) => {
   const SECRET_KEY = process.env.SECRET_KEY;
   const { email, otp } = req.body;
 
   const user = await Rider.findOne({ email });
-
+ 
+  
   if (!user) {
     return res.status(404).json(new ApiResponse(404, null, "User not found"));
   }
@@ -197,13 +188,14 @@ const verifyOtp = async (req, res) => {
   }
 
   user.isVerifiedOtp = true;
-  await Rider.save();
-
+  await user.save();
+  const updatedUser = await Rider.findOne({ email }); // Double-check
+  console.log("Updated User:", updatedUser);
   const token = jwt.sign({ user }, SECRET_KEY);
 
   res
     .status(200)
-    .json(new ApiResponse(200, token, "User verified successfully"));
+    .json(new ApiResponse(200, token, "Rider verified successfully"));
 };
 
 export const loginrider = async (req, res) => {
@@ -319,11 +311,6 @@ export const loginrider = async (req, res) => {
       }
       console.log("Password match:", isValidPassword);
       console.log(password.trim())
-      // if(password!=user.password){
-      //     return res.status(500).json({ message: "password not match" });
-      // }
-   
-
       const token = genarate_token(user);
       return res.status(200).json({ message: "Login successful", user, token });
 
@@ -332,4 +319,4 @@ export const loginrider = async (req, res) => {
       return res.status(500).json({ message: "Server error" });
   }
 };
-export {  verifyOtp};
+

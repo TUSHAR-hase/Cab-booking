@@ -37,10 +37,10 @@ const Login = () => {
         console.log("API Response:", response);
     
         if (res.ok) {
-          Cookies.set("token", response.token);
-          localStorage.setItem("Rider",id)
+          Cookies.set("ridertoken", response.token);
+          localStorage.setItem("ridertoken",response.token)
           // localStorage.getItem()
-          navigate("/booking/riderdashboard"+"/"+id); // Login success hone par dashboard bhejna
+          navigate("/booking/riderdashboard"); 
         } else {
           setErrorMessage(response.message || "Login failed");
         }

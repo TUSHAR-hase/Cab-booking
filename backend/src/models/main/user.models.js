@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
         default: "customer"
     },
 
-    passowrd: {
+    password: {
         type: String,
         required: true,
     },

@@ -35,6 +35,7 @@ const OtpPage = () => {
 
                 if (response.data.message === "User verified successfully") {
                     Cookies.set('token', response.data.data);
+                    localStorage.setItem("token",response.data.data)
                     window.location.href = "http://localhost:5173/";
                 }
                 alert(response.data.message);

@@ -1,8 +1,8 @@
 import mongoose from  "mongoose";
 const cab_booking_model = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    vehicle_id: { type: mongoose.Schema.Types.ObjectId, ref: "Vehicle", required: true },
-    Rider_id: { type: mongoose.Schema.Types.ObjectId, ref: "Rider", required: true },
+    vehicle_id: { type: mongoose.Schema.Types.ObjectId, ref: "Vehicles", required: true },
+    Rider_id: { type: mongoose.Schema.Types.ObjectId, ref: "Riders", required: true },
     source_location: {
         address: { type: String, required: true }
     },
@@ -10,7 +10,7 @@ const cab_booking_model = new mongoose.Schema({
         address: { type: String, required: true }
     },
 
-    status: { type: String, enum: ["pending", "confirmed", "completed", "cancelled"], default: "pending" },
+    status: { type: String, enum: ["pending", "accepted", "completed", "cancelled"], default: "pending" },
     pickup_time: { type: Date, required: true },
    
     payment_status: { type: String, enum: ["unpaid", "paid"], default: "unpaid" },

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { jwtDecode } from "jwt-decode";
+
 import {
   CalendarDays,
   DollarSign,
@@ -7,14 +9,17 @@ import {
   Edit,
   Bell,
   Plane,
-  Hotel,
+  Hotel,Calendar,
   Car,
 } from "lucide-react";
+import { BASE_URL } from "../../../config";
 
 const UserDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [flights, setFlights] = useState([]);
   const [hotels, setHotels] = useState([]);
+    const [user_id, setuserId] = useState(null);
+  
   const [cabs, setCabs] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -25,7 +30,43 @@ const UserDashboard = () => {
     profilePic: "",
   });
   const [editedUser, setEditedUser] = useState(user);
+    useEffect(() => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const decoded = jwtDecode(token);
+          console.log("Decoded Token:", decoded);
+          setuserId(decoded.user._id);
+        } catch (error) {
+          console.error("Error decoding token:", error);
+        }
+      }
+    }, []);
+  
+    useEffect(() => {
+      if (user_id) {
+        console.log("Fetching vehicles for user ID:", user_id);
 
+        getalluserrequest();
+      }
+    }, [user_id]);
+  const getalluserrequest = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/user/getbooking/${user_id}`);
+      const data = await res.json();
+
+      if (!data || data.length === 0) {
+        console.log("No bookings found");
+
+      } else {
+        console.log("Fetched requests:", data);
+        setCabs(data)
+        console.log(data)
+      }
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
+  };
   useEffect(() => {
     // Dummy Booking Data
     setFlights([
@@ -38,10 +79,6 @@ const UserDashboard = () => {
       { id: 4, name: "The Oberoi", city: "Mumbai", date: "2025-01-30", price: 5800, status: "Completed" },
     ]);
 
-    setCabs([
-      { id: 5, from: "Connaught Place", to: "Delhi Airport", date: "2025-02-10", price: 1200, status: "Cancelled" },
-      { id: 6, from: "Saket", to: "Qutub Minar", date: "2025-01-05", price: 500, status: "Completed" },
-    ]);
 
     setTransactions([
       { id: 1, amount: 4500, date: "2025-02-10", status: "Paid" },
@@ -101,42 +138,49 @@ const UserDashboard = () => {
         )}
       </div>
 
-      {/* Booking Sections */}
-      {[{ title: "Flights", icon: <Plane />, data: flights },
-        { title: "Hotels", icon: <Hotel />, data: hotels },
-        { title: "Cabs", icon: <Car />, data: cabs }].map(({ title, icon, data }) => (
-        <div key={title} className="mt-10">
-          <h2 className="text-3xl font-bold text-red-500 mb-4 flex items-center gap-2">
-            {icon} {title} Bookings
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.length === 0 ? (
-              <p className="text-gray-400">No {title.toLowerCase()} bookings.</p>
-            ) : (
-              data.map((booking) => (
-                <motion.div
-                  key={booking.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="bg-[#1a1a1a] p-6 rounded-2xl shadow-lg border border-gray-800"
-                >
-                  <h3 className="text-xl font-bold">{title === "Hotels" ? booking.name : `${booking.from} → ${booking.to}`}</h3>
-                  <p className="text-yellow-400 font-semibold mt-2">{booking.status}</p>
-                  <div className="mt-3 text-gray-300 text-sm">
-                    <p className="flex items-center gap-2">
-                      <CalendarDays size={18} className="text-red-500" /> {booking.date}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <DollarSign size={18} className="text-red-500" /> ₹{booking.price}
-                    </p>
-                  </div>
-                </motion.div>
-              ))
-            )}
+      <div key="Cabs" className="mt-10">
+  <h2 className="text-3xl font-bold text-red-500 mb-4 flex items-center gap-2">
+    <Car /> Cab Bookings
+  </h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {cabs.length === 0 ? (
+      <p className="text-gray-400">No cab bookings.</p>
+    ) : (
+      cabs.map((booking) => (
+        <motion.div
+          key={booking._id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-[#1a1a1a] p-6 rounded-2xl shadow-lg border border-gray-800"
+        >
+          <h3 className="text-xl font-bold">
+            {booking.source_location.address} → {booking.destination_location.address}
+          </h3>
+
+          <p className="text-yellow-400 font-semibold mt-2">Status: {booking.status}</p>
+
+          <div className="mt-3 text-gray-300 text-sm">
+            <p className="text-gray-300 mt-1">
+              <Calendar size={16} className="inline-block" /> Pick Time:{" "}
+              {booking.pickup_time ? new Date(booking.pickup_time).toLocaleString() : "Not Available"}
+            </p>
+
+            <p className="flex items-center gap-2">
+              <DollarSign size={18} className="text-red-500" /> Payment: {booking.payment_status}
+            </p>
+
+            <p className="mt-1">Rider Mobile: {booking.Rider_id.phone}</p>
+            <p className="mt-1">
+              <Car size={16} className="inline-block" /> Vehicle: {booking.vehicle_id.vehicle_number} ({booking.vehicle_id.vehicle_type})
+            </p>
           </div>
-        </div>
-      ))}
+        </motion.div>
+      ))
+    )}
+  </div>
+</div>
+
 
       {/* Transactions */}
       <h2 className="text-3xl font-bold text-red-500 mt-10 mb-4">Payment History</h2>

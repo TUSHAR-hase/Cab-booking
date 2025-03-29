@@ -1,5 +1,5 @@
-import React, { useState,useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Menu,
@@ -8,7 +8,6 @@ import {
   Info,
   PhoneCall,
   CalendarCheck,
-  Hotel,
   Car,
   Plane,
   User,
@@ -16,27 +15,39 @@ import {
   UserPlus,
 } from "lucide-react";
 import Cookies from "js-cookie";
-import logo from "../assets/logo.png"
-
+import logo from "../assets/logo.png";
 
 const Navbar = () => {
-  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isRider, setIsRider] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = Cookies.get("token");
-    if (token) {
+    const ridertoken = localStorage.getItem("ridertoken");
+    const usertoken = localStorage.getItem("token");
+
+    if (ridertoken) {
+      setIsRider(true);
       setIsLoggedIn(true);
+    } else if (token || usertoken) {
+      setIsLoggedIn(true);
+      setIsRider(false);
     } else {
       setIsLoggedIn(false);
+      setIsRider(false);
     }
   }, []);
-  
+
   const handleLogout = () => {
     Cookies.remove("token");
-    localStorage.removeItem("token")
+    Cookies.remove("ridertoken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("ridertoken");
     setIsLoggedIn(false);
+    setIsRider(false);
+    navigate("/");
   };
 
   return (
@@ -118,37 +129,50 @@ const Navbar = () => {
           <PhoneCall size={18} /> <span>Contact Us</span>
         </Link>
 
-        {/* Authentication Links */}
-
-        {isLoggedIn  ? (
-          <div className="flex flex-col lg:flex-row space-y-3 lg:space-y-0 lg:space-x-3 items-center">
-            <Link
-              to="/profile"
-              className="flex items-center space-x-2 bg-white text-black! px-4 py-2 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-md"
-            >
-              <User size={18} /> <span>Profile</span>
-            </Link>
-            <p onClick={handleLogout} className="cursor-pointer flex items-center space-x-2 bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 shadow-md">
-              Logout
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col lg:flex-row space-y-3 lg:space-y-0 lg:space-x-3 items-center">
+        {/* Rider Dashboard Link */}
+        {isRider && (
           <Link
-            to="/login"
-            className="flex items-center space-x-2 bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 shadow-md"
+            to="/booking/riderdashboard"
+            className="flex items-center space-x-2 p-3 hover:text-red-500 transition-all duration-300"
           >
-            <LogIn size={18} /> <span>Login</span>
+            <User size={18} /> <span>Rider Dashboard</span>
           </Link>
-          <Link
-            to="/register"
-            className="flex items-center space-x-2 bg-white text-black! px-4 py-2 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-md"
-          >
-            <UserPlus size={18} /> <span>Register</span>
-          </Link>
-        </div>
         )}
 
+        {/* User Dashboard Link */}
+        {isLoggedIn && !isRider && (
+          <Link
+            to="/userdashboard"
+            className="flex items-center space-x-2 p-3 hover:text-red-500 transition-all duration-300"
+          >
+            <User size={18} /> <span>User Dashboard</span>
+          </Link>
+        )}
+
+        {/* Authentication Links */}
+        {isLoggedIn ? (
+          <p
+            onClick={handleLogout}
+            className="cursor-pointer flex items-center space-x-2 bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 shadow-md"
+          >
+            Logout
+          </p>
+        ) : (
+          <div className="flex flex-col lg:flex-row space-y-3 lg:space-y-0 lg:space-x-3 items-center">
+            <Link
+              to="/login"
+              className="flex items-center space-x-2 bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 shadow-md"
+            >
+              <LogIn size={18} /> <span>Login</span>
+            </Link>
+            <Link
+              to="/register"
+              className="flex items-center space-x-2  text-black px-4 py-2 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-md"
+            >
+              <UserPlus size={18} /> <span>Register</span>
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );

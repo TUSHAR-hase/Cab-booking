@@ -1,28 +1,31 @@
-import Hotel from "../../models/hotels/hotel.models";
-import { ApiError } from "../../utils/apiError";
-import { ApiResponse } from "../../utils/apiResponse";
-import asyncHandler from "../../middleware/asyncHandler";
-import { HotelRoom } from "../../models/hotels/hotelRoom.models";
+import Hotel from "../../models/hotels/hotel.models.js";
+import { ApiError } from "../../utils/apiError.js";
+import { ApiResponse } from "../../utils/apiResponse.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { HotelRoom } from "../../models/hotels/hotelRoom.models.js";
 
 
 //====================== Hotel CRUD ========================
 const createHotel = asyncHandler(async (req, res) => {
 
+
     //check if the hotel owner is approved
     if (!req.hotel_owner || !req.hotel_owner.isApproved) {
-        throw new ApiError(401, "You are not authorized to create a hotel");
+        return res.status(401).json({ message: "You are not authorized to create a hotel", status: false });
     }
     //get the deatails 
     const { name, area, district, pincode, longitude, latitude, description } = req.body;
 
     //validate
     if (!name || !area || !district || !pincode || !longitude || !latitude || !description) {
-        throw new ApiError(400, "Please provide all the required fields");
+        //throw new ApiError(400, "Please provide all the required fields");
+        return res.status(400).json({ message: "Please provide all the required fields", status: false });
     }
 
     //check the hotel images
     if (!req.files || req.files.length === 0) {
-        throw new ApiError(400, "Please provide hotel images");
+        // throw new ApiError(400, "Please provide hotel images");
+        return res.status(400).json({ message: "Please provide hotel images", status: false });
     }
 
     //make array of images 
@@ -36,12 +39,13 @@ const createHotel = asyncHandler(async (req, res) => {
         name,
         address,
         description,
-        hotelImages
+        hotelImages,
+        hotel_owner: req.hotel_owner._id
     });
 
     //check for error if not created 
     if (!newHotel) {
-        throw new ApiError(500, "An error occurred while creating the hotel");
+        return res.status(500).json({ message: "An error occurred while creating the hotel", status: false });
     }
 
     //send the response
@@ -51,23 +55,23 @@ const createHotel = asyncHandler(async (req, res) => {
 const updateHotel = asyncHandler(async (req, res) => {
 
     //get the deatails
-    const { hotel_id, name, area, district, pincode, longitude, latitude, description } = req.body;
+    const { id, name, area, district, pincode, longitude, latitude, description } = req.body;
 
     //check for hotel id
-    if (!hotel_id) {
+    if (!id) {
         throw new ApiError(400, "Please provide a hotel id");
     }
 
     //validate 
     if (!name || !area || !district || !pincode || !longitude || !latitude || !description) {
-        throw new ApiError(400, "Please provide at least one field to update");
+        return res.status(400).json({ message: "Please provide at least one field to update", status: false })
     }
 
 
     const address = { area, district, pincode, longitude, latitude };
 
     //find the hotel
-    const hotel = await Hotel.findById(hotel_id);
+    const hotel = await Hotel.findById(id);
     if (!hotel) {
         throw new ApiError(404, "Hotel not found");
     }
@@ -82,58 +86,72 @@ const updateHotel = asyncHandler(async (req, res) => {
 });
 
 const updateHotelImages = asyncHandler(async (req, res) => {
+    // Get the id and deleted images array from request
+    const { id, existingImages = [] } = req.body;
 
-    //get the id
-    const { hotel_id } = req.body
-
-    //validate
-    if (!hotel_id) {
-        throw new ApiError(400, "Please provide hotel information")
-    }
-
-    // find the hotel
-    const hotel = await Hotel.findById(hotel_id)
-
-    if (!hotel) {
-        throw new ApiError(404, "Hotel not found!")
-    }
-
-    // check for images
-    if (!req.files || req.files.length === 0) {
-        throw new ApiError(400, "Please provide room images");
-    }
-    //update images
-    const hotelImages = req.files.map(file => file.path)
-    hotel.hotelImages = hotelImages
-    await hotel.save()
-
-
-    return res.status(200).json(new ApiResponse(200, null, "Hotel images updated successfully "))
-});
-
-const deleteHotel = asyncHandler(async (req, res) => {
-    const { hotel_id } = req.body;
-
-    // Validate input
-    if (!hotel_id) {
+    // Validate
+    if (!id) {
         throw new ApiError(400, "Please provide hotel information");
     }
 
     // Find the hotel
-    const hotel = await Hotel.findById(hotel_id);
+    const hotel = await Hotel.findById(id);
     if (!hotel) {
         throw new ApiError(404, "Hotel not found!");
     }
 
-    // Delete all rooms associated with the hotel
-    await HotelRoom.deleteMany({ hotel: hotel_id });
+    // Handle image deletions
+    if (existingImages && existingImages.length > 0) {
+        // Filter out the deleted images
+        hotel.hotelImages = hotel.hotelImages.filter(
+            img => existingImages.includes(img)
+        );
 
-    // Delete the hotel
-    await hotel.deleteOne();
+    }
+    if (existingImages.length == 0) {
+        hotel.hotelImages = []
+    }
 
-    return res.status(200).json(new ApiResponse(200, null, "Hotel and all associated rooms deleted successfully"));
+    // Handle new image uploads
+    let newImages = [];
+    if (req.files && req.files.length > 0) {
+        newImages = req.files.map(file => file.path);
+    }
+
+    // Update the hotel images (keep existing + add new)
+    hotel.hotelImages = [...hotel.hotelImages, ...newImages];
+    await hotel.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, hotel, "Hotel images updated successfully")
+    );
 });
 
+const deleteHotel = asyncHandler(async (req, res) => {
+    const { id } = req.body;
+
+    // Validate input
+    if (!id) {
+        throw new ApiError(400, "Please provide hotel information");
+    }
+
+    // Find the hotel
+    const hotel = await Hotel.findById(id);
+    if (!hotel) {
+        throw new ApiError(404, "Hotel not found!");
+    }
+
+    // Check if any rooms exist for this hotel
+    const roomsExist = await HotelRoom.exists({ hotel: id });
+    if (roomsExist) {
+        return res.status(400).json({ message: "Cannot delete hotel - rooms are still assigned to this hotel. Please delete all rooms first.", status: false });
+    }
+
+    // If no rooms exist, proceed with hotel deletion
+    await hotel.deleteOne();
+
+    return res.status(200).json(new ApiResponse(200, null, "Hotel deleted successfully"));
+});
 const getOwnerHotels = asyncHandler(async (req, res) => {
     const hotel_owner_id = req.hotel_owner._id
 
@@ -143,19 +161,13 @@ const getOwnerHotels = asyncHandler(async (req, res) => {
 
     const hotels = await Hotel.find({ hotel_owner: hotel_owner_id });
 
-    if (hotels.length === 0) {
-        throw new ApiError(404, "No hotels found");
-    }
+
 
     res.status(200).json(new ApiResponse(200, hotels, "Hotels retrieved successfully"));
 });
 
 const getUnapprovedHotels = asyncHandler(async (req, res) => {
     const hotels = await Hotel.find({ isApproved: false });
-
-    if (!hotels) {
-        throw new ApiError(404, "No hotels found");
-    }
 
     res.status(200).json(new ApiResponse(200, hotels, "Hotels retrieved successfully"));
 })
@@ -183,21 +195,21 @@ const approveHotel = asyncHandler(async (req, res) => {
 
 const addRooms = asyncHandler(async (req, res) => {
     //get the details
-    const { hotel_id, room_type, room_price_per_day, status, facilities, max_occupancy, room_number } = req.body;
+    const { hotel, room_type, room_price_per_day, status, facilities, max_occupancy, room_number } = req.body;
 
     //validate
-    if (!hotel_id || !room_type || !room_price_per_day || !status || !facilities || !max_occupancy || !room_number) {
-        throw new ApiError(400, "Please provide all the required fields");
+    if (!hotel || !room_type || !room_price_per_day || !status || !facilities || !max_occupancy || !room_number) {
+        return res.status(400).json({ message: "Please provide all fields", status: false })
     }
 
     //check for images
     if (!req.files || req.files.length === 0) {
-        throw new ApiError(400, "Please provide room images");
+        return res.status(400).json({ message: "Please provide room images", status: false })
     }
 
     //find the hotel
-    const hotel = await Hotel.findById(hotel_id);
-    if (!hotel) {
+    const existedHotel = await Hotel.findById(hotel);
+    if (!existedHotel) {
         throw new ApiError(404, "Hotel not found");
     }
 
@@ -206,7 +218,7 @@ const addRooms = asyncHandler(async (req, res) => {
 
     //create room
     const newRoom = await HotelRoom.create({
-        hotel: hotel_id,
+        hotel: hotel,
         room_type,
         room_price_per_day,
         room_images: roomImages,
@@ -241,15 +253,16 @@ const updateRoomStatus = asyncHandler(async (req, res) => {
 
 const updateRoom = asyncHandler(async (req, res) => {
     //get details
-    const { room_id, room_type, room_price_per_day, status, facilities, max_occupancy, room_number } = req.body;
+
+    const { id, room_type, room_price_per_day, status, facilities, max_occupancy, room_number } = req.body;
 
     //validate
-    if (!room_id || !room_type || !room_price_per_day || !status || !facilities || !max_occupancy || !room_number) {
-        throw new ApiError(400, "Please provide all the required fields");
+    if (!id || !room_type || !room_price_per_day || !status || !facilities || !max_occupancy || !room_number) {
+        return res.status(400).json({ message: "Please provide at least one field to update", status: false })
     }
 
     //find the room
-    const room = await HotelRoom.findById(room_id);
+    const room = await HotelRoom.findById(id);
 
     if (!room) {
         throw new ApiError(404, "Room not found");
@@ -270,34 +283,52 @@ const updateRoom = asyncHandler(async (req, res) => {
 
 
 const updateRoomImages = asyncHandler(async (req, res) => {
-    const { room_id } = req.body
-    if (!room_id) {
-        throw new ApiError(400, "Please provide room information")
+    // Get the id and deleted images array from request
+    const { id, existingImages = [] } = req.body;
+
+    // Validate
+    if (!id) {
+        throw new ApiError(400, "Please provide room information");
     }
 
-    const room = await HotelRoom.findById(room_id)
-
+    // Find the room
+    const room = await HotelRoom.findById(id);
     if (!room) {
-        throw new ApiError(404, "Room not found!")
+        throw new ApiError(404, "Room not found!");
     }
 
-    if (!req.files || req.files.length === 0) {
-        throw new ApiError(400, "Please provide room images");
+    // Handle image deletions
+    if (existingImages && existingImages.length > 0) {
+        // Filter out the deleted images
+        room.room_images = room.room_images.filter(
+            img => existingImages.includes(img)
+        );
     }
-    const roomImages = req.files.map(file => file.path);
-    room.room_images = roomImages
-    await room.save()
+    if (existingImages.length == 0) {
+        room.room_images = [];
+    }
 
-    return res.status(200).json(new ApiResponse(200, null, "Room images updated successfully "))
-})
+    // Handle new image uploads
+    let newImages = [];
+    if (req.files && req.files.length > 0) {
+        newImages = req.files.map(file => file.path);
+    }
 
+    // Update the room images (keep existing + add new)
+    room.room_images = [...room.room_images, ...newImages];
+    await room.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, room, "Room images updated successfully")
+    );
+});
 const deleteRoom = asyncHandler(async (req, res) => {
-    const { room_id } = req.body
-    if (!room_id) {
+    const { id } = req.body
+    if (!id) {
         throw new ApiError(400, "Please provide room information")
     }
 
-    const room = await HotelRoom.findById(room_id)
+    const room = await HotelRoom.findById(id)
 
     if (!room) {
         throw new ApiError(404, "Room not found!")
@@ -341,6 +372,27 @@ const getRooms = asyncHandler(async (req, res) => {
 });
 
 
+const getOwnerRooms = asyncHandler(async (req, res) => {
+    try {
+        // Find all hotels owned by the current owner
+        const hotels = await Hotel.find({ hotel_owner: req.hotel_owner._id });
+
+        if (!hotels.length) {
+            return res.status(404).json({ message: "No hotels found for this owner" });
+        }
+
+        // Extract hotel IDs
+        const hotelIds = hotels.map(hotel => hotel._id);
+
+        // Find all rooms associated with these hotels
+        const rooms = await HotelRoom.find({ hotel: { $in: hotelIds } });
+
+        res.status(200).json(new ApiResponse(200, rooms, "room retrived successfully"));
+    } catch (error) {
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
+});
+
 export {
     createHotel,
     getOwnerHotels,
@@ -355,5 +407,5 @@ export {
     approveHotel,
     updateRoom,
     updateRoomImages,
-    deleteRoom
+    deleteRoom, getOwnerRooms
 };

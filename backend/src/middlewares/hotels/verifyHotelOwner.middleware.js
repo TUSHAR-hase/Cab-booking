@@ -1,8 +1,8 @@
-import { ApiError } from "../../utils/apiError";
-import { ApiResponse } from "../../utils/apiResponse";
-import asyncHandler from "../../middleware/asyncHandler";
+import { ApiError } from "../../utils/apiError.js";
+import { ApiResponse } from "../../utils/apiResponse.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
 import { HotelOwner } from "../../models/hotels/hotelOwner.model.js";
-
+import jwt from "jsonwebtoken";
 
 const verifyHotelOwner = asyncHandler(async (req, res, next) => {
     try {
@@ -12,7 +12,7 @@ const verifyHotelOwner = asyncHandler(async (req, res, next) => {
             throw new ApiError(401, "Unauthorized request")
         }
 
-        const decodedinfo = await jwt.verify(token, process.env.JWT_SECRET)
+        const decodedinfo = await jwt.verify(token, process.env.SECRET_KEY)
 
         const owner = await HotelOwner.findById(decodedinfo?._id)
 

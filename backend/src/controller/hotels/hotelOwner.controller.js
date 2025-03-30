@@ -320,7 +320,7 @@ const logineHotelOwner = asyncHandler(async (req, res) => {
     //if it is verified then sign with jwt token and sent the response 
     const token = jwt.sign({ _id: hotelOwner._id, hotel_owner: true }, process.env.SECRET_KEY);
 
-    res.status(200).json(new ApiResponse(200, token, "Login successful"));
+    res.status(200).json(new ApiResponse(200, { token: token }, "Login successful"));
 });
 
 const getHotelOwner = asyncHandler(async (req, res) => {

@@ -18,7 +18,7 @@ const UserDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [flights, setFlights] = useState([]);
   const [hotels, setHotels] = useState([]);
-    const [user_id, setuserId] = useState(null);
+    const [id, setuserId] = useState(null);
   
   const [cabs, setCabs] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -44,15 +44,15 @@ const UserDashboard = () => {
     }, []);
   
     useEffect(() => {
-      if (user_id) {
-        console.log("Fetching vehicles for user ID:", user_id);
+      if (id) {
+        console.log("Fetching vehicles for user ID:", id);
 
         getalluserrequest();
       }
-    }, [user_id]);
+    }, [id]);
   const getalluserrequest = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/user/getbooking/${user_id}`);
+      const res = await fetch(`${BASE_URL}/api/user/getbooking/${id}`);
       const data = await res.json();
 
       if (!data || data.length === 0) {

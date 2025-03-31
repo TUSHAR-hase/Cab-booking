@@ -42,6 +42,8 @@ app.use("/api/hotel/owner", hotelOwnerRouter)
 import { hotelRouter } from "./routes/hotels/hotel.routes.js"
 app.use("/api/hotel", hotelRouter)
 
+import { hotelBookingRouter } from "./routes/hotels/hotelBooking.routes.js";
+app.use("/api/booking", hotelBookingRouter)
 // ------------------------------------------------------------
 
 

@@ -221,8 +221,8 @@ const RiderDashboard = () => {
 
   return (
 
-    <div className="min-h-screen bg-black text-white font-[Poppins] p-8">
-      <motion.h1 className="text-5xl font-extrabold text-center text-red-500 mb-8"
+    <div className="min-h-screen bg-black text-white font-[Poppins] p-8 relative">
+      <motion.h1 className="text-5xl font-extrabold text-left text-red-500 mb-8 "
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}>
@@ -230,6 +230,11 @@ const RiderDashboard = () => {
       </motion.h1>
 
       {/* Add Vehicle Button */}
+      <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="absolute top-4 right-4">
       <motion.button
         className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-all flex items-center gap-2 mb-8"
         whileHover={{ scale: 1.05 }}
@@ -239,6 +244,8 @@ const RiderDashboard = () => {
         <Plus size={20} />
         Add Vehicle
       </motion.button>
+
+      </motion.div>
 
       {/* Vehicles Section */}
       {/* Vehicles List */}

@@ -110,7 +110,7 @@ export default function RiderSignup() {
             Already have an account?{" "}
             <span
               className="text-red-400 cursor-pointer hover:underline"
-              onClick={() => navigate("/riderlogin")}
+              onClick={() => navigate("/booking/riderlogin")}
             >
               Login here
             </span>

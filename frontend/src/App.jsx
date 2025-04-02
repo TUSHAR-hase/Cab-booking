@@ -40,16 +40,16 @@ import FlightDashboard from "./Pages/Flight/Owner/Dashboard/FlightDashboard.jsx"
 import FlightBooking from "./Pages/Flight/Owner/Dashboard/Flightbooking.jsx";
 import FlightOwnerLogin from "./Pages/Flight/Owner/FlightOwnerLogin.jsx";
 import FlightRegister from "./Pages/Flight/Owner/Dashboard/FlightRegister.jsx";
-import SuperLayout from "./Pages/Super/SuperLayout.jsx";
-import FlightAdmin from "./Pages/Super/FlightAdmin.jsx";
-import HotelAdmin from "./Pages/Super/SuperHotelAdmin.jsx";
-import SuperHotelAdmin from "./Pages/Super/SuperHotelAdmin.jsx";
+import SuperLayout from "d:/bookinHub/frontend/src/Pages/Super/SuperLayout.jsx";
+import FlightAdmin from "d:/bookinHub/frontend/src/Pages/Super/FlightAdmin.jsx";
+import SuperHotelAdmin from "d:/bookinHub/frontend/src/Pages/Super/SuperHotelAdmin.jsx";
 
 function App() {
   const location = useLocation();
 
   // Check if the current route is under "admin" to conditionally render Navbar and Footer
-  const isAdminRoute = location.pathname.startsWith("/hotelowner");
+  const isAdminRoute = location.pathname.startsWith("/hotelowner") || 
+                    location.pathname.startsWith("/airline-owner");
 
   return (
     <>
@@ -72,15 +72,25 @@ function App() {
 
         {/* Hotel */}
         <Route path="/booking/hotel" element={<HotelSearch />} />
-        <Route path="/booking/hotel/:id" element={<HotelDetails />} />
+        <Route path="/booking/hoteldetails" element={<HotelDetails />} />
         <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
-        <Route path="/register/airline" element={<AirlineOwnerRegistration />} />
+       
         <Route path="/register/hotel/owner" element={<HotelOwnerRegister />} />
         <Route path="/login/hotel" element={<HotelOwnerLogin />} />
         <Route path="/verify/:email" element={<HotelOwnerVerify />} />
         <Route path="addhotel" element={<HotelAdd />} />
         <Route path="addroom" element={<RoomAdd />} />
+ 
 
+        <Route path="/register/airline" element={<AirlineOwnerRegistration />} />
+         <Route path="/login/airline" element={<FlightOwnerLogin />} />
+
+         <Route path="/add-flight" element={<FlightRegister />} />
+        <Route path="/airline-owner/dashboard" element={<FlightAdminPanel />}>
+          <Route path="flights" element={<FlightDashboard />} />
+          <Route path="booked" element={<FlightBooking />} />
+          
+        </Route>
         {/* Hotel Owner */}
         <Route path="/hotelowner/dashboard" element={<HotelAdminPanel />}>
           <Route path="hotel" element={<HotelDashboard />} />
@@ -89,15 +99,21 @@ function App() {
 
         {/* Cab */}
         <Route path="/booking/cab" element={<CabDetails />} />
-        <Route path="/booking/cabreview" element={<CabReviewPage />} />
-        <Route path="/booking/addingcab" element={<AddingCab />} />
-        <Route path="/userdashboard" element={<UserDashboard />} />
-        <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
-        <Route path="/booking/confirmbooking/:id" element={<ConfirmBooking />} />
-        <Route path="/booking/ridersignup" element={<RiderSignup />} />
-        <Route path="/booking/riderlogin" element={<Riderlogin />} />
-        <Route path="/forgetpassword" element={<ForgotPassword />} />
-        <Route path="/otprider/:email" element={<OtpVerified />} />
+          <Route path="/booking/cabreview" element={<CabReviewPage />} />
+          <Route path="/booking/addingcab" element={<AddingCab />} />
+          <Route path="/userdashboard" element={<UserDashboard />} />
+          <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
+          <Route path="/booking/confirmbooking/:id" element={<ConfirmBooking />} />
+          <Route path="/booking/ridersignup" element={<RiderSignup />} />
+          <Route path="/booking/riderlogin" element={<Riderlogin />} />
+          <Route path="/forgetpassword" element={<ForgotPassword />} />
+          <Route path="/otprider/:email" element={<OtpVerified/>} />
+
+  <Route path="/super/dashboard" element={<SuperLayout />}>
+  <Route index element={<div>Select an admin panel from the sidebar</div>} />
+  <Route path="flight" element={<FlightAdmin />} />
+  <Route path="hotel" element={<SuperHotelAdmin />} /> {/* Assuming HotelAdmin, adjust if SuperHotelAdmin */}
+</Route>
       </Routes>
       {/* Show Footer only if not on admin routes */}
       {!isAdminRoute && (

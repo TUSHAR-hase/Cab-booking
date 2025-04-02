@@ -43,6 +43,8 @@ import FlightRegister from "./Pages/Flight/Owner/Dashboard/FlightRegister.jsx";
 import SuperLayout from "d:/bookinHub/frontend/src/Pages/Super/SuperLayout.jsx";
 import FlightAdmin from "d:/bookinHub/frontend/src/Pages/Super/FlightAdmin.jsx";
 import SuperHotelAdmin from "d:/bookinHub/frontend/src/Pages/Super/SuperHotelAdmin.jsx";
+import About from "./Pages/Main/About.jsx";
+import Contact from "./Pages/Main/contact.jsx";
 
 function App() {
   const location = useLocation();
@@ -64,6 +66,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/otp/:email" element={<OtpPage />} />
         <Route path="/flight/otp/:email" element={<FLightOtpPage />} />
         <Route path="/booking/flight" element={<FlightSearch />} />

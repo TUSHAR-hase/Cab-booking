@@ -126,7 +126,7 @@ const Login = () => {
             Forgot Password?
           </a>
           <span className="text-white mx-2 opacity-50">|</span>
-          <a href="/ridersignup" className="text-white/70 hover:text-red-300 transition-colors">
+          <a href="/booking/ridersignup" className="text-white/70 hover:text-red-300 transition-colors">
             Create Account
           </a>
         </div>

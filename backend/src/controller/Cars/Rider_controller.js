@@ -136,7 +136,7 @@ export const getRider = async (req, res) => {
 }
 export const getRidersByid = async (req, res) => {
     try {
-        const rider = await Rider.findById(res.params.id)
+        const rider = await Rider.findById(req.params.id)
         if (!rider) {
             res.status(500).json({ message: "Rider not found" })
         } else {

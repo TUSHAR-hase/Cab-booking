@@ -16,6 +16,8 @@ import {
   X,
   Camera,
 } from "lucide-react";
+import { HiOutlineBell, HiOutlineCurrencyDollar } from "react-icons/hi";
+import { FaRupeeSign } from "react-icons/fa";
 import { BASE_URL } from "../../../config";
 
 const UserDashboard = () => {
@@ -30,8 +32,12 @@ const UserDashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [user, setUser] = useState({
     name: "John Doe",
-    email: "johndoe@example.com",
-    profilePic: "",
+    email: "john.doe@example.com",
+    phone: "+1 234 567 890",
+    profilePic:
+      "https://i.pinimg.com/280x280_RS/8d/35/e0/8d35e05e1a89c8a252452d03b8adff24.jpg",
+    coverPhoto:
+      "https://images.pexels.com/photos/2399254/pexels-photo-2399254.jpeg",
   });
   useEffect(() => {
     if (showEditModal) {
@@ -39,12 +45,12 @@ const UserDashboard = () => {
     } else {
       document.body.style.overflow = "auto";
     }
-  
+
     return () => {
       document.body.style.overflow = "auto"; // Ensure reset on unmount
     };
   }, [showEditModal]);
-  
+
   const [editedUser, setEditedUser] = useState(user);
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -68,7 +74,7 @@ const UserDashboard = () => {
   }, [user_id]);
   const getalluserrequest = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/user/getbooking/${user_id}`);
+      const res = await fetch(`${BASE_URL}/api/user/getbooking/${id}`);
       const data = await res.json();
       if (!data || !Array.isArray(data) || data.length === 0) {
         console.log("No bookings found or the data is not an array.");
@@ -160,53 +166,61 @@ const UserDashboard = () => {
     document.body.style.overflow = "auto";
   };
 
-    const [shadow, setShadow] = useState("0px 0px 10px rgba(255, 255, 255, 0.3)");
-  
-    const handleMouseMove = (e) => {
-      const { offsetX, offsetY, target } = e.nativeEvent;
-      const { clientWidth, clientHeight } = target;
-      
-      // Calculate shadow position based on cursor
-      const x = (offsetX / clientWidth - 0.5) * 20; // Adjust intensity
-      const y = (offsetY / clientHeight - 0.5) * 20;
-  
-      setShadow(`${x}px ${y}px 20px rgba(255, 255, 255, 0.3)`);
-    };
+  const [shadow, setShadow] = useState("0px 0px 10px rgba(255, 255, 255, 0.3)");
+
+  const handleMouseMove = (e) => {
+    const { offsetX, offsetY, target } = e.nativeEvent;
+    const { clientWidth, clientHeight } = target;
+
+    // Calculate shadow position based on cursor
+    const x = (offsetX / clientWidth - 0.5) * 20; // Adjust intensity
+    const y = (offsetY / clientHeight - 0.5) * 20;
+
+    setShadow(`${x}px ${y}px 20px rgba(255, 255, 255, 0.3)`);
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white p-8 font-[Poppins]">
-      {/* User Profile */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="text-center flex flex-col items-center mb-10 "
-      >
-        <div
-          className="relative w-28 h-28 bg-gray-800 rounded-full flex items-center justify-center 
-             shadow-lg overflow-hidden border-2 border-transparent transition-all hover:border-red-500"
-        >
-          {user.profilePic ? (
-            <img
-              src={user.profilePic}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <User size={50} className="text-red-500" />
-          )}
+    <div className="min-h-screen bg-black text-white font-[Poppins]">
+      {/* Cover Photo and Avatar */}
+      <div className="relative h-48 bg-gray-200">
+        <img
+          src={user.coverPhoto}
+          alt="Cover"
+          className="w-full h-full object-cover rounded-t-lg"
+        />
+        <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
+          <img
+            src={user.profilePic}
+            alt="Avatar"
+            className="w-32 h-32 rounded-full border-4 border-white hover:border-red-600 transition-all duration-300"
+          />
         </div>
-        <h1 className="text-3xl font-bold mt-4">{user.name}</h1>
-        <p className="text-gray-400 text-lg">{user.email}</p>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowEditModal(true)}
-          className="mt-4 px-4 py-2 bg-red-500 text-black font-semibold rounded-lg flex items-center gap-2 hover:bg-red-600 transition"
-        >
-          <Edit size={18} /> Edit Profile
-        </motion.button>
-      </motion.div>
+      </div>
+
+      {/* Profile Header */}
+      <div className="container mx-auto px-4 pt-20">
+        <div className="flex flex-col items-center text-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-white ">{user.name}</h1>
+            <p className="text-gray-400 text-lg mt-2">{user.email}</p>
+          </div>
+          <div className="flex gap-4 mt-5 md:mt-4">
+            <button
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+              onClick={() => setShowEditModal(true)}
+            >
+              Edit Profile
+            </button>
+            <button
+              className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition duration-200"
+              onClick={() => setIsPasswordModalOpen(true)}
+            >
+              Change Password
+            </button>
+          </div>
+        </div>
+      </div>
+
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-auto">
           <motion.div
@@ -215,9 +229,12 @@ const UserDashboard = () => {
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="box-border w-120 p-5 relative bg-gray-900 rounded-lg 
             shadow-xl  transition-shadow duration-300 max-h-screen overflow-y-auto
-            "style={{ boxShadow: shadow }}
+            "
+            style={{ boxShadow: shadow }}
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => setShadow("0px 0px 10px rgba(255, 255, 255, 0.3)")}
+            onMouseLeave={() =>
+              setShadow("0px 0px 10px rgba(255, 255, 255, 0.3)")
+            }
           >
             <button
               onClick={handleCloseModal}
@@ -286,10 +303,13 @@ const UserDashboard = () => {
       )}
 
       {/* Notifications */}
-      <h2 className="text-3xl font-bold text-red-500 mb-4">Notifications</h2>
-      <div className="mb-6">
+      <div className="flex items-center gap-2 mb-4 mx-2">
+        <HiOutlineBell className="w-6 h-6 text-red-600 cursor-pointer hover:" />
+        <h2 className="text-3xl font-bold text-red-500">Notifications</h2>
+      </div>
+      <div className="mb-6 p-2">
         {notifications.length === 0 ? (
-          <p className="text-gray-400">No new notifications.</p>
+          <p className="text-gray-400 mt-2">No new notifications.</p>
         ) : (
           notifications.map((notif) => (
             <div
@@ -304,12 +324,13 @@ const UserDashboard = () => {
       </div>
 
       <div key="Cabs" className="mt-10">
-        <h2 className="text-3xl font-bold text-red-500 mb-4 flex items-center gap-2">
-          <Car /> Cab Bookings
+        <h2 className="text-3xl font-bold text-red-600 mb-4 flex items-center gap-2 mx-2">
+          <Car /> 
+          <h2 className="text-3xl font-bold text-red-500">Cab Bookings</h2>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.isArray(cabs) && cabs.length === 0 ? (
-            <p className="text-gray-400">No cab bookings.</p>
+            <p className="text-2xl text-gray-400 mx-10">No cab bookings.</p>
           ) : (
             cabs.map((booking) => (
               <motion.div
@@ -353,20 +374,21 @@ const UserDashboard = () => {
           )}
         </div>
       </div>
-      
 
       {/* Transactions */}
-      <h2 className="text-3xl font-bold text-red-500 mt-10 mb-4">
-        Payment History
-      </h2>
-      <div className="mb-6">
+      <div className="mt-7">
+      <div className="flex items-center gap-2 mb-4 mx-2">
+        <FaRupeeSign className="w-6 h-6 text-red-600 cursor-pointer hover:" />
+        <h2 className="text-3xl font-bold text-red-500">Payment History</h2>
+      </div>
+      <div className="mt-4 p-2">
         {transactions.length === 0 ? (
           <p className="text-gray-400">No transactions.</p>
         ) : (
           transactions.map((t) => (
             <div
               key={t.id}
-              className="bg-[#1a1a1a] p-4 mb-2 rounded-lg flex justify-between"
+              className="bg-[#1a1a1a] p-4 mt-2 rounded-lg flex justify-between"
             >
               <p>₹{t.amount}</p>
               <p>{t.date}</p>
@@ -380,6 +402,7 @@ const UserDashboard = () => {
             </div>
           ))
         )}
+        </div>
       </div>
     </div>
   );

@@ -100,6 +100,7 @@ export default function RiderSignup() {
             ))}
             <button
               type="submit"
+
               className="w-full py-3.5 bg-red-500 rounded-lg text-white font-semibold transform transition-all hover:scale-[1.02] hover:bg-red-600 active:scale-95 shadow-lg"
             >
               Sign Up

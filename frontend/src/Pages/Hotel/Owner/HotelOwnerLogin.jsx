@@ -20,16 +20,24 @@ const HotelOwnerLogin = () => {
 
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/hotel/owner/login`, { email, password });
-            if (response.data.message === "Login successful") {
-                Cookies.set("token", response.data.data);
-                window.location.href = "http://localhost:5173/"; //temporary navigate to landing page // Redirect to hotel owner dashboard
+
+            if (response?.data?.message === "Login successful") {
+                Cookies.set("token", response.data.data.token);
+                window.location.href = `/hotelowner/dashboard`; // Redirect to hotel owner dashboard
             }
         } catch (error) {
-            if (error.response.data.message === "User not verified") {
-                navigate("/otp/" + email);
+            if (error.response && error.response.data) {
+                const errorMessage = error.response.data.message;
+
+                if (errorMessage === "User not verified") {
+                    navigate("/otp/" + email);
+                } else {
+                    setErrorMessage("Enter valid credentials");
+                    alert("Enter valid credentials");
+                }
             } else {
-                setErrorMessage("Enter valid credentials");
-                alert("Enter valid credentials");
+                setErrorMessage("Something went wrong. Please try again.");
+                alert("Something went wrong. Please try again.");
             }
         }
         setErrorMessage("");

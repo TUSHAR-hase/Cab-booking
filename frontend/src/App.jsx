@@ -35,6 +35,7 @@ import ConfirmBooking from "./Pages/Cab/ConfrimBooking";
 import RiderSignup from "./Pages/Cab/Rider/RiderSignup.jsx";
 import ForgotPassword from "./Pages/Cab/ForgetPassword.jsx";
 import FLightOtpPage from "./Pages/Flight/Otp.jsx";
+import RiderProfile from "./Pages/Cab/Rider/RiderProfile.jsx";
 
 function App() {
   const location = useLocation();
@@ -89,6 +90,7 @@ function App() {
           <Route path="/booking/riderlogin" element={<Riderlogin />} />
           <Route path="/forgetpassword" element={<ForgotPassword />} />
           <Route path="/otprider/:email" element={<OtpVerified/>} />
+          <Route path="/riderprofile" element={<RiderProfile/>}/>
       </Routes>
       {/* Show Footer only if not on admin routes */}
       {!isAdminRoute && (

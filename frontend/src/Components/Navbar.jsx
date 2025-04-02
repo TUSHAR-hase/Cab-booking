@@ -13,6 +13,10 @@ import {
   User,
   LogIn,
   UserPlus,
+  LayoutDashboard,
+  UserCircle,
+  LogOut,
+  Bed,
 } from "lucide-react";
 import Cookies from "js-cookie";
 import logo from "../assets/logo.png";
@@ -99,7 +103,7 @@ const Navbar = () => {
               to="/booking/hotel"
               className="flex items-center space-x-2 px-4 py-2 hover:bg-red-500 transition-all duration-300"
             >
-              <Car size={16} /> <span>Hotel</span>
+              <Bed size={16} /> <span>Hotel</span>
             </Link>
             <Link
               to="/booking/cab"
@@ -131,12 +135,37 @@ const Navbar = () => {
 
         {/* Rider Dashboard Link */}
         {isRider && (
-          <Link
-            to="/booking/riderdashboard"
-            className="flex items-center space-x-2 p-3 hover:text-red-500 transition-all duration-300"
-          >
-            <User size={18} /> <span>Rider Dashboard</span>
-          </Link>
+          <div className="relative group">
+          <button className="flex items-center space-x-2 p-3 cursor-pointer hover:text-red-500 transition-all 
+        duration-300 ">
+            <User size={18}  /> 
+          </button>
+          <div className="absolute right-0 hidden group-hover:block bg-black text-white mt-1 
+        rounded-lg shadow-lg w-40 border border-red-500 transition-all duration-300">
+            <Link
+              to="/booking/riderdashboard"
+              className="flex items-center space-x-2 px-4 py-2 hover:bg-red-500 transition-all 
+        duration-300"
+            >
+              <LayoutDashboard size={16} /> <span>Dashboard</span>
+            </Link>
+            <Link
+              to="/riderprofile"
+              className="flex items-center space-x-2 px-4 py-2 hover:bg-red-500 transition-all 
+        duration-300"
+            >
+              <UserCircle size={16} /> <span>Profile</span>
+            </Link>
+          </div>
+        </div>
+          // <Link
+            // to="/booking/riderdashboard"
+            // // className="flex items-center space-x-2 p-3 hover:text-red-500 transition-all duration-300"
+          // >
+            //  <User size={18} /> <span>Rider Dashboard</span>
+          
+
+          
         )}
 
         {/* User Dashboard Link */}
@@ -151,12 +180,13 @@ const Navbar = () => {
 
         {/* Authentication Links */}
         {isLoggedIn ? (
-          <p
+          <button
             onClick={handleLogout}
             className="cursor-pointer flex items-center space-x-2 bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 shadow-md"
           >
-            Logout
-          </p>
+            <LogOut size={18} /> <span>Logout</span>
+  
+          </button>
         ) : (
           <div className="flex flex-col lg:flex-row space-y-3 lg:space-y-0 lg:space-x-3 items-center">
             <Link

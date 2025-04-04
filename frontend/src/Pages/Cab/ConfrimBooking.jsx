@@ -148,7 +148,7 @@ const ConfirmBookingPage = () => {
               response
             );
             if (verificationResponse.data.success) {
-              navigate("/booking-success", { state: { booking: bookingData } });
+              navigate(`/bookingsuccess/${userDetails.id}`, { state: { booking: bookingData } });
             } else {
               throw new Error("Payment verification failed");
             }

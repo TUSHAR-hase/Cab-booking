@@ -1,30 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CheckCircleIcon,PhoneIcon, UserIcon, MapIcon, ClockIcon, CurrencyDollarIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import {Car} from"lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { BASE_URL } from "../../../config";
 
 const BookingSuccess = () => {
   const navigate = useNavigate();
-  
-  const bookingDetails = {
-    bookingId: "CAB78945612",
-    pickupTime: "Today, 2:30 PM",
-    pickupLocation: "123 Main Street, City Center",
-    dropLocation: "456 Mall Road, Downtown",
-    vehicleType: "Premium Sedan",
-    driver: {
-      name: "Rajesh Kumar",
-      rating: 4.8,
-      phone: "+91 98765 43210",
-      vehicleNumber: "DL 12 AB 3456",
+  const [bookingDetails,setbookingDetails]=useState(null)
+  const { id } = useParams();
+
+    useEffect(() => {
       
-    },
-    fare: "₹450.00",
-    distance: "8.5 km",
-    duration: "25 mins",
-    paymentMethod: "UPI (PayTM)",
-    customerName: "Aarav Sharma"
-  };
+        getuserBookings();
+      
+    }, []);
+    const getuserBookings = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/Rv/booking/getuserbooking/${id}`);
+        const data = await res.json();
+        console.log(`${BASE_URL}/api/Rv/booking/getuserbooking/${id}`)
+        console.log(data)
+        if (data && data.length > 0) {
+          setbookingDetails(data[0]); 
+        }
+      } catch (error) {
+        console.error("Error fetching cab bookings:", error);
+      }
+    };
+console.log(bookingDetails)
+
+    console.log(`${BASE_URL}/api/Rv/booking/getuserbooking/${id}`)
 
   return (
     <div className="min-h-screen bg-black py-8 px-4 sm:px-6 lg:px-8">
@@ -37,7 +42,7 @@ const BookingSuccess = () => {
               <div className="ml-3">
                 <h1 className="text-2xl font-bold text-white">Ride Confirmed</h1>
                 <p className="mt-1 text-red-100 flex items-center">
-                  <span>Booking ID: {bookingDetails.bookingId}</span>
+                  {/* <span>Booking ID: {bookingDetails.}</span> */}
                   {/* <span className="mx-2">•</span> */}
                   {/* <span className="flex items-center"> */}
                     {/* <ArrowPathIcon className="h-4 w-4 mr-1 animate-spin" /> */}
@@ -48,7 +53,7 @@ const BookingSuccess = () => {
             </div>
             <div className="bg-[#1a1a1a] px-3 py-1 rounded-full border border-red-600 flex items-center">
               <Car className="h-5 w-5 text-white mr-2" />
-              <span className="text-white font-medium">{bookingDetails.vehicleType}</span>
+              <span className="text-white font-medium">{bookingDetails?.vehicle_type}</span>
             </div>
           </div>
         </div>
@@ -67,18 +72,18 @@ const BookingSuccess = () => {
                     <UserIcon className="h-7 w-7 text-red-600" />
                   </div>
                   <div className="ml-4">
-                    <p className="font-bold text-white text-lg">{bookingDetails.driver.name}</p>
+                    <p className="font-bold text-white text-lg">{bookingDetails?.Rider_id?.name}</p>
                     <div className="flex items-center mt-1">
                       <span className="bg-black text-red-600 text-sm px-2.5 py-0.5 rounded-full flex items-center border border-red-600">
-                        ★ {bookingDetails.driver.rating}
+                        {/* ★ {bookingDetails.Rider_id.rating} */}
                       </span>
-                      <span className="ml-3 text-sm text-gray-400">{bookingDetails.driver.vehicleNumber}</span>
+                      <span className="ml-3 text-sm text-gray-400">{bookingDetails?.Rider_id?.vehicle_number}</span>
                     </div>
                   </div>
                 </div>
               </div>
               <a 
-                href={`tel:${bookingDetails.driver.phone}`}
+                href={`tel:${bookingDetails?.Rider_id.phone}`}
                 className="hover:bg-black px-4 py-2 rounded-lg border border-red-500 text-red-500 text-sm font-medium bg-[#222] transition-colors flex items-center"
               >
                 <PhoneIcon className="h-5 w-5 mr-2" />
@@ -107,45 +112,16 @@ const BookingSuccess = () => {
                 </div>
                 <div className="flex-1">
                   <div className="pb-2 ">
-                    <p className="font-bold text-white">{bookingDetails.pickupLocation}</p>
-                    <p className="text-sm text-gray-400 mt-1">Pickup at {bookingDetails.pickupTime}</p>
+                    <p className="font-bold text-white">{bookingDetails?.source_location?.address}</p>
+                    <p className="text-sm text-gray-400 mt-1">Pickup at {bookingDetails?.pickup_time}</p>
                   </div>
                   <div className="pt-3">
-                    <p className="font-bold text-white">{bookingDetails.dropLocation}</p>
+                    <p className="font-bold text-white">{bookingDetails?.destination_location?.address}</p>
                   </div>
                 </div>
               </div>
 
-             {/* <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="bg-[#1a1a1a] p-3 rounded-lg border border-[#1a1a1a] hover:border-red-600 transition-colors">
-                  <div className="flex items-center text-gray-400 text-sm">
-                    <ClockIcon className="h-4 w-4 text-red-600 mr-2" />
-                    <span>Duration</span>
-                  </div>
-                  <p className="text-white font-medium mt-1">{bookingDetails.duration}</p>
-                </div>
-                <div className="bg-[#1a1a1a] p-3 rounded-lg border border-[#1a1a1a] hover:border-red-600 transition-colors">
-                  <div className="flex items-center text-gray-400 text-sm">
-                    <MapIcon className="h-4 w-4 text-red-600 mr-2" />
-                    <span>Distance</span>
-                  </div>
-                  <p className="text-white font-medium mt-1">{bookingDetails.distance}</p>
-                </div>
-                <div className="bg-[#1a1a1a] p-3 rounded-lg border border-[#1a1a1a] hover:border-red-600 transition-colors">
-                  <div className="flex items-center text-gray-400 text-sm">
-                    <CurrencyDollarIcon className="h-4 w-4 text-red-600 mr-2" />
-                    <span>Fare</span>
-                  </div>
-                  <p className="text-white font-medium mt-1">{bookingDetails.fare}</p>
-                </div>
-                <div className="bg-[#1a1a1a] p-3 rounded-lg border border-[#1a1a1a] hover:border-red-600 transition-colors">
-                  <div className="flex items-center text-gray-400 text-sm">
-                    <UserIcon className="h-4 w-4 text-red-600 mr-2" />
-                    <span>Vehicle</span>
-                  </div>
-                  <p className="text-white font-medium mt-1">{bookingDetails.vehicleType}</p>
-                </div>
-              </div>*/}
+            
             </div>
           </div>
 

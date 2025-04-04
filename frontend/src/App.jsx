@@ -208,7 +208,7 @@ function App() {
         <Route path="/forgetpassword" element={<ForgotPassword />} />
         <Route path="/otprider/:email" element={<OtpVerified />} />
         <Route path="/riderprofile" element={<RiderProfile />} />
-        <Route path="/booking-success" element={<BookingSuccess />} />
+        <Route path="/bookingsuccess/:id" element={<BookingSuccess />} />
 
         <Route path="/super/dashboard" element={<SuperLayout />}>
           <Route

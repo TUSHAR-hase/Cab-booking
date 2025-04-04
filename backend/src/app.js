@@ -1,7 +1,13 @@
 import express, { application } from "express"
 import cors from "cors"
 import crypto from "crypto";
+import fs from 'fs';
+import path from 'path';
 
+const uploadsDir = path.join(process.cwd(), 'uploads', 'vehicles');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 import cookieParser from "cookie-parser"
 import { userRouter } from "./routes/main/userRoutes.js";
 import vehicleapi from "./routes/Cabs/vehicle_routes.js"
@@ -33,7 +39,7 @@ app.use("/api/Rv/Rider", Riderapi)
 //------------FLIGHT ROUTES-------------------------------------
 app.use("/api/flightadmin", flightRouter);
 
-
+app.use('/uploads', express.static('uploads'));
 //------------HOTEL ROUTES-------------------------------------
 
 import { hotelOwnerRouter } from "./routes/hotels/hotelOwner.routes.js"

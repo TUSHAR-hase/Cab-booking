@@ -51,7 +51,7 @@ const ActionButtons = ({ onConfirm, onCancel, onComplete }) => (
           whileTap={{ scale: 0.95 }}
         >
           <CheckCircle size={16} />
-          Complete
+          Complete  
         </motion.button>
       )}
     </AnimatePresence>

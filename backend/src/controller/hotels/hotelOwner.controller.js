@@ -175,7 +175,7 @@ const verifyOtp = asyncHandler(async (req, res) => {
     hotelOwner.isVerifiedOtp = true;
     await hotelOwner.save();
 
-    const token = jwt.sign({ hotelOwner }, SECRET_KEY);
+    const token = jwt.sign({ _id: hotelOwner._id, hotel_owner: true }, SECRET_KEY);
 
     res
         .status(200)

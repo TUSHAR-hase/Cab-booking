@@ -9,9 +9,9 @@ import Riderapi from "./routes/Cabs/Rider_routes.js"
 import booking from "./routes/Cabs/booking.js"
 import Razorpay from "razorpay";
 import { flightRouter } from "./routes/flight/flight.route.js";
-// import "./services/deadlineCron.js"
 import dotenv from "dotenv";
 dotenv.config();
+import "./services/hotel/completeBookingCron.js"
 const app = express()
 
 app.use(cors({
@@ -39,11 +39,14 @@ app.use("/api/flightadmin", flightRouter);
 import { hotelOwnerRouter } from "./routes/hotels/hotelOwner.routes.js"
 app.use("/api/hotel/owner", hotelOwnerRouter)
 
+import { hotelRatingRouter } from "./routes/hotels/hotelRating.routes.js";
+app.use("/api/hotel-ratings", hotelRatingRouter)
 import { hotelRouter } from "./routes/hotels/hotel.routes.js"
 app.use("/api/hotel", hotelRouter)
 
 import { hotelBookingRouter } from "./routes/hotels/hotelBooking.routes.js";
 app.use("/api/booking", hotelBookingRouter)
+
 // ------------------------------------------------------------
 
 

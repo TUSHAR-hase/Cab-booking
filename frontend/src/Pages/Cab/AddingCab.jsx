@@ -18,7 +18,9 @@ const AddVehicle = () => {
     perKm_price: "",
     seating_capacity: "",
     description: "",
-    Rider_id:null
+    Rider_id:null,
+    vehicle_image: null
+
   });
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -43,6 +45,10 @@ const AddVehicle = () => {
     setVehicle({ ...vehicle, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    setVehicle({ ...vehicle, vehicle_image: e.target.files[0] });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -57,37 +63,37 @@ const AddVehicle = () => {
       return;
     }
     setLoading(true);
- try {
-  const res = await fetch(`${BASE_URL}/api/Rv/vehicle/createvehicle`, {
-    method:"POST",
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(vehicle )
+    const formData = new FormData();
+    formData.append("vehicle_image", vehicle.vehicle_image);
+    formData.append("vehicle_type", vehicle.vehicle_type);
+    formData.append("vehicle_model", vehicle.vehicle_model);
+    formData.append("vehicle_number", vehicle.vehicle_number);
+    formData.append("perKm_price", vehicle.perKm_price);
+    formData.append("seating_capacity", vehicle.seating_capacity);
+    formData.append("description", vehicle.description);
+    formData.append("Rider_id", vehicle.Rider_id);
 
-  });
-  console.log("Full Response:", res);
-  if (!res.ok) {
-    throw new Error(`HTTP error! Status: ${res.status}`);
-  }
-  const data = await res.json();
+    try {
+      const res = await fetch(`${BASE_URL}/api/Rv/vehicle/createvehicle`, {
+        method: "POST",
+        body: formData,
+      });
 
-  console.log("Response Data:", data);
-  if (data) {
-    
-    setTimeout(() => {
-      alert("Vehicle added successfully!");
-      navigate("/booking/riderdashboard/");
-    }, 2000);
-  }
- } catch (e) {
-  console.log(e)
- }finally {
-  setLoading(false); // Ensure loading is turned off after the request
-}
-    // console.log(data);
-    
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
 
+      const data = await res.json();
+      if (data) {
+        alert("Vehicle added successfully!");
+        navigate("/booking/riderdashboard/");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error adding vehicle. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -158,7 +164,16 @@ const AddVehicle = () => {
               required
             />
           </div>
-
+          <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">
+            <input
+              type="file"
+              name="vehicle_image"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="text-white"
+              required
+            />
+          </div>
           {/* Insurance Expiry Date */}
           <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">
             <Calendar size={24} className="text-red-500" />

@@ -112,6 +112,7 @@ export const getbooking = async (req, res) => {
 
     }
 }
+
 export const getbookingByid = async (req, resp) => {
     try {
         if (!req.params.id) {

@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { jwtDecode } from "jwt-decode";
-import { useRef } from "react";
-
 import {
   CalendarDays,
   DollarSign,
@@ -13,23 +10,35 @@ import {
   Hotel,
   Calendar,
   Car,
+  Clock,
+  MapPin,
+  CreditCard,
+  ShieldCheck,
+  XCircle,
+  CheckCircle2,
+  ChevronRight,
+  Navigation,
+  Users,
+  Bed,
+  Star,
   X,
-  Camera,
+  IndianRupee,
 } from "lucide-react";
-import { HiOutlineBell, HiOutlineCurrencyDollar } from "react-icons/hi";
-import { FaRupeeSign } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+
 import { BASE_URL } from "../../../config";
 
 const UserDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [flights, setFlights] = useState([]);
   const [hotels, setHotels] = useState([]);
-  const [user_id, setuserId] = useState(null);
-
+  const [id, setuserId] = useState(null);
   const [cabs, setCabs] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("cabs");
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const [user, setUser] = useState({
     name: "John Doe",
     email: "john.doe@example.com",
@@ -39,19 +48,68 @@ const UserDashboard = () => {
     coverPhoto:
       "https://images.pexels.com/photos/2399254/pexels-photo-2399254.jpeg",
   });
-  useEffect(() => {
-    if (showEditModal) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-
-    return () => {
-      document.body.style.overflow = "auto"; // Ensure reset on unmount
-    };
-  }, [showEditModal]);
-
   const [editedUser, setEditedUser] = useState(user);
+
+  // Dummy notifications data
+  const dummyNotifications = [
+    {
+      id: 1,
+      message: "Your cab booking has been confirmed",
+      type: "success",
+      createdAt: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+    },
+    {
+      id: 2,
+      message: "Special discount on hotel bookings this weekend",
+      type: "info",
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+    },
+    {
+      id: 3,
+      message: "Payment failed for your recent booking",
+      type: "error",
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    },
+    {
+      id: 4,
+      message: "Your hotel booking is pending confirmation",
+      type: "warning",
+      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2 days ago
+    },
+  ];
+
+  // Dummy transactions data
+  const dummyTransactions = [
+    {
+      id: 1,
+      amount: 1250,
+      status: "Paid",
+      paymentMethod: "Credit Card",
+      date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+    },
+    {
+      id: 2,
+      amount: 3200,
+      status: "Paid",
+      paymentMethod: "UPI",
+      date: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    },
+    {
+      id: 3,
+      amount: 1800,
+      status: "Failed",
+      paymentMethod: "Debit Card",
+      date: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2 days ago
+    },
+    {
+      id: 4,
+      amount: 2750,
+      status: "Pending",
+      paymentMethod: "Net Banking",
+      date: new Date(Date.now() - 1000 * 60 * 60 * 72), // 3 days ago
+    },
+  ];
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -59,351 +117,739 @@ const UserDashboard = () => {
         const decoded = jwtDecode(token);
         console.log("Decoded Token:", decoded);
         setuserId(decoded.user._id);
+        setUser({
+          name: decoded.user.name || "User",
+          email: decoded.user.email || "",
+          profilePic: decoded.user.profilePic || "",
+        });
       } catch (error) {
         console.error("Error decoding token:", error);
       }
     }
+
+    // Set dummy data
+    setNotifications(dummyNotifications);
+    setTransactions(dummyTransactions);
   }, []);
 
   useEffect(() => {
-    if (user_id) {
-      console.log("Fetching vehicles for user ID:", user_id);
-
-      getalluserrequest();
+    if (id) {
+      console.log("Fetching bookings for user ID:", id);
+      getCabBookings();
+      getHotelBookings();
     }
-  }, [user_id]);
-  const getalluserrequest = async () => {
+  }, [id]);
+
+  const getCabBookings = async () => {
     try {
       const res = await fetch(`${BASE_URL}/api/user/getbooking/${id}`);
       const data = await res.json();
-      if (!data || !Array.isArray(data) || data.length === 0) {
-        console.log("No bookings found or the data is not an array.");
-      } else {
-        setCabs(data); // Only set if it's an array with data
+      if (data && data.length > 0) {
+        setCabs(data);
       }
     } catch (error) {
-      console.error("Error fetching bookings:", error);
+      console.error("Error fetching cab bookings:", error);
     }
   };
-  console.log(cabs);
-  useEffect(() => {
-    // Dummy Booking Data
-    setFlights([
-      {
-        id: 1,
-        from: "Delhi",
-        to: "Mumbai",
-        date: "2025-02-15",
-        price: 4500,
-        status: "Pending",
-      },
-      {
-        id: 2,
-        from: "Bangalore",
-        to: "Goa",
-        date: "2025-01-28",
-        price: 3200,
-        status: "Completed",
-      },
-    ]);
 
-    setHotels([
-      {
-        id: 3,
-        name: "Taj Palace",
-        city: "Delhi",
-        date: "2025-02-20",
-        price: 7500,
-        status: "Pending",
-      },
-      {
-        id: 4,
-        name: "The Oberoi",
-        city: "Mumbai",
-        date: "2025-01-30",
-        price: 5800,
-        status: "Completed",
-      },
-    ]);
-
-    setTransactions([
-      { id: 1, amount: 4500, date: "2025-02-10", status: "Paid" },
-      { id: 2, amount: 7500, date: "2025-01-25", status: "Refunded" },
-    ]);
-
-    setNotifications([
-      {
-        id: 1,
-        message: "Your flight to Mumbai is confirmed!",
-        type: "success",
-      },
-      {
-        id: 2,
-        message: "Your hotel check-in at Taj Palace is tomorrow!",
-        type: "info",
-      },
-    ]);
-  }, []);
+  const getHotelBookings = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/booking/hotel`, {
+        credentials: "include", // This will include credentials in the request
+      });
+      const data = await res.json();
+      console.log(data);
+      if (data.bookings && data.bookings.length > 0) {
+        setHotels(data.bookings);
+      }
+    } catch (error) {
+      console.error("Error fetching hotel bookings:", error);
+    }
+  };
 
   const handleProfileUpdate = () => {
     setUser(editedUser);
     setShowEditModal(false);
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditedUser({ ...editedUser, profilePic: reader.result });
-      };
-      reader.readAsDataURL(file);
+  const getStatusIcon = (status) => {
+    switch (status?.toLowerCase()) {
+      case "completed":
+      case "confirmed":
+      case "paid":
+        return <CheckCircle2 className="text-green-500" size={18} />;
+      case "pending":
+        return <Clock className="text-yellow-500" size={18} />;
+      case "cancelled":
+      case "failed":
+        return <XCircle className="text-red-500" size={18} />;
+      default:
+        return <ShieldCheck className="text-blue-500" size={18} />;
     }
-  };
-  const handleCloseModal = () => {
-    setEditedUser(user); // Reset to original user data
-    setShowEditModal(false);
-    document.body.style.overflow = "auto";
-  };
-
-  const [shadow, setShadow] = useState("0px 0px 10px rgba(255, 255, 255, 0.3)");
-
-  const handleMouseMove = (e) => {
-    const { offsetX, offsetY, target } = e.nativeEvent;
-    const { clientWidth, clientHeight } = target;
-
-    // Calculate shadow position based on cursor
-    const x = (offsetX / clientWidth - 0.5) * 20; // Adjust intensity
-    const y = (offsetY / clientHeight - 0.5) * 20;
-
-    setShadow(`${x}px ${y}px 20px rgba(255, 255, 255, 0.3)`);
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-[Poppins]">
-      {/* Cover Photo and Avatar */}
-      <div className="relative h-48 bg-gray-200">
-        <img
-          src={user.coverPhoto}
-          alt="Cover"
-          className="w-full h-full object-cover rounded-t-lg"
-        />
-        <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
-          <img
-            src={user.profilePic}
-            alt="Avatar"
-            className="w-32 h-32 rounded-full border-4 border-white hover:border-red-600 transition-all duration-300"
-          />
+    <div className="min-h-screen bg-black text-gray-200 p-4 md:p-8 font-[Poppins]">
+      {/* User Profile */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-center flex flex-col items-center mb-10 bg-[#1a1a1a] p-6 rounded-xl shadow-lg border border-gray-800"
+      >
+        <div className="relative w-28 h-28 bg-gray-800 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
+          {user.profilePic ? (
+            <img
+              src={user.profilePic}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <User size={50} className="text-red-500" />
+          )}
         </div>
-      </div>
+        <h1 className="text-3xl font-bold mt-4 text-white">{user.name}</h1>
+        <p className="text-gray-400 text-lg">{user.email}</p>
 
-      {/* Profile Header */}
-      <div className="container mx-auto px-4 pt-20">
-        <div className="flex flex-col items-center text-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-white ">{user.name}</h1>
-            <p className="text-gray-400 text-lg mt-2">{user.email}</p>
-          </div>
-          <div className="flex gap-4 mt-5 md:mt-4">
-            <button
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
-              onClick={() => setShowEditModal(true)}
-            >
-              Edit Profile
-            </button>
-            <button
-              className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition duration-200"
-              onClick={() => setIsPasswordModalOpen(true)}
-            >
-              Change Password
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {showEditModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-auto">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="box-border w-120 p-5 relative bg-gray-900 rounded-lg 
-            shadow-xl  transition-shadow duration-300 max-h-screen overflow-y-auto
-            "
-            style={{ boxShadow: shadow }}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={() =>
-              setShadow("0px 0px 10px rgba(255, 255, 255, 0.3)")
-            }
-          >
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-            <h2 className="text-2xl font-bold text-red-500 mb-5 text-center">
-              Edit Profile
+        <button
+          onClick={() => setShowEditModal(true)}
+          className="mt-4 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg flex items-center gap-2 hover:bg-red-600 transition"
+        >
+          <Edit size={18} /> Edit Profile
+        </button>
+      </motion.div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Notifications */}
+        <div className="lg:col-span-1">
+          <div className="bg-[#1a1a1a] p-6 rounded-xl shadow-lg border border-gray-800">
+            <h2 className="text-2xl font-bold text-red-500 mb-4 flex items-center gap-2">
+              <Bell className="text-red-500" /> Notifications
             </h2>
-            <div className="relative w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center shadow-lg overflow-hidden mx-auto mb-4 group cursor-pointer">
-              {editedUser.profilePic ? (
-                <img
-                  src={editedUser.profilePic}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <User size={40} className="text-red-500" />
-              )}
-              <label className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                <Camera size={24} className="text-white" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </label>
-            </div>
+            {notifications.length === 0 ? (
+              <p className="text-gray-500 italic">No new notifications</p>
+            ) : (
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                {notifications.map((notif) => (
+                  <motion.div
+                    key={notif._id || notif.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`p-3 rounded-lg flex items-start gap-3 border ${
+                      notif.type === "success"
+                        ? "border-green-900 bg-green-900/20"
+                        : notif.type === "warning"
+                        ? "border-yellow-900 bg-yellow-900/20"
+                        : notif.type === "error"
+                        ? "border-red-900 bg-red-900/20"
+                        : "border-blue-900 bg-blue-900/20"
+                    }`}
+                  >
+                    <Bell
+                      className={`mt-1 flex-shrink-0 ${
+                        notif.type === "success"
+                          ? "text-green-400"
+                          : notif.type === "warning"
+                          ? "text-yellow-400"
+                          : notif.type === "error"
+                          ? "text-red-400"
+                          : "text-blue-400"
+                      }`}
+                    />
+                    <div>
+                      <p className="font-medium">{notif.message}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(
+                          notif.createdAt || Date.now()
+                        ).toLocaleString()}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
 
-            <input
-              type="text"
-              className="w-full p-2 mb-3 rounded bg-gray-800 cursor-pointer text-white focus:outline-none focus:ring-2 focus:ring-red-500 hover:border-red-500"
-              value={editedUser.name}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, name: e.target.value })
-              }
-              placeholder="Enter Name"
-            />
-            <input
-              type="email"
-              className="w-full p-2 mb-3 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
-              value={editedUser.email}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, email: e.target.value })
-              }
-              placeholder="Enter Email"
-            />
-            <div className="flex justify-end gap-2 mt-4">
+          {/* Transactions */}
+          <div className="bg-[#1a1a1a] p-6 rounded-xl shadow-lg mt-6 border border-gray-800">
+            <h2 className="text-2xl font-bold text-red-500 mb-4 flex items-center gap-2">
+              <CreditCard className="text-red-500" /> Payment History
+            </h2>
+            {transactions.length === 0 ? (
+              <p className="text-gray-500 italic">No transactions yet</p>
+            ) : (
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                {transactions.map((t) => (
+                  <motion.div
+                    key={t._id || t.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="p-3 bg-gray-900/50 rounded-lg border border-gray-800 hover:bg-gray-800/50 transition"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(t.status)}
+                        <span className="font-medium">₹{t.amount}</span>
+                      </div>
+                      <span className="text-sm text-gray-400">
+                        {new Date(t.date || t.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between mt-1 text-sm">
+                      <span
+                        className={`${
+                          t.status === "Paid"
+                            ? "text-green-400"
+                            : t.status === "Failed"
+                            ? "text-red-400"
+                            : "text-yellow-400"
+                        }`}
+                      >
+                        {t.status}
+                      </span>
+                      <span className="text-gray-400">
+                        {t.paymentMethod || "Credit Card"}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bookings Section */}
+        <div className="lg:col-span-2">
+          <div className="bg-[#1a1a1a] p-6 rounded-xl shadow-lg border border-gray-800">
+            <div className="flex border-b border-gray-800 mb-6 overflow-x-auto">
               <button
-                onClick={handleProfileUpdate}
-                className="bg-red-500 px-4 py-2 rounded text-white hover:bg-red-600"
+                className={`px-6 py-3 font-medium flex items-center gap-2 transition-all ${
+                  activeTab === "cabs"
+                    ? "text-red-500 border-b-2 border-red-500 bg-gray-800/50"
+                    : "text-gray-400 hover:text-gray-300 hover:bg-gray-800/30"
+                }`}
+                onClick={() => setActiveTab("cabs")}
               >
-                Save
+                <Car size={18} /> Cab Bookings
+                {cabs.length > 0 && (
+                  <span className="ml-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    {cabs.length}
+                  </span>
+                )}
               </button>
               <button
-                onClick={handleCloseModal}
-                className="px-4 py-2 rounded text-white bg-gray-700 hover:bg-gray-600"
+                className={`px-6 py-3 font-medium flex items-center gap-2 transition-all ${
+                  activeTab === "hotels"
+                    ? "text-red-500 border-b-2 border-red-500 bg-gray-800/50"
+                    : "text-gray-400 hover:text-gray-300 hover:bg-gray-800/30"
+                }`}
+                onClick={() => setActiveTab("hotels")}
+              >
+                <Hotel size={18} /> Hotel Bookings
+                {hotels.length > 0 && (
+                  <span className="ml-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    {hotels.length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {activeTab === "cabs" ? (
+              <div>
+                <h2 className="text-2xl font-bold text-red-500 mb-6 flex items-center gap-2">
+                  <Car className="text-red-500" /> Your Cab Bookings
+                </h2>
+                {cabs.length === 0 ? (
+                  <div className="text-center py-10">
+                    <Car className="mx-auto text-gray-600" size={48} />
+                    <p className="text-gray-500 mt-2">No cab bookings yet</p>
+                    <button
+                      className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                      onClick={() => (window.location.href = "/booking/cab")}
+                    >
+                      Book a Cab Now
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-5">
+                    {cabs.map((booking) => (
+                      <motion.div
+                        key={booking._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="border border-gray-800 rounded-xl overflow-hidden bg-gradient-to-br from-gray-900/50 to-gray-800/30 hover:shadow-lg transition-all hover:border-gray-700"
+                      >
+                        <div className="p-5">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-start gap-4">
+                              <div className="bg-red-500/20 p-3 rounded-lg">
+                                <Car className="text-red-500" size={24} />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-white">
+                                  {booking.vehicle_id?.vehicle_type ||
+                                    "Premium Cab"}
+                                </h3>
+                                <p className="text-sm text-gray-400 mt-1">
+                                  {booking.vehicle_id?.vehicle_number ||
+                                    "DL 01 AB 1234"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded-full">
+                              {getStatusIcon(booking.status)}
+                              <span className="text-xs font-medium capitalize text-gray-200">
+                                {booking.status || "Pending"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-gray-800 p-2 rounded-full">
+                                <MapPin className="text-red-500" size={16} />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">Route</p>
+                                <p className="text-sm font-medium text-white">
+                                  {booking.source_location?.address ||
+                                    "Unknown"}{" "}
+                                  →{" "}
+                                  {booking.destination_location?.address ||
+                                    "Unknown"}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="bg-gray-800 p-2 rounded-full">
+                                <Calendar className="text-red-500" size={16} />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">Pickup</p>
+                                <p className="text-sm font-medium text-white">
+                                  {booking.pickup_time
+                                    ? new Date(
+                                        booking.pickup_time
+                                      ).toLocaleString()
+                                    : "N/A"}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="bg-gray-800 p-2 rounded-full">
+                                <User className="text-red-500" size={16} />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">Driver</p>
+                                <p className="text-sm font-medium text-white">
+                                  {booking.Rider_id?.name || "Not assigned"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border-t border-gray-800 px-5 py-3 bg-gray-900/50 flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="text-green-400" size={16} />
+                            <span className="font-medium text-white">
+                              ₹{booking.fare || "0"}
+                            </span>
+                          </div>
+                          <button  onClick={() => setSelectedBooking(booking)} className="text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-medium">
+                            View Details <ChevronRight size={16} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <h2 className="text-2xl font-bold text-red-500 mb-6 flex items-center gap-2">
+                  <Hotel className="text-red-500" /> Your Hotel Bookings
+                </h2>
+                {hotels.length === 0 ? (
+                  <div className="text-center py-10">
+                    <Hotel className="mx-auto text-gray-600" size={48} />
+                    <p className="text-gray-500 mt-2">No hotel bookings yet</p>
+                    <button
+                      className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                      onClick={() => (window.location.href = "/booking/hotel")}
+                    >
+                      Book a Hotel Now
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-5">
+                    {hotels.map((booking) => (
+                      <motion.div
+                        key={booking._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="border border-gray-800 rounded-xl overflow-hidden bg-gradient-to-br from-gray-900/50 to-gray-800/30 hover:shadow-lg transition-all hover:border-gray-700"
+                      >
+                        <div className="p-5">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-start gap-4">
+                              <div className="bg-red-500/20 p-3 rounded-lg">
+                                <Hotel className="text-red-500" size={24} />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-white">
+                                  {booking.hotel?.name || "Premium Hotel"}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      size={14}
+                                      className={`${
+                                        i < (booking.hotel?.rating || 3)
+                                          ? "text-yellow-400 fill-yellow-400"
+                                          : "text-gray-600"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded-full">
+                              {getStatusIcon(booking.bookingStatus)}
+                              <span className="text-xs font-medium capitalize text-gray-200">
+                                {booking.bookingStatus || "Pending"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-gray-800 p-2 rounded-full">
+                                <MapPin className="text-red-500" size={16} />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">
+                                  Location
+                                </p>
+                                <p className="text-sm font-medium text-white">
+                                  {booking.hotel?.address?.area ||
+                                    "City Center"}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="bg-gray-800 p-2 rounded-full">
+                                <Bed className="text-red-500" size={16} />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">
+                                  Room Type
+                                </p>
+                                <p className="text-sm font-medium text-white">
+                                  {booking.room?.room_type || "Deluxe Room"}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div className="bg-gray-800 p-2 rounded-full">
+                                <Users className="text-red-500" size={16} />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">Guests</p>
+                                <p className="text-sm font-medium text-white">
+                                  {booking.personDetails?.length || 1}{" "}
+                                  {booking.personDetails?.length === 1
+                                    ? "Guest"
+                                    : "Guests"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 flex flex-wrap gap-3">
+                            <div className="bg-gray-800/50 px-3 py-1 rounded-full flex items-center gap-2">
+                              <Calendar size={14} className="text-gray-400" />
+                              <span className="text-xs text-white">
+                                {new Date(
+                                  booking.bookingStartDate
+                                ).toLocaleDateString()}{" "}
+                                -{" "}
+                                {new Date(
+                                  booking.bookingEndDate
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <div className="bg-gray-800/50 px-3 py-1 rounded-full flex items-center gap-2">
+                              <Clock size={14} className="text-gray-400" />
+                              <span className="text-xs text-white">
+                                {booking.room?.check_in || "12:00 PM"} -{" "}
+                                {booking.room?.check_out || "11:00 AM"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border-t border-gray-800 px-5 py-3 bg-gray-900/50 flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            {/* <DollarSign className="text-green-400" size={16} /> */}
+                            <span className="font-medium text-white">
+                              ₹{booking.totalAmount || "0"}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => setSelectedBooking(booking)}
+                            className="text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-medium"
+                          >
+                            View Details <ChevronRight size={16} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#1a1a1a] rounded-xl p-6 w-full max-w-md border border-gray-800"
+          >
+            <h2 className="text-2xl font-bold text-white mb-4">Edit Profile</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-300 mb-1">Name</label>
+                <input
+                  type="text"
+                  value={editedUser.name}
+                  onChange={(e) =>
+                    setEditedUser({ ...editedUser, name: e.target.value })
+                  }
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={editedUser.email}
+                  onChange={(e) =>
+                    setEditedUser({ ...editedUser, email: e.target.value })
+                  }
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 mb-1">
+                  Profile Picture URL
+                </label>
+                <input
+                  type="text"
+                  value={editedUser.profilePic}
+                  onChange={(e) =>
+                    setEditedUser({ ...editedUser, profilePic: e.target.value })
+                  }
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-white"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-800 transition"
               >
                 Cancel
+              </button>
+              <button
+                onClick={handleProfileUpdate}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+              >
+                Save Changes
               </button>
             </div>
           </motion.div>
         </div>
       )}
-
-      {/* Notifications */}
-      <div className="flex items-center gap-2 mb-4 mx-2">
-        <HiOutlineBell className="w-6 h-6 text-red-600 cursor-pointer hover:" />
-        <h2 className="text-3xl font-bold text-red-500">Notifications</h2>
-      </div>
-      <div className="mb-6 p-2">
-        {notifications.length === 0 ? (
-          <p className="text-gray-400 mt-2">No new notifications.</p>
-        ) : (
-          notifications.map((notif) => (
-            <div
-              key={notif.id}
-              className="bg-[#1a1a1a] p-4 mb-2 rounded-lg flex items-center gap-3"
+      <AnimatePresence>
+        {selectedBooking && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-[#1a1a1a] p-6 rounded-xl max-w-md w-full mx-4 border border-gray-700"
             >
-              <Bell className="text-yellow-400" />
-              <p>{notif.message}</p>
-            </div>
-          ))
-        )}
-      </div>
-
-      <div key="Cabs" className="mt-10">
-        <h2 className="text-3xl font-bold text-red-600 mb-4 flex items-center gap-2 mx-2">
-          <Car /> 
-          <h2 className="text-3xl font-bold text-red-500">Cab Bookings</h2>
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.isArray(cabs) && cabs.length === 0 ? (
-            <p className="text-2xl text-gray-400 mx-10">No cab bookings.</p>
-          ) : (
-            cabs.map((booking) => (
-              <motion.div
-                key={booking._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="bg-[#1a1a1a] p-6 rounded-2xl shadow-lg border border-gray-800"
-              >
+              <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold">
-                  {booking.source_location?.address} →{" "}
-                  {booking.destination_location?.address}
+                  {selectedBooking.hotel ? "Hotel" : "Cab"} Booking Details
                 </h3>
+                <button
+                  onClick={() => setSelectedBooking(null)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X size={24} />
+                </button>
+              </div>
 
-                <p className="text-yellow-400 font-semibold mt-2">
-                  Status: {booking.status}
-                </p>
+              <div className="space-y-4">
+                {selectedBooking.hotel ? (
+                  // Hotel Booking Details
+                  <>
+                    <div className="flex items-center gap-3">
+                      <Hotel size={18} className="text-red-500" />
+                      <p className="text-gray-300 font-medium">
+                        {selectedBooking.hotel?.name || "Premium Hotel"}
+                      </p>
+                    </div>
 
-                <div className="mt-3 text-gray-300 text-sm">
-                  <p className="text-gray-300 mt-1">
-                    <Calendar size={16} className="inline-block" /> Pick Time:{" "}
-                    {booking.pickup_time
-                      ? new Date(booking.pickup_time).toLocaleString()
-                      : "Not Available"}
-                  </p>
+                    <div className="flex items-start gap-3">
+                      <MapPin size={18} className="text-green-400 mt-1" />
+                      <div>
+                        <p className="font-medium">Location</p>
+                        <p className="text-gray-400">
+                          {selectedBooking.hotel?.address?.area ||
+                            "City Center"}
+                        </p>
+                      </div>
+                    </div>
 
-                  <p className="flex items-center gap-2">
-                    <DollarSign size={18} className="text-red-500" /> Payment:{" "}
-                    {booking.payment_status}
-                  </p>
+                    <div className="flex items-start gap-3">
+                      <Bed size={18} className="text-yellow-400 mt-1" />
+                      <div>
+                        <p className="font-medium">Room Type</p>
+                        <p className="text-gray-400">
+                          {selectedBooking.room?.room_type || "Deluxe Room"}
+                        </p>
+                      </div>
+                    </div>
 
-                  <p className="mt-1">Rider Mobile: {booking.Rider_id.phone}</p>
-                  <p className="mt-1">
-                    <Car size={16} className="inline-block" /> Vehicle:{" "}
-                    {booking.vehicle_id.vehicle_number} (
-                    {booking.vehicle_id.vehicle_type})
-                  </p>
+                    <div className="flex items-center gap-3">
+                      <Calendar size={18} className="text-blue-400" />
+                      <p className="text-gray-300">
+                        {new Date(
+                          selectedBooking.bookingStartDate
+                        ).toLocaleDateString()}{" "}
+                        -{" "}
+                        {new Date(
+                          selectedBooking.bookingEndDate
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Users size={18} className="text-purple-400" />
+                      <p className="text-gray-300">
+                        {selectedBooking.personDetails?.length || 1}{" "}
+                        {selectedBooking.personDetails?.length === 1
+                          ? "Guest"
+                          : "Guests"}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <IndianRupee size={18} className="text-green-400" />
+                      <p className="text-gray-300">
+                        Total: ₹{selectedBooking.totalAmount || "0"}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  // Cab Booking Details
+                  <>
+                    <div className="flex items-center gap-3">
+                      <Car size={18} className="text-red-500" />
+                      <p className="text-gray-300 font-medium">
+                        {selectedBooking.vehicle_id?.vehicle_type ||
+                          "Premium Cab"}
+                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <MapPin size={18} className="text-green-400 mt-1" />
+                      <div>
+                        <p className="font-medium">Pickup Location</p>
+                        <p className="text-gray-400">
+                          {selectedBooking.source_location?.address ||
+                            "Unknown"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <MapPin size={18} className="text-red-400 mt-1" />
+                      <div>
+                        <p className="font-medium">Drop-off Location</p>
+                        <p className="text-gray-400">
+                          {selectedBooking.destination_location?.address ||
+                            "Unknown"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Calendar size={18} className="text-blue-400" />
+                      <p className="text-gray-300">
+                        {selectedBooking.pickup_time
+                          ? new Date(
+                              selectedBooking.pickup_time
+                            ).toLocaleString()
+                          : "N/A"}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <User size={18} className="text-purple-400" />
+                      <p className="text-gray-300">
+                        Driver:{" "}
+                        {selectedBooking.Rider_id?.name || "Not assigned"}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <IndianRupee size={18} className="text-green-400" />
+                      <p className="text-gray-300">
+                        Fare: ₹{selectedBooking.fare || "0"}
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-gray-700">
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(
+                      selectedBooking.status || selectedBooking.bookingStatus
+                    )}
+                    <span className="text-sm font-medium capitalize">
+                      Status:{" "}
+                      {selectedBooking.status ||
+                        selectedBooking.bookingStatus ||
+                        "Pending"}
+                    </span>
+                  </div>
                 </div>
-              </motion.div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Transactions */}
-      <div className="mt-7">
-      <div className="flex items-center gap-2 mb-4 mx-2">
-        <FaRupeeSign className="w-6 h-6 text-red-600 cursor-pointer hover:" />
-        <h2 className="text-3xl font-bold text-red-500">Payment History</h2>
-      </div>
-      <div className="mt-4 p-2">
-        {transactions.length === 0 ? (
-          <p className="text-gray-400">No transactions.</p>
-        ) : (
-          transactions.map((t) => (
-            <div
-              key={t.id}
-              className="bg-[#1a1a1a] p-4 mt-2 rounded-lg flex justify-between"
-            >
-              <p>₹{t.amount}</p>
-              <p>{t.date}</p>
-              <p
-                className={
-                  t.status === "Paid" ? "text-green-400" : "text-red-400"
-                }
-              >
-                {t.status}
-              </p>
-            </div>
-          ))
+              </div>
+            </motion.div>
+          </motion.div>
         )}
-        </div>
-      </div>
+      </AnimatePresence>
     </div>
   );
 };

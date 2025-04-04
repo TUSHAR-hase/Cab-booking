@@ -188,6 +188,33 @@ const approveHotel = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, hotel, "Hotel approved successfully"));
 });
 
+const getHotelById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const hotel = await Hotel.findById(id);
+
+    if (!hotel) {
+        throw new ApiError(404, "Hotel not found");
+    }
+
+    // Fetch hotel room details
+    const rooms = await HotelRoom.find({ hotel: id });
+
+    if (rooms.length > 0) {
+        const prices = rooms.map(room => room.room_price_per_day);
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+
+        hotel._doc.minPrice = minPrice;
+        hotel._doc.maxPrice = maxPrice;
+    } else {
+        hotel._doc.minPrice = null;
+        hotel._doc.maxPrice = null;
+    }
+
+    return res.status(200).json(new ApiResponse(200, hotel, "Hotel retrieved successfully"));
+});
+
 //===========================================================
 
 
@@ -338,28 +365,85 @@ const deleteRoom = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, null, "Room deleted successfully "))
 })
+const getRoomByhotelId = asyncHandler(async (req, res) => {
+    const { hotelId } = req.params
+    console.log("getRoomByhotelId is called");
+
+    const hotel = await HotelRoom.find({ hotel: hotelId })
+    return res.status(200).json(new ApiResponse(200, hotel, "Hotel retrived successfully"))
+})
 
 //===========================================================
 
 const searchHotels = asyncHandler(async (req, res) => {
     const { name, area, district, pincode } = req.query;
 
-    let filter = {};
-    if (name) filter.name = { $regex: name, $options: "i" }; // Case-insensitive search
+    // Check if at least one search parameter is provided
+    if (!name && !area && !district && !pincode) {
+        return res.status(400).json({
+            message: "Please provide at least one search parameter",
+            status: false
+        });
+    }
+
+    // Build the filter object
+    const filter = {};
+    if (name) filter.name = { $regex: name, $options: "i" };
     if (area) filter["address.area"] = { $regex: area, $options: "i" };
     if (district) filter["address.district"] = { $regex: district, $options: "i" };
     if (pincode) filter["address.pincode"] = pincode;
 
-    const hotels = await Hotel.find(filter).exec();
+    try {
+        // Find hotels with the filter
+        let hotels = await Hotel.find(filter).lean();
 
-    if (hotels.length === 0) {
-        throw new ApiError(404, "No hotels found matching your criteria");
+        if (hotels.length === 0) {
+            return res.status(404).json({
+                message: "No hotels found matching your criteria",
+                status: false
+            });
+        }
+
+        // Fetch hotel IDs
+        const hotelIds = hotels.map(hotel => hotel._id);
+
+        // Fetch all rooms associated with the found hotels
+        const rooms = await HotelRoom.find({ hotel: { $in: hotelIds } });
+
+        // Create a mapping of hotel -> room prices
+        const hotelPriceMap = rooms.reduce((acc, room) => {
+            if (!acc[room.hotel]) {
+                acc[room.hotel] = [];
+            }
+            acc[room.hotel].push(room.room_price_per_day);
+            return acc;
+        }, {});
+
+        // Append minPrice & maxPrice to each hotel
+        const hotelsWithPrices = hotels.map(hotel => {
+            const prices = hotelPriceMap[hotel._id.toString()] || [];
+            return {
+                ...hotel,
+                minPrice: prices.length ? Math.min(...prices) : null,
+                maxPrice: prices.length ? Math.max(...prices) : null
+            };
+        });
+
+        return res.status(200).json(
+            new ApiResponse(200, hotelsWithPrices, "Hotels retrieved successfully")
+        );
+
+    } catch (error) {
+        // Handle any potential errors
+        console.error("Error searching hotels:", error);
+        return res.status(500).json({
+            message: "An error occurred while searching for hotels",
+            status: false
+        });
     }
-
-    res.status(200).json(new ApiResponse(200, hotels, "Hotels retrieved successfully"));
 });
-
 const getRooms = asyncHandler(async (req, res) => {
+
     const { hotel_id } = req.query;
     if (!hotel_id) {
         throw new ApiError(400, "Please provide a hotel id");
@@ -374,6 +458,8 @@ const getRooms = asyncHandler(async (req, res) => {
 
 const getOwnerRooms = asyncHandler(async (req, res) => {
     try {
+        console.log("getOwnerRoom is called");
+
         // Find all hotels owned by the current owner
         const hotels = await Hotel.find({ hotel_owner: req.hotel_owner._id });
 
@@ -407,5 +493,5 @@ export {
     approveHotel,
     updateRoom,
     updateRoomImages,
-    deleteRoom, getOwnerRooms
+    deleteRoom, getOwnerRooms, getHotelById, getRoomByhotelId
 };

@@ -9,7 +9,7 @@ export default function RiderSignup() {
     phone: "",
     address: "",
     password: "",
-    conformpassword: "",
+    confirm_password: "",
     licence_number: "",
     
   });

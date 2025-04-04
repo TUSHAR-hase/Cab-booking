@@ -1,191 +1,341 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BASE_URL } from "../../../config";
-import { jwtDecode } from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-const ConfirmBookingPage = () => {
-  const {id}=useParams()
-  console.log(id)
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [pickupTime, setPickupTime] = useState("");
-  // const [user_id,setuserid]=useState()
-  const [vehicalid,setVehicle]=useState()
-  const [loading, setLoading] = useState(false);
-  const [rider_id,setRider]=useState()
-  const [userId, setUserId] = useState("");
-  const [username,setusername]=useState()
-  const [useremail,setuseremail]=useState()
-  const [usercontect,setusercontect]=useState()
- const[amount,setammount]=useState()
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
+const ConfirmBookingPage = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
 
-useEffect(() => {
-  const token = localStorage.getItem("token");  
-  if (token) {
-    try {
-      const decoded = jwtDecode(token);
-      console.log(decoded) 
-    setUserId(decoded.user._id)
-    setusercontect(decoded.user.contact)
-    setusername(decoded.user.name)
-    setuseremail(decoded.user.email)
-    } catch (error) {
-      console.error("Error decoding token:", error);
-    }
-  }
-  hendecardetail();
-}, []);
-const hendecardetail=async()=>{
-  const responce=await fetch(`${BASE_URL}/api/Rv/vehicle/getvehicle/${id}`) 
-  const data=await responce.json();
-  console.log(data)
-  setRider(data.Rider_id)
-  setVehicle(id)
-  setammount(data.perKm_price)
-}
+  // State variables
+  const [formData, setFormData] = useState({
+    from: "",
+    to: "",
+    pickupTime: "",
+  });
+  const [vehicleDetails, setVehicleDetails] = useState({
+    rider_id: "",
+    perKm_price: 0,
+  });
+  const [userDetails, setUserDetails] = useState({
+    id: "",
+    name: "",
+    email: "",
+    contact: "",
+  });
+  const [showValidationError, setShowValidationError] = useState(false);
 
-useEffect(() => {
-  const script = document.createElement("script");
-  script.src = "https://checkout.razorpay.com/v1/checkout.js";
-  script.async = true;
-  script.onload = () => console.log("Razorpay script loaded");
-  document.body.appendChild(script);
-}, []);
-const loadRazorpay = async () => {
-  setLoading(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  const allFieldsValid = () => {
+    return formData.from && formData.to && formData.pickupTime;
+  };
 
-  try {
-    // Call backend to create an order
-    const { data } = await axios.post(`${BASE_URL}/create-order`, { amount: 500 });
-console.log(data)
-    if (!data.success) throw new Error("Failed to create order");
-
-    const options = {
-      key: "rzp_test_Y8cefy5g53d5Se", // Get from Razorpay
-      amount: "1",
-      currency: "INR",
-      order_id: data.order.id,
-      name: "Booking Hub",
-      description: "Payment for Booking",
-      handler: async (response) => {
-        // Verify Payment Signature
-        const verifyRes = await axios.post(`${BASE_URL}/verify-payment`, response);
-        if (verifyRes.data.success) {
-          alert("Payment Successful!");
-        } else {
-          alert("Payment Verification Failed!");
+  useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login");
+          return;
         }
-      },
-      prefill: {
-        name: username,
-        email: useremail,
-        contact: usercontect,
-      },
-      theme: {
-        color: "#3399cc",
-      },
+
+        const decoded = jwtDecode(token);
+        setUserDetails({
+          id: decoded.user._id,
+          name: decoded.user.name,
+          email: decoded.user.email,
+          contact: decoded.user.contact,
+        });
+
+        await fetchVehicleDetails();
+      } catch (error) {
+        console.error("Initialization error:", error);
+        setError("Failed to initialize page");
+      }
     };
-    console.log(window.Razorpay);
 
-    const paymentObject = new window.Razorpay(options);
-    paymentObject.open();
-  } catch (error) {
-    console.log(error);
-    alert(error.message);
-  }
+    initializeUser();
+  }, []);
 
-  setLoading(false);
-};
+  const fetchVehicleDetails = async () => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/Rv/vehicle/getvehicle/${id}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch vehicle details");
 
-  const handleProceedToPayment = async() => {
-    if (!from || !to || !pickupTime) {
-      alert("Please fill in all required fields");
+      const data = await response.json();
+      setVehicleDetails({
+        rider_id: data.Rider_id,
+        perKm_price: data.perKm_price,
+      });
+    } catch (error) {
+      console.error("Vehicle details error:", error);
+      setError("Failed to load vehicle details");
+    }
+  };
+
+  const initializeRazorpay = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayment = async () => {
+    if (!allFieldsValid()) {
+      setShowValidationError(true);
       return;
     }
-   try {
-    const res=await fetch(`${BASE_URL}/api/Rv/booking/createbooking`,{
-      method:"POST",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({from,to,pickupTime,vehicalid,rider_id,userId})
-  
-    })
-    console.log(res)
-    if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`);
-    }
-    const data = await res.json();
-  
-    console.log("Response Data:", data);
-    if (data) {
-      
-      setTimeout(() => {
-        alert("GO to Payment PAGE...!");
-       
-      }, 2000);
-      loadRazorpay();
+    try {
+      setLoading(true);
+      setError("");
 
+      // Create booking first
+      const bookingResponse = await fetch(
+        `${BASE_URL}/api/Rv/booking/createbooking`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            vehicalid: id,
+            rider_id: vehicleDetails.rider_id,
+            userId: userDetails.id,
+          }),
+        }
+      );
+
+      if (!bookingResponse.ok) throw new Error("Booking creation failed");
+      const bookingData = await bookingResponse.json();
+
+      // Initialize Razorpay
+      const razorpayLoaded = await initializeRazorpay();
+      if (!razorpayLoaded) throw new Error("Razorpay SDK failed to load");
+
+      // Create payment order
+      const orderResponse = await axios.post(`${BASE_URL}/create-order`, {
+        amount: vehicleDetails.perKm_price * 100, // Convert to paise
+      });
+
+      if (!orderResponse.data.success) throw new Error("Order creation failed");
+
+      // Razorpay options
+      const options = {
+        key: "rzp_test_Y8cefy5g53d5Se",
+        amount: orderResponse.data.order.amount,
+        currency: "INR",
+        order_id: orderResponse.data.order.id,
+        name: "Booking Hub",
+        description: `Booking for ${formData.from} to ${formData.to}`,
+        prefill: userDetails,
+        theme: { color: "#3399cc" },
+        handler: async (response) => {
+          try {
+            const verificationResponse = await axios.post(
+              `${BASE_URL}/verify-payment`,
+              response
+            );
+            if (verificationResponse.data.success) {
+              navigate("/booking-success", { state: { booking: bookingData } });
+            } else {
+              throw new Error("Payment verification failed");
+            }
+          } catch (error) {
+            console.error("Verification error:", error);
+            setError("Payment verification failed");
+          }
+        },
+        modal: {
+          ondismiss: () => setLoading(false),
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+    } catch (error) {
+      console.error("Payment error:", error);
+      setError(error.message || "Payment processing failed");
+    } finally {
+      setLoading(false);
     }
-   } catch (error) {
-    console.log(error)
-   }
-    
+  };
+
+  const handleInputChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="max-w-lg mx-auto p-6 bg-gray-900 text-white shadow-xl rounded-2xl mt-10 border border-gray-700">
-        <h2 className="text-2xl font-bold mb-6 text-center text-red-500">Confirm Your Booking</h2>
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="max-w-lg w-full bg-[#1a1a1a] text-white shadow-xl rounded-2xl p-6 border border-gray-700">
+        <h2 className="text-2xl font-bold mb-6 text-center text-red-500">
+          Confirm Your Booking
+        </h2>
 
-        {/* Pickup Time */}
-        <div className="mb-4">
-          <label className="block font-semibold text-red-500">Pickup Time:</label>
-          <input
-            type="datetime-local"
-            className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white mt-2"
-            value={pickupTime}
-            onChange={(e) => setPickupTime(e.target.value)}
-            required
-          />
+        {error && (
+          <div className="mb-4 p-3 bg-red-800 text-red-200 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <div>
+            <label className="block font-semibold text-red-500 mb-2">
+              Pickup Time
+            </label>
+            <input
+              type="datetime-local"
+              name="pickupTime"
+              className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800"
+              value={formData.pickupTime}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold text-red-500 mb-2">
+              From Location
+            </label>
+            <input
+              type="text"
+              name="from"
+              className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800"
+              placeholder="Enter pickup location"
+              value={formData.from}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block font-semibold text-red-500 mb-2">
+              Destination
+            </label>
+            <input
+              type="text"
+              name="to"
+              className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800"
+              placeholder="Enter destination"
+              value={formData.to}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <button
+            onClick={handlePayment}
+            disabled={loading}
+            className={`w-full py-3 rounded-lg cursor-pointer font-semibold transition-colors ${
+              loading
+                ? "bg-gray-600 cursor-not-allowed"
+                : allFieldsValid()
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-red-500/50"
+            }`}
+          >
+            {loading ? "Processing..." : "Proceed to Payment"}
+          </button>
         </div>
-
-        {/* Location Fields */}
-        <div className="mb-4">
-          <label className="block font-semibold text-red-500">From:</label>
-          <input
-            type="text"
-            className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white mt-2"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            placeholder="Enter pickup location"
-            required
-          />
-        </div>
-
-        <div className="mb-6">
-          <label className="block font-semibold text-red-500">To:</label>
-          <input
-            type="text"
-            className="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white mt-2"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            placeholder="Enter destination"
-            required
-          />
-        </div>
-
-        {/* Proceed Button */}
-        <button
-          className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-blue-600 font-semibold"
-          onClick={handleProceedToPayment}
-        >
-          Proceed to Payment
-        </button>
       </div>
+
+      <AnimatePresence>
+        {showValidationError && (
+          <motion.div
+            key="modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+          >
+            <motion.div
+              key="modal-content"
+              initial={{
+                opacity: 0,
+                y: 20,
+                scale: 0.98,
+                rotate: -1.5,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                rotate: 0,
+                transition: {
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                y: 50,
+                scale: 0.95,
+                transition: { duration: 0.15 },
+              }}
+              className="bg-gray-800 p-6 rounded-2xl max-w-md w-full mx-4 border border-red-500/50 shadow-xl"
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-red-500">
+                    Missing Information
+                  </h3>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowValidationError(false)}
+                    className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700/50 transition-colors"
+                  >
+                    <X size={24} />
+                  </motion.button>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <p className="text-gray-300">
+                  Please fill in all required fields before proceeding.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+                className="mt-4"
+              >
+                <button
+                  onClick={() => setShowValidationError(false)}
+                  className="w-full px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                >
+                  Okay, I'll check
+                </button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

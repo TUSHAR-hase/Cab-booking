@@ -431,7 +431,7 @@ const UserDashboard = () => {
                     icon={<Car size={48} />}
                     message="No cab bookings yet"
                     actionText="Book a Cab Now"
-                    action={() => window.location.href = '/book-cab'}
+                    action={() => window.location.href = '/booking/cab'}
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

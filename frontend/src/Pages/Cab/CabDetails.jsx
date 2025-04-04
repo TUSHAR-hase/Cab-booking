@@ -285,11 +285,11 @@ const CabDetails = () => {
             <div className="relative h-48 w-full bg-gradient-to-br from-gray-900 to-gray-800">
               <img
                 src={
-                  cab.vehicle_image && cab.vehicle_image.trim()
-                    ? `http://localhost:5000/uploads/vehicles/${cab.vehicle_image.split('vehicles/')[1]}`
+                  selectedCab.vehicle_image && selectedCab.vehicle_image.trim()
+                  ? `http://localhost:5000/uploads/vehicles/${cab.vehicle_image.split('vehicles/')[1]}`
                     : "https://cdn.pixabay.com/photo/2017/01/20/00/30/taxi-1999478_960_720.jpg"
                 }
-                alt={cab.vehicle_type || "Cab"}
+                alt={selectedCab.vehicle_type || "Cab"}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.onerror = null;

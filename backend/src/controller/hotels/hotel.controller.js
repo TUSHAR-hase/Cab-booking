@@ -40,7 +40,8 @@ const createHotel = asyncHandler(async (req, res) => {
         address,
         description,
         hotelImages,
-        hotel_owner: req.hotel_owner._id
+        hotel_owner: req.hotel_owner._id,
+        averageRating: 0
     });
 
     //check for error if not created 
@@ -367,7 +368,6 @@ const deleteRoom = asyncHandler(async (req, res) => {
 })
 const getRoomByhotelId = asyncHandler(async (req, res) => {
     const { hotelId } = req.params
-    console.log("getRoomByhotelId is called");
 
     const hotel = await HotelRoom.find({ hotel: hotelId })
     return res.status(200).json(new ApiResponse(200, hotel, "Hotel retrived successfully"))
@@ -435,7 +435,6 @@ const searchHotels = asyncHandler(async (req, res) => {
 
     } catch (error) {
         // Handle any potential errors
-        console.error("Error searching hotels:", error);
         return res.status(500).json({
             message: "An error occurred while searching for hotels",
             status: false
@@ -458,7 +457,6 @@ const getRooms = asyncHandler(async (req, res) => {
 
 const getOwnerRooms = asyncHandler(async (req, res) => {
     try {
-        console.log("getOwnerRoom is called");
 
         // Find all hotels owned by the current owner
         const hotels = await Hotel.find({ hotel_owner: req.hotel_owner._id });

@@ -1,4 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Outlet } from 'react-router-dom'
+import { jwtDecode } from 'jwt-decode';
+import Cookies from 'js-cookie';
+import Swal from 'sweetalert2';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import "./index.css";
 import Home from "./Pages/Home.jsx";
@@ -40,18 +44,59 @@ import FlightDashboard from "./Pages/Flight/Owner/Dashboard/FlightDashboard.jsx"
 import FlightBooking from "./Pages/Flight/Owner/Dashboard/Flightbooking.jsx";
 import FlightOwnerLogin from "./Pages/Flight/Owner/FlightOwnerLogin.jsx";
 import FlightRegister from "./Pages/Flight/Owner/Dashboard/FlightRegister.jsx";
-import SuperLayout from "d:/bookinHub/frontend/src/Pages/Super/SuperLayout.jsx";
-import FlightAdmin from "d:/bookinHub/frontend/src/Pages/Super/FlightAdmin.jsx";
-import SuperHotelAdmin from "d:/bookinHub/frontend/src/Pages/Super/SuperHotelAdmin.jsx";
+import SuperLayout from "./Pages/Super/SuperLayout.jsx";
+import FlightAdmin from "./Pages/Super/FlightAdmin.jsx";
+import SuperHotelAdmin from "./Pages/Super/SuperHotelAdmin.jsx";
 import About from "./Pages/Main/About.jsx";
 import Contact from "./Pages/Main/contact.jsx";
-
+import RateStay from "./Pages/Hotel/RateStay.jsx";
+import RatingThankYou from "./Pages/Hotel/RatingThankYou.jsx"
+import HotelBookingManagement from "./Pages/Hotel/Owner/Dashboard/HotelBooking.jsx";
+import HotelRatingManagement from "./Pages/Hotel/Owner/Dashboard/HotelRatings.jsx"
 function App() {
+  const [isHotelOwner, setIsHotelOwner] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = Cookies.get('token') || localStorage.getItem('token');
+
+      if (token) {
+        try {
+          const decoded = jwtDecode(token);
+          setIsHotelOwner(!!decoded.hotel_owner);
+        } catch (error) {
+          console.error('Invalid token:', error);
+        }
+      }
+      setAuthChecked(true);
+    };
+
+    checkAuth();
+  }, []);
+
+  const HotelOwnerRoute = ({ children }) => {
+    useEffect(() => {
+      if (authChecked && !isHotelOwner) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Access Denied',
+          text: 'Only hotel owners can access this dashboard',
+          confirmButtonColor: '#ef4444',
+        });
+        navigate('/');
+      }
+    }, [authChecked, isHotelOwner, navigate]);
+
+    if (!authChecked) return null; // Or loading spinner
+    return isHotelOwner ? (children ? children : <Outlet />) : null;
+  };
   const location = useLocation();
 
   // Check if the current route is under "admin" to conditionally render Navbar and Footer
-  const isAdminRoute = location.pathname.startsWith("/hotelowner") || 
-                    location.pathname.startsWith("/airline-owner");
+  const isAdminRoute = location.pathname.startsWith("/hotelowner") ||
+    location.pathname.startsWith("/airline-owner");
 
   return (
     <>
@@ -76,48 +121,51 @@ function App() {
 
         {/* Hotel */}
         <Route path="/booking/hotel" element={<HotelSearch />} />
-        <Route path="/booking/hoteldetails" element={<HotelDetails />} />
+        <Route path="/booking/hotel/:id" element={<HotelDetails />} />
         <Route path="/booking/hotelreview" element={<HotelReviewPage />} />
-       
+        <Route path="/rate/:bookingId" element={<RateStay />} />
+        <Route path="/rating-thank-you" element={<RatingThankYou />} />
         <Route path="/register/hotel/owner" element={<HotelOwnerRegister />} />
         <Route path="/login/hotel" element={<HotelOwnerLogin />} />
         <Route path="/verify/:email" element={<HotelOwnerVerify />} />
         <Route path="addhotel" element={<HotelAdd />} />
         <Route path="addroom" element={<RoomAdd />} />
- 
+
 
         <Route path="/register/airline" element={<AirlineOwnerRegistration />} />
-         <Route path="/login/airline" element={<FlightOwnerLogin />} />
+        <Route path="/login/airline" element={<FlightOwnerLogin />} />
 
-         <Route path="/add-flight" element={<FlightRegister />} />
+        <Route path="/add-flight" element={<FlightRegister />} />
         <Route path="/airline-owner/dashboard" element={<FlightAdminPanel />}>
           <Route path="flights" element={<FlightDashboard />} />
           <Route path="booked" element={<FlightBooking />} />
-          
+
         </Route>
         {/* Hotel Owner */}
-        <Route path="/hotelowner/dashboard" element={<HotelAdminPanel />}>
-          <Route path="hotel" element={<HotelDashboard />} />
-          <Route path="room" element={<RoomDashboard />} />
+        <Route path="/hotelowner/dashboard" element={<HotelOwnerRoute><HotelAdminPanel /></HotelOwnerRoute>}>
+          <Route path="hotel" element={<HotelOwnerRoute><HotelDashboard /></HotelOwnerRoute>} />
+          <Route path="room" element={<HotelOwnerRoute><RoomDashboard /></HotelOwnerRoute>} />
+          <Route path="bookings" element={<HotelOwnerRoute><HotelBookingManagement /></HotelOwnerRoute>} />
+          <Route path="ratings" element={<HotelOwnerRoute><HotelRatingManagement /></HotelOwnerRoute>} />
         </Route>
 
         {/* Cab */}
         <Route path="/booking/cab" element={<CabDetails />} />
-          <Route path="/booking/cabreview" element={<CabReviewPage />} />
-          <Route path="/booking/addingcab" element={<AddingCab />} />
-          <Route path="/userdashboard" element={<UserDashboard />} />
-          <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
-          <Route path="/booking/confirmbooking/:id" element={<ConfirmBooking />} />
-          <Route path="/booking/ridersignup" element={<RiderSignup />} />
-          <Route path="/booking/riderlogin" element={<Riderlogin />} />
-          <Route path="/forgetpassword" element={<ForgotPassword />} />
-          <Route path="/otprider/:email" element={<OtpVerified/>} />
+        <Route path="/booking/cabreview" element={<CabReviewPage />} />
+        <Route path="/booking/addingcab" element={<AddingCab />} />
+        <Route path="/userdashboard" element={<UserDashboard />} />
+        <Route path="/booking/riderdashboard" element={<RiderDashboard />} />
+        <Route path="/booking/confirmbooking/:id" element={<ConfirmBooking />} />
+        <Route path="/booking/ridersignup" element={<RiderSignup />} />
+        <Route path="/booking/riderlogin" element={<Riderlogin />} />
+        <Route path="/forgetpassword" element={<ForgotPassword />} />
+        <Route path="/otprider/:email" element={<OtpVerified />} />
 
-  <Route path="/super/dashboard" element={<SuperLayout />}>
-  <Route index element={<div>Select an admin panel from the sidebar</div>} />
-  <Route path="flight" element={<FlightAdmin />} />
-  <Route path="hotel" element={<SuperHotelAdmin />} /> {/* Assuming HotelAdmin, adjust if SuperHotelAdmin */}
-</Route>
+        <Route path="/super/dashboard" element={<SuperLayout />}>
+          <Route index element={<div>Select an admin panel from the sidebar</div>} />
+          <Route path="flight" element={<FlightAdmin />} />
+          <Route path="hotel" element={<SuperHotelAdmin />} /> {/* Assuming HotelAdmin, adjust if SuperHotelAdmin */}
+        </Route>
       </Routes>
       {/* Show Footer only if not on admin routes */}
       {!isAdminRoute && (

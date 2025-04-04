@@ -438,9 +438,20 @@ const HotelDetailsPage = () => {
                   <span>{hotel.address?.area}, {hotel.address?.district}, {hotel.address?.pincode}</span>
                 </div>
                 <div className="flex items-center mt-2">
-                  <div className="flex items-center text-red-400">
+                  <div className="flex items-center text-red-400 mr-4">
                     <span>₹ {hotel.minPrice || 'N/A'} - ₹ {hotel.maxPrice || 'N/A'}</span>
                   </div>
+                  {hotel.averageRating && (
+                    <div className="flex items-center">
+                      <div className="flex items-center bg-red-600 px-2 py-1 rounded">
+                        <FiStar className="text-white mr-1" />
+                        <span className="text-white">
+                          {hotel.averageRating.toFixed(1)}
+                        </span>
+                      </div>
+                    </div>
+
+                  )}
                 </div>
               </div>
               <button

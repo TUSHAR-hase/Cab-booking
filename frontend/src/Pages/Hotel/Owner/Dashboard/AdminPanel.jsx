@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Hotel, Bed, LogOut, Menu } from "lucide-react";
+import { Hotel, Bed, LogOut, Menu, BadgeCheck, CalendarDays } from "lucide-react";
 import HotelDashboard from "./HotelDashboard.jsx";
 import RoomDashboard from "./RoomDashboard.jsx";
-
+import HotelBookingManagement from "./HotelBooking.jsx";
+import HotelRatingManagement from "./HotelRatings.jsx";
 const AdminPanel = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
@@ -37,6 +38,8 @@ const AdminPanel = () => {
   const menuItems = [
     { name: "Hotels", path: "/hotelowner/dashboard/hotel", icon: Hotel },
     { name: "Rooms", path: "/hotelowner/dashboard/room", icon: Bed },
+    { name: "Bookings", path: "/hotelowner/dashboard/bookings", icon: CalendarDays },
+    { name: "Reviews", path: "/hotelowner/dashboard/ratings", icon: BadgeCheck },
   ];
 
   return (
@@ -105,8 +108,12 @@ const AdminPanel = () => {
       >
         {location.pathname === "/hotelowner/dashboard/hotel" ? (
           <HotelDashboard />
-        ) : (
+        ) : location.pathname === "/hotelowner/dashboard/room" ? (
           <RoomDashboard />
+        ) : location.pathname === "/hotelowner/dashboard/bookings" ? (
+          <HotelBookingManagement />
+        ) : (
+          <HotelRatingManagement />
         )}
       </main>
     </div>

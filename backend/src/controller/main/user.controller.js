@@ -107,7 +107,7 @@ const registerUser = async (req, res) => {
     otp,
     type,
     isVerifiedOtp: false,
-    password:hashedPAssword
+    password: hashedPAssword
   });
 
   res
@@ -156,13 +156,13 @@ const loginUser = async (req, res) => {
     return res.status(404).json(new ApiResponse(404, null, "User not found"));
   }
 
-  
+
 
   const isMatch = await bcrypt.compare(password, user.password);
   // console.log(user.passowrd)
-  console.log(password)
+  // console.log(password)
 
-console.log(isMatch)
+  // console.log(isMatch)
   if (!isMatch) {
     return res
       .status(401)
@@ -271,23 +271,23 @@ console.log(isMatch)
 
 export { registerUser, verifyOtp, loginUser };
 export const getbookingByid = async (req, resp) => {
-    try {
-        if (!req.params.id) {
-            return resp.status(400).json({ message: "user ID is required" });
-        }
-
-        const bookings = await booking.find({ user_id: req.params.id })
-            .populate("Rider_id", "phone") 
-
-            .populate("vehicle_id", "vehicle_number vehicle_type"); 
-
-        if (!bookings || bookings.length === 0) {
-            return resp.status(404).json({ message: "Booking not found" });
-        }
-
-        resp.status(200).json(bookings);
-    } catch (error) {
-        console.error("Error fetching bookings:", error); 
-        resp.status(500).json({ message: "Internal Server Error", error: error.message });
+  try {
+    if (!req.params.id) {
+      return resp.status(400).json({ message: "user ID is required" });
     }
+
+    const bookings = await booking.find({ user_id: req.params.id })
+      .populate("Rider_id", "phone")
+
+      .populate("vehicle_id", "vehicle_number vehicle_type");
+
+    if (!bookings || bookings.length === 0) {
+      return resp.status(404).json({ message: "Booking not found" });
+    }
+
+    resp.status(200).json(bookings);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    resp.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
 };

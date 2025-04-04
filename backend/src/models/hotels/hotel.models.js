@@ -18,6 +18,9 @@ const addressSchema = new mongoose.Schema({
     },
     latitude: {
         type: Number
+    },
+    averageRating: {
+        type: Number
     }
 });
 

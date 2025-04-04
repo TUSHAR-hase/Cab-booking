@@ -91,7 +91,7 @@ const Footer = () => {
         ))}
       </motion.div>
 
-     
+
 
       {/* Copyright */}
       <p className="text-gray-500 text-center text-lg mt-8">

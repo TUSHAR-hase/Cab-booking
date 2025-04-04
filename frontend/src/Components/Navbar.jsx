@@ -76,11 +76,10 @@ const Navbar = () => {
 
       {/* Navigation Links */}
       <div
-        className={`lg:flex flex-col lg:flex-row lg:space-x-6 text-base absolute lg:static top-0 left-0 w-full lg:w-auto bg-black lg:bg-transparent transition-transform duration-300 ${
-          isMenuOpen
-            ? "h-screen flex flex-col items-center pt-16"
-            : "hidden lg:flex"
-        }`}
+        className={`lg:flex flex-col lg:flex-row lg:space-x-6 text-base absolute lg:static top-0 left-0 w-full lg:w-auto bg-black lg:bg-transparent transition-transform duration-300 ${isMenuOpen
+          ? "h-screen flex flex-col items-center pt-16"
+          : "hidden lg:flex"
+          }`}
       >
         <Link
           to="/"

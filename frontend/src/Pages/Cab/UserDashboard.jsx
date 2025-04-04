@@ -89,15 +89,18 @@ const UserDashboard = () => {
 
   const getCabBookings = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/user/getbooking/${id}`);
+      const res = await fetch(`${BASE_URL}/api/Rv/booking/getuserbooking/${id}`);
+      // console.log(${BASE_URL}/api/user/getbooking/${id})
       const data = await res.json();
       if (data && data.length > 0) {
         setCabs(data);
+// console.log(cabs)
+
       }
     } catch (error) {
       console.error("Error fetching cab bookings:", error);
-    }
-  };
+    }
+  };
 
   const getHotelBookings = async () => {
     try {
@@ -257,7 +260,7 @@ const UserDashboard = () => {
           </div>
           <div className="flex items-center gap-2">
             <DollarSign size={14} className="text-green-400" />
-            <span className="font-medium">₹{booking.fare || "0"}</span>
+            <span className="font-medium">₹{booking.vehicle_id.perKm_price*8 || "0"}</span>
           </div>
         </div>
       </div>

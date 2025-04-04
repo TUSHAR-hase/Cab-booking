@@ -51,7 +51,7 @@ const ActionButtons = ({ onConfirm, onCancel, onComplete }) => (
           whileTap={{ scale: 0.95 }}
         >
           <CheckCircle size={16} />
-          Complete  
+          Complete
         </motion.button>
       )}
     </AnimatePresence>
@@ -290,7 +290,9 @@ const RiderDashboard = () => {
         <h1 className="text-4xl md:text-5xl font-bold bg-red-500 to-gray-500 bg-clip-text text-transparent">
           Welcome Back, {rider}
         </h1>
-        <p className="text-gray-400 mt-2 mx-2">Manage your rides and vehicles</p>
+        <p className="text-gray-400 mt-2 mx-2">
+          Manage your rides and vehicles
+        </p>
       </motion.div>
 
       {/* Stats Overview */}
@@ -322,10 +324,7 @@ const RiderDashboard = () => {
           >
             <div className="flex items-center gap-4">
               <div className={`p-3 bg-${stat.color}-500/10 rounded-full`}>
-                <stat.icon
-                  size={28}
-                  className={`text-${stat.color}-500`}
-                />
+                <stat.icon size={28} className={`text-${stat.color}-500`} />
               </div>
               <div>
                 <h3 className="text-gray-400 text-sm">{stat.title}</h3>
@@ -405,7 +404,7 @@ const RiderDashboard = () => {
             </div>
             <h2 className="text-xl font-semibold">Confirmed Rides</h2>
           </div>
-          
+
           {confirmedBookings.map((booking) => (
             <motion.div
               key={booking._id}
@@ -441,7 +440,7 @@ const RiderDashboard = () => {
             </div>
             <h2 className="text-xl font-semibold">Completed Rides</h2>
           </div>
-          
+
           {completedBookings.map((booking) => (
             <motion.div
               key={booking._id}
@@ -488,63 +487,83 @@ const RiderDashboard = () => {
             Add Vehicle
           </motion.button>
         </div>
+        {vehicles.length === 0 ? (
+          <div className="p-4 text-center text-gray-400 rounded-lg bg-gray-700/20">
+            No vehicles added yet
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {vehicles.map((vehicle) => (
+              <motion.div
+                key={vehicle._id}
+                className="rounded-xl bg-gray-800 border border-gray-700 hover:border-red-500 
+    transition-colors overflow-hidden"
+                whileHover={{ y: -5 }}
+              >
+                {/* Vehicle Image */}
+                <div className="border-b bg-green-600 border-gray-700">
+                  <img
+                    src={
+                      vehicle.image && vehicle.image.trim()
+                        ? vehicle.image
+                        : "https://via.placeholder.com/400x250/1a1a1a/666666?text=No+Image"
+                    }
+                    alt={vehicle.vehicle_number}
+                    className="w-full h-40 object-cover"
+                  />
+                </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
-          {vehicles.map((vehicle) => (
-            <motion.div
-              key={vehicle._id}
-              className="p-6 rounded-xl bg-gray-800/100 border border-gray-700 hover:border-red-500 transition-colors"
-              whileHover={{ y: -5 }}
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 hover:bg-red-500/10 rounded-full">
-                  <Car size={24} className="text-red-400" />
+                {/* Vehicle Header */}
+                <div className=" py-3 flex items-center gap-4">
+                  <div className="p-3 hover:bg-red-500/10 rounded-full">
+                    <Car size={24} className="text-red-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {vehicle.vehicle_number}
+                  </h3>
                 </div>
-                <h3 className="text-lg font-semibold">
-                  {vehicle.vehicle_number}
-                </h3>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm text-gray-400">
-                <div className="flex items-center gap-2">
-                  <Users size={16} />
-                  {vehicle.seating_capacity} Seats
+                {/* Vehicle Info */}
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-400 px-4 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Users size={16} /> {vehicle.seating_capacity} Seats
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <IndianRupee size={16} /> {vehicle.perKm_price}/km
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ZapOff size={16} /> {vehicle.vehicle_type}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} /> {vehicle.vehicle_model}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <IndianRupee size={16} />
-                  {vehicle.perKm_price}/km
-                </div>
-                <div className="flex items-center gap-2">
-                  <ZapOff size={16} />
-                  {vehicle.vehicle_type}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar size={16} />
-                  {vehicle.vehicle_model}
-                </div>
-              </div>
 
-              <div className="flex gap-3 mt-6 justify-end">
-                <motion.button
-                  onClick={() => showUpdateForm(vehicle)}
-                  className="px-4 py-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <Edit size={16} />
-                  Edit
-                </motion.button>
-                <motion.button
-                  onClick={() => deleteVehicle(vehicle._id)}
-                  className="px-4 py-2 bg-red-500/60 hover:bg-red-500/60 text-white rounded-lg flex items-center gap-2 text-sm"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <Trash2 size={16} />
-                  Remove
-                </motion.button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                {/* Action Buttons */}
+                <div className="flex gap-3 p-4 justify-end ">
+                  <motion.button
+                    onClick={() => showUpdateForm(vehicle)}
+                    className="px-4 py-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm 
+        text-white hover:bg-gray-600"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <Edit size={16} />
+                    Edit
+                  </motion.button>
+                  <motion.button
+                    onClick={() => deleteVehicle(vehicle._id)}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex 
+        items-center gap-2 text-sm"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <Trash2 size={16} />
+                    Remove
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Update Vehicle Modal */}
@@ -575,14 +594,28 @@ const RiderDashboard = () => {
 
               <form onSubmit={handleUpdate} className="space-y-4">
                 {[
-                  { name: "vehicle_number", label: "Vehicle Number", disabled: true },
-                  { name: "seating_capacity", label: "Seating Capacity", type: "number" },
-                  { name: "perKm_price", label: "Price per KM", type: "number" },
+                  {
+                    name: "vehicle_number",
+                    label: "Vehicle Number",
+                    disabled: true,
+                  },
+                  {
+                    name: "seating_capacity",
+                    label: "Seating Capacity",
+                    type: "number",
+                  },
+                  {
+                    name: "perKm_price",
+                    label: "Price per KM",
+                    type: "number",
+                  },
                   { name: "vehicle_type", label: "Vehicle Type" },
                   { name: "vehicle_model", label: "Vehicle Model" },
                 ].map((field) => (
                   <div key={field.name}>
-                    <label className="text-sm text-gray-400">{field.label}</label>
+                    <label className="text-sm text-gray-400">
+                      {field.label}
+                    </label>
                     <input
                       type={field.type || "text"}
                       name={field.name}

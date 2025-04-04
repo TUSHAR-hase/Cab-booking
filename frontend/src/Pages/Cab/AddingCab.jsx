@@ -18,7 +18,8 @@ const AddVehicle = () => {
     perKm_price: "",
     seating_capacity: "",
     description: "",
-    Rider_id:null
+    Rider_id:null,
+    vehicle_image: null
   });
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -42,53 +43,58 @@ const AddVehicle = () => {
   const handleChange = (e) => {
     setVehicle({ ...vehicle, [e.target.name]: e.target.value });
   };
+  const handleFileChange = (e) => {
+    setVehicle({ ...vehicle, vehicle_image: e.target.files[0] });
+  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (
-      !vehicle.vehicle_type ||
-      !vehicle.vehicle_model ||
-      !vehicle.vehicle_number ||
-      !vehicle.perKm_price ||
-      !vehicle.seating_capacity
-    ) {
-      alert("Please fill all required fields!");
-      return;
-    }
-    setLoading(true);
- try {
-  const res = await fetch(`${BASE_URL}/api/Rv/vehicle/createvehicle`, {
-    method:"POST",
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(vehicle )
-
-  });
-  console.log("Full Response:", res);
-  if (!res.ok) {
-    throw new Error(`HTTP error! Status: ${res.status}`);
+  if (
+    !vehicle.vehicle_type ||
+    !vehicle.vehicle_model ||
+    !vehicle.vehicle_number ||
+    !vehicle.perKm_price ||
+    !vehicle.seating_capacity
+  ) {
+    alert("Please fill all required fields!");
+    return;
   }
-  const data = await res.json();
+  setLoading(true);
+  const formData = new FormData();
+  formData.append("vehicle_image", vehicle.vehicle_image);
+  formData.append("vehicle_type", vehicle.vehicle_type);
+  formData.append("vehicle_model", vehicle.vehicle_model);
+  formData.append("vehicle_number", vehicle.vehicle_number);
+  formData.append("perKm_price", vehicle.perKm_price);
+  formData.append("seating_capacity", vehicle.seating_capacity);
+  formData.append("description", vehicle.description);
+  formData.append("Rider_id", vehicle.Rider_id);
 
-  console.log("Response Data:", data);
-  if (data) {
-    
-    setTimeout(() => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/Rv/vehicle/createvehicle`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (data) {
       alert("Vehicle added successfully!");
       navigate("/booking/riderdashboard/");
-    }, 2000);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error adding vehicle. Please try again.");
+  } finally {
+    setLoading(false);
   }
- } catch (e) {
-  console.log(e)
- }finally {
-  setLoading(false); // Ensure loading is turned off after the request
-}
-    // console.log(data);
-    
+};
 
-  };
+
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-8 font-[Poppins]">
@@ -158,6 +164,16 @@ const AddVehicle = () => {
               required
             />
           </div>
+          <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">
+            <input
+              type="file"
+              name="vehicle_image"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="text-white"
+              required
+            />
+          </div>
 
           {/* Insurance Expiry Date */}
           <div className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg">

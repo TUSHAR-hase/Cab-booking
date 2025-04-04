@@ -119,6 +119,7 @@ const CabDetails = () => {
                     ? "bg-red-600 hover:bg-red-700 text-white border-red-700 "
                     : "bg-gray-900 text-gray-600 border-gray-800 cursor-not-allowed"
                 }`}
+                
               >
                 <X className="w-5 h-5" />
                 Clear Filters
@@ -167,19 +168,25 @@ const CabDetails = () => {
                   whileHover={{ y: -5 }}
                   className="bg-[#1a1a1a] rounded-xl overflow-hidden border border-gray-800 hover:border-red-500/30 transition-all shadow-lg"
                 >
+
                   <div className="relative h-48">
                     <img
                       src={
-                        cab.image && cab.image.trim()
-                          ? cab.image
-                          : ""
+                        cab.vehicle_image
+                          ? `${BASE_URL}/${cab.vehicle_image.replace(/\\/g, '/')}`
+                          : "https://cdn.pixabay.com/photo/2017/01/20/00/30/taxi-1999478_960_720.jpg"
                       }
                       alt={cab.vehicle_type || "Cab"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop in case placeholder fails
-                        e.target.src =
-                          "https://via.placeholder.com/400x250/1a1a1a/666666?text=Cab+Image";
+                        e.target.onerror = null;
+                        // First fallback - try another CDN image
+                        e.target.src = "https://images.unsplash.com/photo-1547036967-23d11aacaee0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+                        // Second fallback - inline SVG if CDN fails
+                        e.target.onerror = () => {
+                          e.target.onerror = null;
+                          e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 250'%3E%3Crect width='400' height='250' fill='%231a1a1a'/%3E%3Ctext x='50%' y='50%' fill='%23666666' font-family='sans-serif' font-size='20' text-anchor='middle' dominant-baseline='middle'%3ECab Image%3C/text%3E%3C/svg%3E";
+                        };
                       }}
                     />
 
@@ -278,19 +285,19 @@ const CabDetails = () => {
             <div className="relative h-48 w-full bg-gradient-to-br from-gray-900 to-gray-800">
               <img
                 src={
-                  selectedCab?.image?.trim()
-                    ? selectedCab.image
-                    : "https://via.placeholder.com/400x250/1a1a1a/666666?text=Cab+Image"
+                  cab.vehicle_image && cab.vehicle_image.trim()
+                    ? `http://localhost:5000/uploads/vehicles/${cab.vehicle_image.split('vehicles/')[1]}`
+                    : "https://cdn.pixabay.com/photo/2017/01/20/00/30/taxi-1999478_960_720.jpg"
                 }
-                alt={selectedCab?.vehicle_type || "Cab vehicle"}
-                className="w-full h-full object-cover object-center"
+                alt={cab.vehicle_type || "Cab"}
+                className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src =
-                    "https://via.placeholder.com/400x250/1a1a1a/666666?text=Cab+Image";
+                    "https://cdn.pixabay.com/photo/2017/01/20/00/30/taxi-1999478_960_720.jpg";
                 }}
-                loading="lazy"
               />
+
               <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#1a1a1a] to-transparent" />
             </div>
 

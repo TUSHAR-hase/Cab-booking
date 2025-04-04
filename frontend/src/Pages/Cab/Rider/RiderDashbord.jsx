@@ -501,7 +501,7 @@ const RiderDashboard = () => {
                 whileHover={{ y: -5 }}
               >
                 {/* Vehicle Image */}
-                <div className="border-b bg-green-600 border-gray-700">
+                <div className="border-b  border-gray-700">
                   <img
                     src={
                       vehicle.image && vehicle.image.trim()

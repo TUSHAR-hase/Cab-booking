@@ -57,8 +57,7 @@ const Footer = () => {
               { name: "Hotels", link: "/booking/hotel" },
               { name: "Flights", link: "/booking/flight" },
               { name: "Cabs", link: "/booking/cab" },
-              { name: "Deals", link: "/deals" },
-              { name: "Support", link: "/support" },
+              { name: "About", link: "/about" },
             ].map((item, index) => (
               <motion.li
                 key={index}

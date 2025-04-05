@@ -307,7 +307,7 @@ const UserDashboard = () => {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <DollarSign size={14} className="text-green-400" />
+            {/* <DollarSign size={14} className="text-green-400" /> */}
             <span className="font-medium">₹{booking.totalAmount || "0"}</span>
           </div>
         </div>

@@ -20,6 +20,7 @@ import {
 } from "../../controller/hotels/hotel.controller.js";
 import { upload } from "../../middlewares/multer.middleware.js";
 import { verifyHotelOwner } from "../../middlewares/Hotels/verifyHotelOwner.middleware.js";
+import { verifyAdmin } from "../../middlewares/main/auth.middleware.js";
 
 const hotelRouter = Router();
 
@@ -50,7 +51,8 @@ hotelRouter.route("/search").get(searchHotels);
 hotelRouter.route("/:id").get(getHotelById); // Add user middleware if required
 
 //---------------------------- Admin Routes --------------------------------------------
-hotelRouter.route("/admin/get-unapproved-hotels").get(getUnapprovedHotels); // Add admin check middleware
-hotelRouter.route("/approve").post(approveHotel); // Add admin check middleware
+hotelRouter.route("/admin/get-unapproved-hotels").get(verifyAdmin, getUnapprovedHotels); // Add admin check middleware
+hotelRouter.route("/admin/get-owner-hotels").post(verifyAdmin, getOwnerHotels); // Add admin check middleware
+hotelRouter.route("/approve").post(verifyAdmin, approveHotel); // Add admin check middleware
 
 export { hotelRouter };

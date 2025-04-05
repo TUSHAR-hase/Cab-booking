@@ -30,4 +30,30 @@ const verifyUser = asyncHandler(async (req, res, next) => {
     }
 })
 
-export { verifyUser };
+const verifyAdmin = asyncHandler(async (req, res, next) => {
+
+    try {
+        const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "")
+
+        if (!token) {
+            throw new ApiError(401, "Unauthorized request")
+        }
+
+        const decodedinfo = await jwt.verify(token, process.env.SECRET_KEY)
+
+
+        if (decodedinfo.user && decodedinfo.user.type !== "admin") {
+            throw new ApiError(403, "Access denied")
+        }
+        req.user = decodedinfo.user
+        next()
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            throw new ApiError(401, 'Token Expired');
+        }
+
+        throw new ApiError(404, error?.message)
+    }
+})
+
+export { verifyUser, verifyAdmin };

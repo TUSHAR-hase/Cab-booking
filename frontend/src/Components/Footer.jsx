@@ -1,11 +1,14 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Linkedin, Github, Mail, Phone } from "lucide-react";
+import { FaPlaneDeparture, FaHotel, FaCarAlt, FaEnvelope, FaPhone, FaFacebookF, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+
+// Import the logo (adjust the path based on your project structure)
+import Logo from "../assets/logo.png"; // Replace with your actual logo path
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-b from-black via-gray-900 to-black text-white py-16 px-8">
+    <footer className="bg-black text-white py-16 px-6 sm:px-10 font-[Poppins]">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -18,12 +21,26 @@ const Footer = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-4xl font-extrabold text-red-500 tracking-wide">
-            BrandLogo
-          </h2>
-          <p className="text-gray-400 text-md mt-4 leading-relaxed">
-            Transforming digital experiences with innovation and precision.
+          <div className="flex justify-center md:justify-start">
+            <img
+              src={Logo}
+              alt="Bookin Hub Logo"
+              className="w-[200px] h-auto object-contain" // Increased size to w-[50px] for visibility
+            />
+          </div>
+          <p className="text-gray-400 text-md mt-4 leading-relaxed max-w-xs mx-auto md:mx-0">
+            Book your next cab, hotel, or flight with ease. Your journey starts here.
           </p>
+          <motion.div
+            className="mt-6 flex justify-center md:justify-start space-x-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <FaPlaneDeparture className="text-red-500 text-2xl" />
+            <FaHotel className="text-red-500 text-2xl" />
+            <FaCarAlt className="text-red-500 text-2xl" />
+          </motion.div>
         </motion.div>
 
         {/* Quick Links */}
@@ -32,21 +49,27 @@ const Footer = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <h3 className="text-2xl font-semibold text-red-500 mb-6 relative after:block after:w-16 after:h-1 after:bg-red-500 after:mt-2 after:mx-auto md:after:mx-0">
-            Quick Links
+          <h3 className="text-2xl font-semibold text-red-500 mb-6 relative after:block after:w-16 after:h-1 after:bg-red-500 after:mt-2 after:mx-auto md:after:mx-0 uppercase">
+            Explore
           </h3>
           <ul className="space-y-4">
-            {["Home", "About", "Services", "Projects", "Contact"].map((link, index) => (
+            {[
+              { name: "Hotels", link: "/booking/hotel" },
+              { name: "Flights", link: "/booking/flight" },
+              { name: "Cabs", link: "/booking/cab" },
+              { name: "Deals", link: "/deals" },
+              { name: "Support", link: "/support" },
+            ].map((item, index) => (
               <motion.li
                 key={index}
                 whileHover={{ scale: 1.1, x: 5 }}
                 transition={{ duration: 0.3 }}
               >
                 <Link
-                  to={`/${link.toLowerCase()}`}
-                  className="text-gray-400 hover:text-red-500 transition-all duration-300 hover:underline text-lg"
+                  to={item.link}
+                  className="text-gray-400 hover:text-red-500 transition-all duration-300 text-lg"
                 >
-                  {link}
+                  {item.name}
                 </Link>
               </motion.li>
             ))}
@@ -59,15 +82,21 @@ const Footer = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <h3 className="text-2xl font-semibold text-red-500 mb-6 relative after:block after:w-16 after:h-1 after:bg-red-500 after:mt-2 after:mx-auto md:after:mx-0">
-            Contact
+          <h3 className="text-2xl font-semibold text-red-500 mb-6 relative after:block after:w-16 after:h-1 after:bg-red-500 after:mt-2 after:mx-auto md:after:mx-0 uppercase">
+            Get in Touch
           </h3>
           <p className="text-gray-400 flex items-center justify-center md:justify-start space-x-3 text-lg hover:text-red-500 transition-all duration-300">
-            <Mail size={20} className="text-red-500" /> <span>support@example.com</span>
+            <FaEnvelope className="text-red-500" /> <span>support@bookinhub.com</span>
           </p>
-          <p className="text-gray-400 flex items-center justify-center md:justify-start space-x-3 text-lg mt-3 hover:text-red-500 transition-all duration-300">
-            <Phone size={20} className="text-red-500" /> <span>+123 456 7890</span>
+          <p className="text-gray-400 flex items-center justify-center md:justify-start space-x-3 text-lg mt-4 hover:text-red-500 transition-all duration-300">
+            <FaPhone className="text-red-500" /> <span>+1 800 123 4567</span>
           </p>
+          <Link
+            to="/contact"
+            className="mt-6 inline-block bg-red-500 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-red-700 transition-all duration-300"
+          >
+            Contact Us
+          </Link>
         </motion.div>
       </motion.div>
 
@@ -78,24 +107,22 @@ const Footer = () => {
         transition={{ duration: 0.5, delay: 0.6 }}
         className="flex justify-center space-x-8 mt-12"
       >
-        {[Facebook, Twitter, Linkedin, Github].map((Icon, index) => (
+        {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedin].map((Icon, index) => (
           <motion.a
             key={index}
             href="#"
-            className="text-gray-400 hover:text-red-500 transition-all duration-300 hover:scale-110"
+            className="text-gray-400 hover:text-red-500 transition-all duration-300"
             whileHover={{ scale: 1.2, rotate: 10 }}
             transition={{ type: "spring", stiffness: 200 }}
           >
-            <Icon size={32} />
+            <Icon size={28} />
           </motion.a>
         ))}
       </motion.div>
 
-
-
       {/* Copyright */}
-      <p className="text-gray-500 text-center text-lg mt-8">
-        &copy; {new Date().getFullYear()} BrandLogo. All rights reserved.
+      <p className="text-gray-500 text-center text-md mt-10">
+        © {new Date().getFullYear()} Bookin Hub. All rights reserved.
       </p>
     </footer>
   );

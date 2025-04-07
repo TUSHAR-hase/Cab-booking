@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiMapPin, FiDollarSign, FiStar, FiArrowLeft, FiUser, FiCalendar, FiCreditCard, FiCheck } from 'react-icons/fi';
+import { FiMapPin, FiDollarSign, FiStar, FiArrowLeft, FiUser, FiCalendar, FiCheck } from 'react-icons/fi';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from 'framer-motion';
 import Lottie from 'react-lottie';
 import successAnimation from './success-animation.json'; // Replace with your animation file
+import axios from 'axios';
 
 const HotelDetailsPage = () => {
   const { id } = useParams();
@@ -25,12 +26,18 @@ const HotelDetailsPage = () => {
     endDate: '',
     guests: [{ name: '', age: '', aadhar: '' }],
     specialRequests: '',
-    paymentMethod: 'creditCard'
   });
   const [totalAmount, setTotalAmount] = useState(0);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [isRoomAvailable, setIsRoomAvailable] = useState(true);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [userDetails, setUserDetails] = useState({
+    id: "",
+    name: "",
+    email: "",
+    contact: "",
+  });
 
   // Animation options
   const defaultOptions = {
@@ -57,15 +64,40 @@ const HotelDetailsPage = () => {
   };
 
   useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+
+        const decoded = jwtDecode(token);
+        setUserDetails({
+          id: decoded.user._id,
+          name: decoded.user.name,
+          email: decoded.user.email,
+          contact: decoded.user.contact,
+        });
+
+        await fetchVehicleDetails();
+      } catch (error) {
+        console.error("Initialization error:", error);
+        setError("Failed to initialize page");
+      }
+    };
+
+    initializeUser();
+  }, []);
+
+  useEffect(() => {
     const fetchHotelDetails = async () => {
       setIsLoading(true);
       try {
-        // Fetch hotel details
         const hotelResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/hotel/${id}`);
         if (!hotelResponse.ok) throw new Error('Failed to fetch hotel details');
         const hotelData = await hotelResponse.json();
 
-        // Fetch rooms for this hotel
         const roomsResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/hotel/room/${id}`);
         if (!roomsResponse.ok) throw new Error('Failed to fetch rooms');
         const roomsData = await roomsResponse.json();
@@ -73,7 +105,6 @@ const HotelDetailsPage = () => {
         setHotel(hotelData.data);
         setRooms(roomsData.data);
 
-        // Initialize image loading states
         const loadingStates = {};
         if (hotelData.hotelImages) {
           hotelData.hotelImages.forEach((_, index) => {
@@ -130,7 +161,6 @@ const HotelDetailsPage = () => {
       endDate: '',
       guests: [{ name: '', age: '', aadhar: '' }],
       specialRequests: '',
-      paymentMethod: 'creditCard'
     });
     setBookingConfirmed(false);
     setIsRoomAvailable(true);
@@ -298,11 +328,11 @@ const HotelDetailsPage = () => {
       }
     }
 
-    if (bookingData.guests.length > selectedRoom.maxOccupancy) {
+    if (bookingData.guests.length > selectedRoom.max_occupancy) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: `Maximum occupancy for this room is ${selectedRoom.maxOccupancy}`,
+        text: `Maximum occupancy for this room is ${selectedRoom.max_occupancy}`,
         background: '#1a202c',
         color: '#f56565',
         confirmButtonColor: '#e53e3e',
@@ -323,9 +353,27 @@ const HotelDetailsPage = () => {
     setBookingStep(prev => prev - 1);
   };
 
-  const handleBookingSubmit = async () => {
+  const initializeRazorpay = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayment = async () => {
+    if (!validateStep2()) return;
+
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/booking`, {
+      setPaymentLoading(true);
+
+      // Create booking first
+      const bookingResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/booking`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -339,28 +387,74 @@ const HotelDetailsPage = () => {
           personDetails: bookingData.guests,
           specialRequests: bookingData.specialRequests,
           totalAmount: totalAmount,
-          paymentMethod: bookingData.paymentMethod
         })
       });
 
-      if (!response.ok) throw new Error('Failed to complete booking');
+      if (!bookingResponse.ok) throw new Error('Booking creation failed');
+      const bookingDataResponse = await bookingResponse.json();
 
-      const data = await response.json();
+      // Initialize Razorpay
+      const razorpayLoaded = await initializeRazorpay();
+      if (!razorpayLoaded) throw new Error('Razorpay SDK failed to load');
 
-      setBookingConfirmed(true);
-      setBookingStep(3);
+      // Create payment order
+      const orderResponse = await axios.post(`${import.meta.env.VITE_API_URL}/create-order`, {
+        amount: totalAmount * 100, // Convert to paise
+      });
 
-      // You might want to store the booking ID for reference
-      // localStorage.setItem('lastBookingId', data.booking._id);
+      if (!orderResponse.data.success) throw new Error('Order creation failed');
+
+      // Razorpay options
+      const options = {
+        key: "rzp_test_Y8cefy5g53d5Se", // Replace with your Razorpay Key ID
+        amount: orderResponse.data.order.amount,
+        currency: "INR",
+        order_id: orderResponse.data.order.id,
+        name: "Booking Hub",
+        description: `Booking for ${hotel.name} - ${selectedRoom.room_type}`,
+        prefill: userDetails,
+        theme: { color: "#3399cc" },
+        handler: async (response) => {
+          try {
+            const verificationResponse = await axios.post(
+              `${import.meta.env.VITE_API_URL}/verify-payment`,
+              response
+            );
+            if (verificationResponse.data.success) {
+              setBookingConfirmed(true);
+              setBookingStep(3);
+            } else {
+              throw new Error('Payment verification failed');
+            }
+          } catch (error) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Payment verification failed. Please try again.',
+              background: '#1a202c',
+              color: '#f56565',
+              confirmButtonColor: '#e53e3e',
+            });
+          }
+        },
+        modal: {
+          ondismiss: () => setPaymentLoading(false),
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
     } catch (err) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Failed to complete booking. Please try again.',
+        text: err.message || 'Payment processing failed. Please try again.',
         background: '#1a202c',
         color: '#f56565',
         confirmButtonColor: '#e53e3e',
       });
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -387,9 +481,11 @@ const HotelDetailsPage = () => {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-black text-red-500 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
+        {/* Existing Hotel Details UI remains unchanged */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center text-red-400 hover:text-red-300 mb-6"
@@ -398,7 +494,6 @@ const HotelDetailsPage = () => {
         </button>
 
         <div className="bg-gray-900 rounded-lg shadow-md overflow-hidden mb-8">
-          {/* Hotel Images Slider */}
           <div className="h-96 relative">
             {hotel.hotelImages && hotel.hotelImages.length > 0 ? (
               <Slider {...sliderSettings} className="h-full">
@@ -428,7 +523,6 @@ const HotelDetailsPage = () => {
             )}
           </div>
 
-          {/* Hotel Basic Info */}
           <div className="p-6">
             <div className="flex flex-col md:flex-row md:justify-between md:items-start">
               <div>
@@ -445,12 +539,9 @@ const HotelDetailsPage = () => {
                     <div className="flex items-center">
                       <div className="flex items-center bg-red-600 px-2 py-1 rounded">
                         <FiStar className="text-white mr-1" />
-                        <span className="text-white">
-                          {hotel.averageRating.toFixed(1)}
-                        </span>
+                        <span className="text-white">{hotel.averageRating.toFixed(1)}</span>
                       </div>
                     </div>
-
                   )}
                 </div>
               </div>
@@ -464,7 +555,6 @@ const HotelDetailsPage = () => {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="flex border-b border-gray-700 mb-6">
           <button
             className={`px-4 py-2 font-medium ${activeTab === 'overview' ? 'text-red-500 border-b-2 border-red-500' : 'text-red-400 hover:text-red-300'}`}
@@ -486,7 +576,6 @@ const HotelDetailsPage = () => {
           </button>
         </div>
 
-        {/* Tab Content */}
         <div className="bg-gray-900 rounded-lg shadow-md p-6">
           {activeTab === 'overview' && (
             <div>
@@ -549,18 +638,15 @@ const HotelDetailsPage = () => {
       </div>
 
       {/* Booking Modal */}
-      {/* Booking Modal */}
       <AnimatePresence>
         {showBookingModal && (
           <div className="fixed inset-0 flex justify-center items-center bg-opacity-50 backdrop-blur-sm z-50 p-4">
-            {/* Modal Content */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="relative bg-gray-900 border-2 border-red-600 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             >
-              {/* Modal Header */}
               <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-4 flex justify-between items-center z-10">
                 <h3 className="text-xl font-bold text-red-500">
                   {bookingStep === 1 && 'Select Dates'}
@@ -571,11 +657,10 @@ const HotelDetailsPage = () => {
                   onClick={closeModal}
                   className="text-red-400 hover:text-red-300 text-2xl"
                 >
-                  &times;
+                  ×
                 </button>
               </div>
 
-              {/* Modal Body */}
               <div className="p-6">
                 {/* Step 1: Date Selection */}
                 {bookingStep === 1 && (
@@ -711,7 +796,7 @@ const HotelDetailsPage = () => {
                   </div>
                 )}
 
-                {/* Step 3: Review & Payment */}
+                {/* Step 3: Review & Confirmation */}
                 {bookingStep === 3 && !bookingConfirmed && (
                   <div className="space-y-6">
                     <div className="bg-gray-800 p-4 rounded-lg">
@@ -754,51 +839,6 @@ const HotelDetailsPage = () => {
                               <p className="text-red-300 text-sm">Aadhar: {guest.aadhar}</p>
                             </div>
                           ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-800 p-4 rounded-lg">
-                      <h4 className="text-lg font-semibold text-red-400 mb-4">Payment Method</h4>
-                      <div className="space-y-3">
-                        <div className="flex items-center bg-gray-700 p-3 rounded-lg cursor-pointer">
-                          <input
-                            type="radio"
-                            id="creditCard"
-                            name="paymentMethod"
-                            className="mr-3"
-                            checked={bookingData.paymentMethod === 'creditCard'}
-                            onChange={() => setBookingData({ ...bookingData, paymentMethod: 'creditCard' })}
-                          />
-                          <label htmlFor="creditCard" className="flex items-center text-red-300 cursor-pointer">
-                            <FiCreditCard className="mr-2" /> Credit/Debit Card
-                          </label>
-                        </div>
-                        <div className="flex items-center bg-gray-700 p-3 rounded-lg cursor-pointer">
-                          <input
-                            type="radio"
-                            id="upi"
-                            name="paymentMethod"
-                            className="mr-3"
-                            checked={bookingData.paymentMethod === 'upi'}
-                            onChange={() => setBookingData({ ...bookingData, paymentMethod: 'upi' })}
-                          />
-                          <label htmlFor="upi" className="flex items-center text-red-300 cursor-pointer">
-                            <img src="https://cdn-icons-png.flaticon.com/512/825/825454.png" alt="UPI" className="w-5 h-5 mr-2" /> UPI
-                          </label>
-                        </div>
-                        <div className="flex items-center bg-gray-700 p-3 rounded-lg cursor-pointer">
-                          <input
-                            type="radio"
-                            id="netBanking"
-                            name="paymentMethod"
-                            className="mr-3"
-                            checked={bookingData.paymentMethod === 'netBanking'}
-                            onChange={() => setBookingData({ ...bookingData, paymentMethod: 'netBanking' })}
-                          />
-                          <label htmlFor="netBanking" className="flex items-center text-red-300 cursor-pointer">
-                            <img src="https://cdn-icons-png.flaticon.com/512/2965/2965300.png" alt="Net Banking" className="w-5 h-5 mr-2" /> Net Banking
-                          </label>
                         </div>
                       </div>
                     </div>
@@ -865,7 +905,7 @@ const HotelDetailsPage = () => {
                       <>
                         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 0 7.938l3-2.647z"></path>
                         </svg>
                         Checking...
                       </>
@@ -877,17 +917,29 @@ const HotelDetailsPage = () => {
 
                 {bookingStep === 2 && (
                   <button
-                    onClick={handleNextStep}
-                    className="px-6 py-2 ml-auto bg-red-600 hover:bg-red-700 text-black font-bold rounded-lg"
+                    onClick={handlePayment}
+                    disabled={paymentLoading}
+                    className={`px-6 py-2 ml-auto bg-red-600 hover:bg-red-700 text-black font-bold rounded-lg flex items-center ${paymentLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
-                    Continue to Payment
+                    {paymentLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                      </>
+                    ) : (
+                      'Continue to Payment'
+                    )}
                   </button>
                 )}
 
                 {bookingStep === 3 && !bookingConfirmed && (
                   <button
-                    onClick={handleBookingSubmit}
-                    className="px-6 py-2 ml-auto bg-green-600 hover:bg-green-700 text-black font-bold rounded-lg flex items-center"
+                    onClick={handlePayment}
+                    disabled={paymentLoading}
+                    className={`px-6 py-2 ml-auto bg-green-600 hover:bg-green-700 text-black font-bold rounded-lg flex items-center ${paymentLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
                     <FiCheck className="mr-2" /> Confirm Booking
                   </button>

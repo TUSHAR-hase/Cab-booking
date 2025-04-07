@@ -17,8 +17,10 @@ import {
   UserCircle,
   LogOut,
   Bed,
+  Shield,
 } from "lucide-react";
 import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 import logo from "../assets/logo.png";
 
 const Navbar = () => {
@@ -26,6 +28,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isRider, setIsRider] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [refreshNavbar, setRefreshNavbar] = useState(false);
 
@@ -41,9 +44,18 @@ const Navbar = () => {
     } else if (token || usertoken) {
       setIsLoggedIn(true);
       setIsRider(false);
+
+      // Check if user is admin
+      try {
+        const decoded = jwtDecode(token || usertoken);
+        setIsAdmin(decoded.user.type === 'admin'); // Assuming your JWT has a 'role' field
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
     } else {
       setIsLoggedIn(false);
       setIsRider(false);
+      setIsAdmin(false);
     }
   }, [refreshNavbar, location.pathname]);
 
@@ -53,40 +65,29 @@ const Navbar = () => {
     Cookies.remove("ridertoken");
     localStorage.removeItem("token");
     localStorage.removeItem("ridertoken");
-
-    // Immediately update state to reflect logout
-    
-    
-
-   
-   
-
-    // Use setTimeout to ensure state updates before reload
-    setTimeout(() => {
-      // Full page reload and navigation to home
-      
-      setIsLoggedIn(false);
-      setIsRider(false);
-      setRefreshNavbar(prev => !prev);
-    }, 50);
-    
-    window.location.href = "/";
-
-     // Force React to complete the state update
-    
+    setIsLoggedIn(false);
+    setIsRider(false);
+    setIsAdmin(false);
+    navigate("/");
   };
-
   const handleProfileClick = (e) => {
     const currentPath = window.location.pathname;
-    if (currentPath === "/riderprofile" || currentPath === "/booking/riderdashboard") {
+    if (currentPath === "/riderprofile" ) {
+      e.preventDefault();
+      window.location.reload();
+    }
+     
+     
+     
+  };
+  const handledashboardClick = (e) => {
+    const currentPath = window.location.pathname;
+    if (currentPath === "/booking/riderdashboard") {
       e.preventDefault();
       window.location.reload();
     }
   };
-
-  window.updateNavbar = () => {
-    setRefreshNavbar(prev => !prev);
-  };
+  
 
   return (
     <nav className="bg-black text-white px-4 py-3 flex justify-between items-center shadow-lg relative z-50">
@@ -167,7 +168,7 @@ const Navbar = () => {
           <PhoneCall size={18} /> <span>Contact Us</span>
         </Link>
 
-        {/* Rider Dashboard Link */}
+        {/* Rider Dashboard Link - kept exactly as before */}
         {isRider && (
           <div className="relative group">
             <button className="flex items-center space-x-2 p-3 cursor-pointer hover:text-red-500 transition-all duration-300">
@@ -176,7 +177,7 @@ const Navbar = () => {
             <div className="absolute right-0 hidden group-hover:block bg-black text-white mt-1 rounded-lg shadow-lg w-40 border border-red-500 transition-all duration-300">
               <Link
                 to="/booking/riderdashboard"
-                onClick={handleProfileClick}
+                onClick={handledashboardClick}
                 className="flex items-center space-x-2 px-4 py-2 hover:bg-red-500 transition-all duration-300"
               >
                 <LayoutDashboard size={16} /> <span>Dashboard</span>
@@ -192,8 +193,18 @@ const Navbar = () => {
           </div>
         )}
 
+        {/* Admin Dashboard Link */}
+        {isAdmin && (
+          <Link
+            to="/super/dashboard/"
+            className="flex items-center space-x-2 p-3 hover:text-red-500 transition-all duration-300"
+          >
+            <Shield size={18} /> <span>Admin Dashboard</span>
+          </Link>
+        )}
+
         {/* User Dashboard Link */}
-        {isLoggedIn && !isRider && (
+        {isLoggedIn && !isRider && !isAdmin && (
           <Link
             to="/userdashboard"
             onClick={handleProfileClick}

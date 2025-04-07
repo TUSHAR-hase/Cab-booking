@@ -342,14 +342,23 @@ const getUnapprovedHotelOwner = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, owners, "Hotel Owner fetched successfully."))
 });
+const getApprovedHotelOwner = asyncHandler(async (req, res) => {
+    const owners = await HotelOwner.find({ isApproved: true })
 
+    if (!owners) {
+        throw new ApiError(404, "No hotel found.")
+    }
+
+    return res.status(200).json(new ApiResponse(200, owners, "Hotel Owner fetched successfully."))
+});
 const approveHotelOwner = asyncHandler(async (req, res) => {
-    // Get the hotel owner
-    const hotel_id = req.body;
-    if (!hotel_id) {
+    const { hotelId } = req.body;
+    if (!hotelId) {
         throw new ApiError(400, "Please provide a hotel owner id");
     }
-    const hotelOwner = await HotelOwner.findById(req.params.id);
+    // console.log(hotelId);
+
+    const hotelOwner = await HotelOwner.findById(hotelId);
 
     if (!hotelOwner) {
         throw new ApiError(404, "Hotel owner not found");
@@ -358,9 +367,58 @@ const approveHotelOwner = asyncHandler(async (req, res) => {
     // Update the hotel owner
     hotelOwner.isApproved = true;
     await hotelOwner.save();
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASSWORD;
 
-    // Send the response
-    res.status(200).json(new ApiResponser(200, hotelOwner, "Hotel owner approved successfully"));
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: smtpUser,
+            pass: smtpPass,
+        },
+    });
+
+    const mailOptions = {
+        from: smtpUser,
+        to: hotelOwner.email,
+        subject: "Your Hotel Owner Account is Now Active - BookinHub",
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+            <h2 style="color: #2ecc71;">Welcome to BookinHub!</h2>
+            <p>Dear Hotel Owner,</p>
+            <p>We're excited to inform you that your <strong>Hotel Owner Account</strong> has been approved!</p>
+            
+            <p>You now have full access to your <strong>Hotel Owner Dashboard</strong> where you can:</p>
+            <ul style="line-height: 1.6;">
+                <li>Add and manage your hotel properties</li>
+                <li>Create room listings with photos and pricing</li>
+                <li>View and confirm incoming bookings</li>
+                <li>Track your earnings and performance</li>
+            </ul>
+            
+            <p>Get started now by logging in to your dedicated Hotel Owner Dashboard:</p>
+            <a href=http://localhost:5173/hotelowner/dashboard" style="display: inline-block; padding: 10px 15px; background: #2ecc71; color: white; text-decoration: none; border-radius: 5px; margin: 15px 0;">Access Hotel Owner Dashboard</a>
+            
+            <p>Our <strong>Support Team</strong> is available if you need help setting up your properties or have any questions.</p>
+            
+            <p style="margin-top: 25px; color: #555;">We look forward to helping you grow your business!<br><strong>The BookinHub Team</strong></p>
+            
+            <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #777;">
+                <p>Need assistance? <a href="mailto:hotelsupport@bookinhub.com" style="color: #3498db;">Email Hotel Support</a> or call +1 (800) 123-4567</p>
+            </div>
+            </div>
+        `,
+    };
+
+    // Send email
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log("Error: ", error);
+        } else {
+            console.log("Email sent: ", info.response);
+        }
+    });
+    res.status(200).json(new ApiResponse(200, hotelOwner, "Hotel owner approved successfully"));
 });
 
 const rejectHotelOwner = asyncHandler(async (req, res) => {
@@ -375,7 +433,6 @@ const rejectHotelOwner = asyncHandler(async (req, res) => {
     }
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASSWORD;
-
     const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -415,4 +472,4 @@ const rejectHotelOwner = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, null, "Hotel Owner rejected successfully."))
 })
 
-export { logineHotelOwner, registerHotelOwner, approveHotelOwner, rejectHotelOwner, getHotelOwner, getUnapprovedHotelOwner, verifyOtp };
+export { logineHotelOwner, getApprovedHotelOwner, registerHotelOwner, approveHotelOwner, rejectHotelOwner, getHotelOwner, getUnapprovedHotelOwner, verifyOtp };

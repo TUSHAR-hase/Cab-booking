@@ -154,17 +154,29 @@ const deleteHotel = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, null, "Hotel deleted successfully"));
 });
 const getOwnerHotels = asyncHandler(async (req, res) => {
-    const hotel_owner_id = req.hotel_owner._id
+    const hotel_owner_id = req.hotel_owner?._id || req.body.ownerId;
 
     if (!hotel_owner_id) {
         throw new ApiError(400, "Please provide a hotel owner id");
     }
 
+    // Find all hotels owned by the owner
     const hotels = await Hotel.find({ hotel_owner: hotel_owner_id });
 
+    // For each hotel, find its rooms and add the room count
+    const hotelsWithRoomCount = await Promise.all(
+        hotels.map(async (hotel) => {
+            const rooms = await HotelRoom.find({ hotel: hotel._id });
+            return {
+                ...hotel.toObject(),
+                totalRooms: rooms.length
+            };
+        })
+    );
 
 
-    res.status(200).json(new ApiResponse(200, hotels, "Hotels retrieved successfully"));
+
+    res.status(200).json(new ApiResponse(200, hotelsWithRoomCount, "Hotels retrieved successfully"));
 });
 
 const getUnapprovedHotels = asyncHandler(async (req, res) => {
@@ -398,10 +410,7 @@ const searchHotels = asyncHandler(async (req, res) => {
         let hotels = await Hotel.find(filter).lean();
 
         if (hotels.length === 0) {
-            return res.status(404).json({
-                message: "No hotels found matching your criteria",
-                status: false
-            });
+            return res.status(404).json({ message: "No hotels found matching your criteria", status: false });
         }
 
         // Fetch hotel IDs

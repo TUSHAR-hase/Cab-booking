@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiMapPin, FiStar, FiFilter } from 'react-icons/fi';
 import Slider from 'react-slick';
@@ -19,6 +19,35 @@ const HotelSearchPage = () => {
   const [imageLoading, setImageLoading] = useState({});
   const [showFilters, setShowFilters] = useState(true); // Filters shown by default
   const navigate = useNavigate();
+
+  const checkAuthOnPageLoad = (navigate, redirectPath = null) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      Swal.fire({
+        title: 'Authentication Required',
+        text: 'You need to be logged in to access this page',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Login Now',
+        background: '#1a1a1a',
+        color: '#f1f5f9',
+        backdrop: 'rgba(0,0,0,0.8)'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login', { state: { from: redirectPath || window.location.pathname } });
+        } else {
+          navigate('/'); // Redirect to home if they cancel
+        }
+      });
+      return false;
+    }
+    return true;
+  };
+  useEffect(() => {
+    checkAuthOnPageLoad(navigate);
+  }, [navigate]);
 
   const sliderSettings = {
     dots: true,
@@ -68,9 +97,8 @@ const HotelSearchPage = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/hotel/search?${params.toString()}`);
 
       if (!response.ok) {
-        console.log(response);
-
-        throw new Error(response.message || 'Failed to fetch hotels');
+        const err = await response.json()
+        throw new Error(err.message || 'Failed to fetch hotels');
       }
 
       const data = await response.json();
@@ -130,7 +158,7 @@ const HotelSearchPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black text-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
         <div className="mb-12 text-center">
@@ -141,7 +169,7 @@ const HotelSearchPage = () => {
         </div>
 
         {/* Search Section */}
-        <div className="bg-gray-800 rounded-xl shadow-2xl p-6 mb-12 border border-gray-700">
+        <div className="bg-[#1a1a1a] rounded-xl shadow-2xl p-6 mb-12 border border-gray-700">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-red-400">Search Hotels</h2>
             <button
@@ -164,6 +192,7 @@ const HotelSearchPage = () => {
                     <input
                       type="text"
                       name={field}
+                      autoComplete='off'
                       value={filters[field]}
                       onChange={handleInputChange}
                       placeholder={`Enter ${field}`}

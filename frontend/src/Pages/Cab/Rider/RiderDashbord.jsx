@@ -51,7 +51,7 @@ const ActionButtons = ({ onConfirm, onCancel, onComplete }) => (
           whileTap={{ scale: 0.95 }}
         >
           <CheckCircle size={16} />
-          Complete  
+          Complete
         </motion.button>
       )}
     </AnimatePresence>
@@ -290,7 +290,9 @@ const RiderDashboard = () => {
         <h1 className="text-4xl md:text-5xl font-bold bg-red-500 to-gray-500 bg-clip-text text-transparent">
           Welcome Back, {rider}
         </h1>
-        <p className="text-gray-400 mt-2 mx-2">Manage your rides and vehicles</p>
+        <p className="text-gray-400 mt-2 mx-2 text-xl ">
+          Manage your rides and vehicles
+        </p>
       </motion.div>
 
       {/* Stats Overview */}
@@ -322,10 +324,7 @@ const RiderDashboard = () => {
           >
             <div className="flex items-center gap-4">
               <div className={`p-3 bg-${stat.color}-500/10 rounded-full`}>
-                <stat.icon
-                  size={28}
-                  className={`text-${stat.color}-500`}
-                />
+                <stat.icon size={28} className={`text-${stat.color}-500`} />
               </div>
               <div>
                 <h3 className="text-gray-400 text-sm">{stat.title}</h3>
@@ -360,7 +359,7 @@ const RiderDashboard = () => {
             </div>
           ) : requestBookings.length === 0 ? (
             <div className="p-4 text-center text-gray-400 rounded-lg bg-gray-700/20">
-              No pending requests
+              No Pending Requests
             </div>
           ) : (
             <div className="space-y-4">
@@ -405,32 +404,52 @@ const RiderDashboard = () => {
             </div>
             <h2 className="text-xl font-semibold">Confirmed Rides</h2>
           </div>
-          
-          {confirmedBookings.map((booking) => (
-            <motion.div
-              key={booking._id}
-              className="p-4 bg-gray-800/100 rounded-lg border-l-4 border-green-500 mb-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold">{booking.user_id?.name}</h3>
-                  <div className="text-sm text-gray-400 mt-2">
-                    <p>
-                      {booking.source_location.address} →{" "}
-                      {booking.destination_location.address}
-                    </p>
-                    <p className="mt-1 flex items-center gap-2">
-                      <Calendar size={14} />
-                      {new Date(booking.pickup_time).toLocaleString()}
-                    </p>
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="h-20 bg-gray-700/50 rounded-lg animate-pulse"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                />
+              ))}
+            </div>
+          ) : confirmedBookings.length === 0 ? (
+            <div className="p-4 text-center text-gray-400 rounded-lg bg-gray-700/20">
+              No Confirm Requests
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {confirmedBookings.map((booking) => (
+                <motion.div
+                  key={booking._id}
+                  className="p-4 bg-gray-800/100 rounded-lg border-l-4 border-green-500 mb-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{booking.user_id?.name}</h3>
+                      <div className="text-sm text-gray-400 mt-2">
+                        <p>
+                          {booking.source_location.address} →{" "}
+                          {booking.destination_location.address}
+                        </p>
+                        <p className="mt-1 flex items-center gap-2">
+                          <Calendar size={14} />
+                          {new Date(booking.pickup_time).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <ActionButtons onComplete={() => handleComplete(booking._id)} />
-            </motion.div>
-          ))}
+                  <ActionButtons
+                    onComplete={() => handleComplete(booking._id)}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Completed Bookings */}
@@ -441,110 +460,171 @@ const RiderDashboard = () => {
             </div>
             <h2 className="text-xl font-semibold">Completed Rides</h2>
           </div>
-          
-          {completedBookings.map((booking) => (
-            <motion.div
-              key={booking._id}
-              className="p-4 bg-gray-800/100 rounded-lg border-l-4 border-blue-500 mb-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold">{booking.user_id?.name}</h3>
-                  <div className="text-sm text-gray-400 mt-2">
-                    <p>
-                      {booking.source_location.address} →{" "}
-                      {booking.destination_location.address}
-                    </p>
-                    <p className="mt-1 flex items-center gap-2">
-                      <Calendar size={14} />
-                      {new Date(booking.pickup_time).toLocaleString()}
-                    </p>
+
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="h-20 bg-gray-700/50 rounded-lg animate-pulse"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                />
+              ))}
+            </div>
+          ) : completedBookings.length === 0 ? (
+            <div className="p-4 text-center text-gray-400 rounded-lg bg-gray-700/20">
+              No Complete rides
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {completedBookings.map((booking) => (
+                <motion.div
+                  key={booking._id}
+                  className="p-4 bg-gray-800/100 rounded-lg border-l-4 border-blue-500 mb-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{booking.user_id?.name}</h3>
+                      <div className="text-sm text-gray-400 mt-2">
+                        <p>
+                          {booking.source_location.address} →{" "}
+                          {booking.destination_location.address}
+                        </p>
+                        <p className="mt-1 flex items-center gap-2">
+                          <Calendar size={14} />
+                          {new Date(booking.pickup_time).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Vehicles Section */}
       <div className="mb-12">
         <div className="flex justify-between items-center mb-8    ">
-          <h2 className="text-2xl font-semibold flex items-center gap-3 text-red-500">
+          <h2 className="text-3xl font-bold flex items-center gap-3 text-red-500">
             <div className="p-3 hover:bg-red-500/10 rounded-full">
-              <Car size={24} className="text-red-500 cursor-pointer" />
+              <Car size={30} className="text-red-500 cursor-pointer" />
             </div>
             Your Vehicles
           </h2>
           <motion.button
-            className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all flex items-center gap-2"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/booking/addingcab")}
+            className={`px-6 py-3 ${
+              vehicles.length === 0
+                ? "bg-gray-500 hidden"
+                : "bg-red-500 hover:bg-red-600"
+            } text-white rounded-lg transition-all flex items-center gap-2`}
+            whileHover={vehicles.length === 0 ? {} : { scale: 1.05 }}
+            whileTap={vehicles.length === 0 ? {} : { scale: 0.95 }}
+            onClick={
+              vehicles.length === 0
+                ? undefined
+                : () => navigate("/booking/addingcab")
+            }
+            disabled={vehicles.length === 0}
           >
             <Plus size={20} />
             Add Vehicle
           </motion.button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
-          {vehicles.map((vehicle) => (
-            <motion.div
-              key={vehicle._id}
-              className="p-6 rounded-xl bg-gray-800/100 border border-gray-700 hover:border-red-500 transition-colors"
-              whileHover={{ y: -5 }}
+        {vehicles.length === 0 ? (
+          <div className="p-8 text-center bg-[#1a1a1a] text-gray-400 rounded-xl  border border-gray-700">
+            <Car size={48} className="mx-auto mb-4 text-gray-600 hover:text-red-500 cursor-pointer" />
+            {/* <h3 className="text-lg mb-2">No vehicles added yet</h3> */}
+            <p className="mb-4">
+              Add your first vehicle to start accepting rides
+            </p>
+            <motion.button
+              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center justify-center gap-2 mx-auto cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/booking/addingcab")}
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 hover:bg-red-500/10 rounded-full">
-                  <Car size={24} className="text-red-400" />
+              <Plus size={18} className="relative top-[1px] " />
+              <span>Add Vehicle</span>
+            </motion.button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {vehicles.map((vehicle) => (
+              <motion.div
+                key={vehicle._id}
+                className="rounded-xl bg-gray-800 border border-gray-700 hover:border-red-500 
+    transition-colors overflow-hidden"
+                whileHover={{ y: -5 }}
+              >
+                {/* Vehicle Image */}
+                <div className="border-b  border-gray-700">
+                  <img
+                    src={
+                      vehicle.image && vehicle.image.trim()
+                        ? vehicle.image
+                        : "https://via.placeholder.com/400x250/1a1a1a/666666?text=No+Image"
+                    }
+                    alt={vehicle.vehicle_number}
+                    className="w-full h-40 object-cover"
+                  />
                 </div>
-                <h3 className="text-lg font-semibold">
-                  {vehicle.vehicle_number}
-                </h3>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm text-gray-400">
-                <div className="flex items-center gap-2">
-                  <Users size={16} />
-                  {vehicle.seating_capacity} Seats
+                {/* Vehicle Header */}
+                <div className=" py-3 flex items-center gap-4">
+                  <div className="p-3 hover:bg-red-500/10 rounded-full">
+                    <Car size={24} className="text-red-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {vehicle.vehicle_number}
+                  </h3>
                 </div>
-                <div className="flex items-center gap-2">
-                  <IndianRupee size={16} />
-                  {vehicle.perKm_price}/km
-                </div>
-                <div className="flex items-center gap-2">
-                  <ZapOff size={16} />
-                  {vehicle.vehicle_type}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar size={16} />
-                  {vehicle.vehicle_model}
-                </div>
-              </div>
 
-              <div className="flex gap-3 mt-6 justify-end">
-                <motion.button
-                  onClick={() => showUpdateForm(vehicle)}
-                  className="px-4 py-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <Edit size={16} />
-                  Edit
-                </motion.button>
-                <motion.button
-                  onClick={() => deleteVehicle(vehicle._id)}
-                  className="px-4 py-2 bg-red-500/60 hover:bg-red-500/60 text-white rounded-lg flex items-center gap-2 text-sm"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <Trash2 size={16} />
-                  Remove
-                </motion.button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                {/* Vehicle Info */}
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-400 px-4 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Users size={16} /> {vehicle.seating_capacity} Seats
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <IndianRupee size={16} /> {vehicle.perKm_price}/km
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ZapOff size={16} /> {vehicle.vehicle_type}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} /> {vehicle.vehicle_model}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 p-4 justify-end ">
+                  <motion.button
+                    onClick={() => showUpdateForm(vehicle)}
+                    className="px-4 py-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm 
+        text-white hover:bg-gray-600"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <Edit size={16} />
+                    Edit
+                  </motion.button>
+                  <motion.button
+                    onClick={() => deleteVehicle(vehicle._id)}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex 
+        items-center gap-2 text-sm"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <Trash2 size={16} />
+                    Remove
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Update Vehicle Modal */}
@@ -575,14 +655,28 @@ const RiderDashboard = () => {
 
               <form onSubmit={handleUpdate} className="space-y-4">
                 {[
-                  { name: "vehicle_number", label: "Vehicle Number", disabled: true },
-                  { name: "seating_capacity", label: "Seating Capacity", type: "number" },
-                  { name: "perKm_price", label: "Price per KM", type: "number" },
+                  {
+                    name: "vehicle_number",
+                    label: "Vehicle Number",
+                    disabled: true,
+                  },
+                  {
+                    name: "seating_capacity",
+                    label: "Seating Capacity",
+                    type: "number",
+                  },
+                  {
+                    name: "perKm_price",
+                    label: "Price per KM",
+                    type: "number",
+                  },
                   { name: "vehicle_type", label: "Vehicle Type" },
                   { name: "vehicle_model", label: "Vehicle Model" },
                 ].map((field) => (
                   <div key={field.name}>
-                    <label className="text-sm text-gray-400">{field.label}</label>
+                    <label className="text-sm text-gray-400">
+                      {field.label}
+                    </label>
                     <input
                       type={field.type || "text"}
                       name={field.name}

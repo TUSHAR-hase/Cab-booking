@@ -89,15 +89,18 @@ const UserDashboard = () => {
 
   const getCabBookings = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/api/user/getbooking/${id}`);
+      const res = await fetch(`${BASE_URL}/api/Rv/booking/getuserbooking/${id}`);
+      // console.log(${BASE_URL}/api/user/getbooking/${id})
       const data = await res.json();
       if (data && data.length > 0) {
         setCabs(data);
+// console.log(cabs)
+
       }
     } catch (error) {
       console.error("Error fetching cab bookings:", error);
-    }
-  };
+    }
+  };
 
   const getHotelBookings = async () => {
     try {
@@ -257,7 +260,7 @@ const UserDashboard = () => {
           </div>
           <div className="flex items-center gap-2">
             <DollarSign size={14} className="text-green-400" />
-            <span className="font-medium">₹{booking.fare || "0"}</span>
+            <span className="font-medium">₹{booking.vehicle_id.perKm_price*8 || "0"}</span>
           </div>
         </div>
       </div>
@@ -307,7 +310,7 @@ const UserDashboard = () => {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <DollarSign size={14} className="text-green-400" />
+            {/* <DollarSign size={14} className="text-green-400" /> */}
             <span className="font-medium">₹{booking.totalAmount || "0"}</span>
           </div>
         </div>
@@ -428,7 +431,7 @@ const UserDashboard = () => {
                     icon={<Car size={48} />}
                     message="No cab bookings yet"
                     actionText="Book a Cab Now"
-                    action={() => window.location.href = '/book-cab'}
+                    action={() => window.location.href = '/booking/cab'}
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

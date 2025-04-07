@@ -64,15 +64,19 @@ function App() {
   const [isHotelOwner, setIsHotelOwner] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const navigate = useNavigate();
-
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isUser, setIsUser] = useState(false);
   useEffect(() => {
     const checkAuth = () => {
-      const token = Cookies.get("token") || localStorage.getItem("token");
+      const token = Cookies.get("token");
 
       if (token) {
         try {
           const decoded = jwtDecode(token);
           setIsHotelOwner(!!decoded.hotel_owner);
+
+          setIsAdmin(decoded.user?.type == "admin");
+          setIsUser(!!decoded.user);
         } catch (error) {
           console.error("Invalid token:", error);
         }
@@ -99,6 +103,23 @@ function App() {
     if (!authChecked) return null; // Or loading spinner
     return isHotelOwner ? children ? children : <Outlet /> : null;
   };
+  const AdminRoute = ({ children }) => {
+    useEffect(() => {
+      if (authChecked && !isAdmin) {
+        Swal.fire({
+          icon: "error",
+          title: "Access Denied",
+          text: "Only administrators can access this dashboard",
+          confirmButtonColor: "#ef4444",
+        });
+        navigate("/");
+      }
+    }, [authChecked, isAdmin, navigate]);
+
+    if (!authChecked) return null;
+    return isAdmin ? children ? children : <Outlet /> : null;
+  };
+
   const location = useLocation();
 
   // Check if the current route is under "admin" to conditionally render Navbar and Footer
@@ -210,7 +231,7 @@ function App() {
         <Route path="/riderprofile" element={<RiderProfile />} />
         <Route path="/bookingsuccess/:id" element={<BookingSuccess />} />
 
-        <Route path="/super/dashboard" element={<SuperLayout />}>
+        <Route path="/super/dashboard" element={<AdminRoute><SuperLayout /></AdminRoute>}>
           <Route
             index
             element={<div>Select an admin panel from the sidebar</div>}

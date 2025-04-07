@@ -54,7 +54,13 @@ const CabDetails = () => {
 
   return (
     <div className="min-h-screen w-full bg-black text-gray-100 font-[Poppins] p-4 md:p-8">
+        <div className="relative z-10 text-center  px-6 md:px-12 mt-5 mb-8">
+        <h1 className="text-red-500 text-4xl md:text-6xl font-bold">Discover Your Perfect Ride</h1>
+        <p className="text-lg md:text-xl mt-3">Book cabs instantly—luxury, budget, or shared rides.</p>
+        </div>
       {/* Search and Filter Section */}
+
+
       <div className="max-w-7xl mx-auto mb-8">
         <div className="bg-[#1a1a1a] rounded-xl p-6 shadow-lg border border-gray-800">
           <h1 className="text-2xl font-bold text-red-500 mb-6 ">
@@ -108,13 +114,15 @@ const CabDetails = () => {
                   setModelFilter("");
                 }}
                 disabled={!filtersApplied}
-                className={`w-full px-4 py-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${filtersApplied
-                  ? "bg-gray-800 hover:bg-gray-700 text-white border-gray-700 "
-                  : "bg-gray-900 text-gray-600 border-gray-800 cursor-not-allowed"
-                  }`}
+                className={`w-full px-4 py-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${
+                  filtersApplied
+                    ? "bg-red-600 hover:bg-red-700 text-white border-red-700 "
+                    : "bg-gray-900 text-gray-600 border-gray-800 cursor-not-allowed"
+                }`}
+                
               >
                 <X className="w-5 h-5" />
-                Reset Filters
+                Clear Filters
               </button>
             </div>
           </div>

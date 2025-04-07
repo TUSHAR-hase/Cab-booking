@@ -19,17 +19,17 @@ const FlightOwnerLogin = () => {
         }
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/flight/owner/login`, { email, password });
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/flightadmin/login`, { email, password });
             if (response.data.message === "Login successful") {
                 Cookies.set("token", response.data.data);
-                window.location.href = "http://localhost:5173/"; //temporary navigate to landing page // Redirect to flight owner dashboard
+                navigate("/airline-owner/dashboard");
             }
         } catch (error) {
             if (error.response.data.message === "User not verified") {
                 navigate("/otp/" + email);
             } else {
-                setErrorMessage("Enter valid credentials");
-                alert("Enter valid credentials");
+                setErrorMessage(error.response.data.message);
+                alert(error.response.data.message);
             }
         }
         setErrorMessage("");

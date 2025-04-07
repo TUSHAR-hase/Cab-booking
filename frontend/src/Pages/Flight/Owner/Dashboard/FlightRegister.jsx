@@ -2,18 +2,23 @@ import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Plane, Route, DollarSign, Clock, Briefcase } from "lucide-react";
+import Cookies from "js-cookie";
 
 const FlightRegister = () => {
   const [formData, setFormData] = useState({
     flightNo: "",
     route: "",
-    class: "",
-    price: "",
+    economy_seats: "",
+    business_seats: "",
+    first_class_seats: "",
+    economy_price: "",
+    business_price: "",
+    first_class_price: "",
     departure: "",
     arrival: "",
     flight_name: "",
-    number_of_seats: "",
-    status: "On-Time"
+    status: "On-Time",
+    gate_number: "",
   });
 
   const handleInputChange = (e) => {
@@ -22,41 +27,61 @@ const FlightRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     try {
-      const flightData = {
-        flight_name: formData.flight_name,
-        number_of_seats: parseInt(formData.number_of_seats),
-        status: formData.status,
-        flightNo: formData.flightNo,
-        route: formData.route,
-        class: formData.class,
-        price: parseFloat(formData.price),
-        departure: formData.departure,
-        arrival: formData.arrival
-      };
-      
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/flights`, flightData);
-      
-      // Reset form
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/flightadmin/add-flight`,
+        {
+          flightNo: formData.flightNo,
+          route: formData.route,
+          economy_seats: formData.economy_seats,
+          business_seats: formData.business_seats,
+          first_class_seats: formData.first_class_seats,
+          economy_price: formData.economy_price,
+          business_price: formData.business_price,
+          first_class_price: formData.first_class_price,
+          departure: formData.departure,
+          arrival: formData.arrival,
+          flight_name: formData.flight_name,
+          status: formData.status,
+          gate_number: formData.gate_number,},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }
+      );
+
+      if (response.data.statusCode === 201) {
+        alert("Flight and schedule created successfully");
+         // Reset form
       setFormData({
         flightNo: "",
         route: "",
-        class: "",
-        price: "",
+        economy_seats: "",
+        business_seats: "",
+        first_class_seats: "",
+        economy_price: "",
+        business_price: "",
+        first_class_price: "",
         departure: "",
         arrival: "",
         flight_name: "",
-        number_of_seats: "",
-        status: "On-Time"
+        status: "On-Time",
+        gate_number: "",
       });
-      
-      alert("Flight registered successfully!");
+      }
+      else{
+        alert(response.data.message);
+      }
     } catch (error) {
       console.error("Error submitting form", error);
       alert("Error registering flight!");
     }
   };
 
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">
       <motion.div
@@ -68,7 +93,9 @@ const FlightRegister = () => {
         <h1 className="text-4xl font-bold uppercase tracking-wide text-red-500 mb-2">
           Flight <span className="text-white">Registration</span>
         </h1>
-        <p className="text-gray-400 mb-6">Register new flights with detailed information</p>
+        <p className="text-gray-400 mb-6">
+          Register new flights with detailed information
+        </p>
 
         <form onSubmit={handleSubmit} className="text-left">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -87,7 +114,7 @@ const FlightRegister = () => {
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="text-sm font-semibold">Flight Name</label>
               <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
@@ -103,23 +130,55 @@ const FlightRegister = () => {
                 />
               </div>
             </div>
-            
+
             <div>
-              <label className="text-sm font-semibold">Number of Seats</label>
+              <label className="text-sm font-semibold">Economy Seats</label>
               <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
                 <Plane className="text-red-500 mr-3" />
                 <input
                   type="number"
-                  name="number_of_seats"
-                  placeholder="Number of Seats"
-                  value={formData.number_of_seats}
+                  name="economy_seats"
+                  placeholder="Economy Seats"
+                  value={formData.economy_seats}
                   onChange={handleInputChange}
                   className="w-full bg-black text-white focus:outline-none"
                   required
                 />
               </div>
             </div>
-            
+
+            <div>
+              <label className="text-sm font-semibold">Business Seats</label>
+              <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
+                <Plane className="text-red-500 mr-3" />
+                <input
+                  type="number"
+                  name="business_seats"
+                  placeholder="Business Seats"
+                  value={formData.business_seats}
+                  onChange={handleInputChange}
+                  className="w-full bg-black text-white focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold">First Class Seats</label>
+              <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
+                <Plane className="text-red-500 mr-3" />
+                <input
+                  type="number"
+                  name="first_class_seats"
+                  placeholder="First Class Seats"
+                  value={formData.first_class_seats}
+                  onChange={handleInputChange}
+                  className="w-full bg-black text-white focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
             <div>
               <label className="text-sm font-semibold">Route</label>
               <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
@@ -135,42 +194,55 @@ const FlightRegister = () => {
                 />
               </div>
             </div>
-            
+
             <div>
-              <label className="text-sm font-semibold">Class</label>
-              <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
-                <Briefcase className="text-red-500 mr-3" />
-                <select
-                  name="class"
-                  value={formData.class}
-                  onChange={handleInputChange}
-                  className="w-full bg-black text-white focus:outline-none"
-                  required
-                >
-                  <option value="">Select Class</option>
-                  <option value="Economy">Economy</option>
-                  <option value="Business">Business</option>
-                  <option value="First">First Class</option>
-                </select>
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm font-semibold">Price</label>
+              <label className="text-sm font-semibold">Economy Price</label>
               <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
                 <DollarSign className="text-red-500 mr-3" />
                 <input
                   type="number"
-                  name="price"
-                  placeholder="Ticket Price"
-                  value={formData.price}
+                  name="economy_price"
+                  placeholder="Economy Price"
+                  value={formData.economy_price}
                   onChange={handleInputChange}
                   className="w-full bg-black text-white focus:outline-none"
                   required
                 />
               </div>
             </div>
-            
+
+            <div>
+              <label className="text-sm font-semibold">Business Price</label>
+              <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
+                <DollarSign className="text-red-500 mr-3" />
+                <input
+                  type="number"
+                  name="business_price"
+                  placeholder="Business Price"
+                  value={formData.business_price}
+                  onChange={handleInputChange}
+                  className="w-full bg-black text-white focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold">First Class Price</label>
+              <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
+                <DollarSign className="text-red-500 mr-3" />
+                <input
+                  type="number"
+                  name="first_class_price"
+                  placeholder="First Class Price"
+                  value={formData.first_class_price}
+                  onChange={handleInputChange}
+                  className="w-full bg-black text-white focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
             <div>
               <label className="text-sm font-semibold">Status</label>
               <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
@@ -188,7 +260,23 @@ const FlightRegister = () => {
                 </select>
               </div>
             </div>
-            
+
+            <div>
+              <label className="text-sm font-semibold">Gate Number</label>
+              <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
+                <DollarSign className="text-red-500 mr-3" />
+                <input
+                  type="number"
+                  name="gate_number"
+                  placeholder="Gate Number"
+                  value={formData.gate_number}
+                  onChange={handleInputChange}
+                  className="w-full bg-black text-white focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
             <div>
               <label className="text-sm font-semibold">Departure</label>
               <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">
@@ -203,7 +291,7 @@ const FlightRegister = () => {
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="text-sm font-semibold">Arrival</label>
               <div className="flex items-center bg-black border border-red-500 p-3 rounded-lg text-lg">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Menu,
@@ -22,16 +22,19 @@ import Cookies from "js-cookie";
 import logo from "../assets/logo.png";
 
 const Navbar = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isRider, setIsRider] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
+  const [refreshNavbar, setRefreshNavbar] = useState(false);
 
   useEffect(() => {
     const token = Cookies.get("token");
     const ridertoken = localStorage.getItem("ridertoken");
     const usertoken = localStorage.getItem("token");
 
+    
     if (ridertoken) {
       setIsRider(true);
       setIsLoggedIn(true);
@@ -42,16 +45,47 @@ const Navbar = () => {
       setIsLoggedIn(false);
       setIsRider(false);
     }
-  }, []);
+  }, [refreshNavbar, location.pathname]);
 
   const handleLogout = () => {
+    // Clear all authentication tokens
     Cookies.remove("token");
     Cookies.remove("ridertoken");
     localStorage.removeItem("token");
     localStorage.removeItem("ridertoken");
-    setIsLoggedIn(false);
-    setIsRider(false);
-    navigate("/");
+
+    // Immediately update state to reflect logout
+    
+    
+
+   
+   
+
+    // Use setTimeout to ensure state updates before reload
+    setTimeout(() => {
+      // Full page reload and navigation to home
+      
+      setIsLoggedIn(false);
+      setIsRider(false);
+      setRefreshNavbar(prev => !prev);
+    }, 50);
+    
+    window.location.href = "/";
+
+     // Force React to complete the state update
+    
+  };
+
+  const handleProfileClick = (e) => {
+    const currentPath = window.location.pathname;
+    if (currentPath === "/riderprofile" || currentPath === "/booking/riderdashboard") {
+      e.preventDefault();
+      window.location.reload();
+    }
+  };
+
+  window.updateNavbar = () => {
+    setRefreshNavbar(prev => !prev);
   };
 
   return (
@@ -67,7 +101,7 @@ const Navbar = () => {
           to="/"
           className="text-xl font-bold text-red-500 hover:scale-110 transition-transform duration-300"
         >
-          <img src={logo} alt="Logo" className="w-35 " />
+          <img src={logo} alt="Logo" className="w-35" />
         </Link>
       </motion.div>
 
@@ -80,10 +114,11 @@ const Navbar = () => {
 
       {/* Navigation Links */}
       <div
-        className={`lg:flex flex-col lg:flex-row lg:space-x-6 text-base absolute lg:static top-0 left-0 w-full lg:w-auto bg-black lg:bg-transparent transition-transform duration-300 ${isMenuOpen
-          ? "h-screen flex flex-col items-center pt-16"
-          : "hidden lg:flex"
-          }`}
+        className={`lg:flex flex-col lg:flex-row lg:space-x-6 text-base absolute lg:static top-0 left-0 w-full lg:w-auto bg-black lg:bg-transparent transition-transform duration-300 ${
+          isMenuOpen
+            ? "h-screen flex flex-col items-center pt-16"
+            : "hidden lg:flex"
+        }`}
       >
         <Link
           to="/"
@@ -135,42 +170,33 @@ const Navbar = () => {
         {/* Rider Dashboard Link */}
         {isRider && (
           <div className="relative group">
-          <button className="flex items-center space-x-2 p-3 cursor-pointer hover:text-red-500 transition-all 
-        duration-300 ">
-            <User size={18}  /> 
-          </button>
-          <div className="absolute right-0 hidden group-hover:block bg-black text-white mt-1 
-        rounded-lg shadow-lg w-40 border border-red-500 transition-all duration-300">
-            <Link
-              to="/booking/riderdashboard"
-              className="flex items-center space-x-2 px-4 py-2 hover:bg-red-500 transition-all 
-        duration-300"
-            >
-              <LayoutDashboard size={16} /> <span>Dashboard</span>
-            </Link>
-            <Link
-              to="/riderprofile"
-              className="flex items-center space-x-2 px-4 py-2 hover:bg-red-500 transition-all 
-        duration-300"
-            >
-              <UserCircle size={16} /> <span>Profile</span>
-            </Link>
+            <button className="flex items-center space-x-2 p-3 cursor-pointer hover:text-red-500 transition-all duration-300">
+              <User size={18} />
+            </button>
+            <div className="absolute right-0 hidden group-hover:block bg-black text-white mt-1 rounded-lg shadow-lg w-40 border border-red-500 transition-all duration-300">
+              <Link
+                to="/booking/riderdashboard"
+                onClick={handleProfileClick}
+                className="flex items-center space-x-2 px-4 py-2 hover:bg-red-500 transition-all duration-300"
+              >
+                <LayoutDashboard size={16} /> <span>Dashboard</span>
+              </Link>
+              <Link
+                to="/riderprofile"
+                onClick={handleProfileClick}
+                className="flex items-center space-x-2 px-4 py-2 hover:bg-red-500 transition-all duration-300"
+              >
+                <UserCircle size={16} /> <span>Profile</span>
+              </Link>
+            </div>
           </div>
-        </div>
-          // <Link
-            // to="/booking/riderdashboard"
-            // // className="flex items-center space-x-2 p-3 hover:text-red-500 transition-all duration-300"
-          // >
-            //  <User size={18} /> <span>Rider Dashboard</span>
-          
-
-          
         )}
 
         {/* User Dashboard Link */}
         {isLoggedIn && !isRider && (
           <Link
             to="/userdashboard"
+            onClick={handleProfileClick}
             className="flex items-center space-x-2 p-3 hover:text-red-500 transition-all duration-300"
           >
             <User size={18} /> <span>User Dashboard</span>
@@ -184,7 +210,6 @@ const Navbar = () => {
             className="cursor-pointer flex items-center space-x-2 bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 shadow-md"
           >
             <LogOut size={18} /> <span>Logout</span>
-  
           </button>
         ) : (
           <div className="flex flex-col lg:flex-row space-y-3 lg:space-y-0 lg:space-x-3 items-center">
@@ -196,7 +221,7 @@ const Navbar = () => {
             </Link>
             <Link
               to="/register"
-              className="flex items-center space-x-2  text-black px-4 py-2 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-md"
+              className="flex items-center space-x-2 text-black px-4 py-2 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-md"
             >
               <UserPlus size={18} /> <span>Register</span>
             </Link>

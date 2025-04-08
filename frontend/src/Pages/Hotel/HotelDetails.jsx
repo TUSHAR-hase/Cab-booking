@@ -399,7 +399,7 @@ const HotelDetailsPage = () => {
 
       // Create payment order
       const orderResponse = await axios.post(`${import.meta.env.VITE_API_URL}/create-order`, {
-        amount: totalAmount * 100, // Convert to paise
+        amount: totalAmount , // Convert to paise
       });
 
       if (!orderResponse.data.success) throw new Error('Order creation failed');

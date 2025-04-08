@@ -307,7 +307,6 @@ const UserDashboard = () => {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {/* <DollarSign size={14} className="text-green-400" /> */}
             <span className="font-medium">₹{booking.totalAmount || "0"}</span>
           </div>
         </div>
@@ -428,7 +427,7 @@ const UserDashboard = () => {
                     icon={<Car size={48} />}
                     message="No cab bookings yet"
                     actionText="Book a Cab Now"
-                    action={() => window.location.href = '/book-cab'}
+                    action={() => window.location.href = '/booking/cab'}
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -452,7 +451,7 @@ const UserDashboard = () => {
                     icon={<Hotel size={48} />}
                     message="No hotel bookings yet"
                     actionText="Book a Hotel Now"
-                    action={() => window.location.href = '/hotels'}
+                    action={() => window.location.href = '/booking/hotel'}
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -529,8 +528,8 @@ const UserDashboard = () => {
 
       {/* Hotel Booking Details Modal */}
       {showHotelModal && selectedHotelBooking && (
-        <div className="fixed inset-0 flex justify-center items-center bg-opacity-50 backdrop-blur-sm z-50">
-          <div className="bg-black p-6 rounded-xl shadow-lg max-w-4xl w-full border-2 border-red-600">
+        <div className="fixed inset-0 flex justify-center items-center bg-opacity-50 backdrop-blur-sm z-50 p-4">
+          <div className="bg-black p-6 rounded-xl shadow-lg max-w-4xl w-full border-2 border-red-600 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-2xl font-bold text-red-500">Booking Details</h2>
               <button

@@ -1,18 +1,40 @@
 import { Vehicle } from "../../models/Cabs/cab_vehicle_model.js"
-
-export const create_vehicle = async (res, resp) => {
+import fs from "fs"
+export const create_vehicle = async (req, res) => {
     try {
-        const newvehicle = new Vehicle(res.body);
-        const seved_vehicle = await newvehicle.save();
-     console.log(`seved vehicle${seved_vehicle}`)
-     return resp.status(201).json({ 
-        message: "Vehicle added successfully!", 
-        vehicle: newvehicle 
-    });
+      if (!req.file) {
+        return res.status(400).json({ message: "Vehicle image is required" });
+      }
+  
+      // Verify file was saved successfully
+      if (!fs.existsSync(req.file.path)) {
+        throw new Error("File upload failed");
+      }
+  
+      const vehicle = new Vehicle({
+        ...req.body,
+        perKm_price: parseFloat(req.body.perKm_price),
+        seating_capacity: parseInt(req.body.seating_capacity),
+        vehicle_image: req.file.path.replace(/\\/g, '/') // Convert to forward slashes
+      });
+  
+      const savedVehicle = await vehicle.save();
+      res.status(201).json(savedVehicle);
+  
     } catch (error) {
-        console.log(error)
+      console.error("Error creating vehicle:", error);
+      
+      // Clean up failed upload
+      if (req.file?.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+  
+      res.status(500).json({ 
+        message: "Error creating vehicle",
+        error: error.message 
+      });
     }
-}
+  };
 export const getvehicle = async (req, res) => {
     try {
         const vehicles = await Vehicle.find();

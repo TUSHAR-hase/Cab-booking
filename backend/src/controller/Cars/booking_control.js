@@ -9,16 +9,16 @@ export const create_booking = async (res, resp) => {
             vehicle_id: vehicalid,
             Rider_id: rider_id,
             source_location: {
-                address:from
+                address: from
             },
             destination_location: {
-                address:to
+                address: to
             },
             pickup_time: pickupTime
         });
         const seved_booking = await newbooking.save();
-       
-            console.log(`seved booking${seved_booking}`)
+
+        console.log(`seved booking${seved_booking}`)
         return resp.status(201).json({
             message: "booking added successfully!",
             booking: newbooking
@@ -30,7 +30,7 @@ export const create_booking = async (res, resp) => {
 export const acceptBooking = async (req, resp) => {
     try {
         const { id } = req.params;
-        console.log("Received booking ID:", req.params.id); 
+        console.log("Received booking ID:", req.params.id);
 
         if (!id) {
             return resp.status(400).json({ message: "Booking ID is required" });
@@ -38,7 +38,7 @@ export const acceptBooking = async (req, resp) => {
 
         const updatedBooking = await booking.findByIdAndUpdate(
             id,
-            { status: "accepted" },  
+            { status: "accepted" },
             { new: true }
         );
 
@@ -62,7 +62,7 @@ export const complateBooking = async (req, resp) => {
 
         const updatedBooking = await booking.findByIdAndUpdate(
             id,
-            { status: "completed" },  
+            { status: "completed" },
             { new: true }
         );
 
@@ -86,7 +86,7 @@ export const rejectBooking = async (req, resp) => {
 
         const updatedBooking = await booking.findByIdAndUpdate(
             id,
-            { status: "rejected" },  
+            { status: "rejected" },
             { new: true }
         );
 
@@ -112,6 +112,26 @@ export const getbooking = async (req, res) => {
 
     }
 }
+export const getbookingByuserid = async (req, resp) => {
+    try {
+        if (!req.params.id) {
+            return resp.status(400).json({ message: "Rider ID is required" });
+        }
+
+        const bookings = await booking.find({ user_id: req.params.id })
+            .populate("Rider_id")
+            .populate("vehicle_id");
+
+        if (!bookings || bookings.length === 0) {
+            return resp.status(404).json({ message: "Booking not found" });
+        }
+        console.log(bookings)
+        resp.status(200).json(bookings);
+    } catch (error) {
+        console.error("Error fetching bookings:", error);
+        resp.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
 export const getbookingByid = async (req, resp) => {
     try {
         if (!req.params.id) {
@@ -119,16 +139,14 @@ export const getbookingByid = async (req, resp) => {
         }
 
         const bookings = await booking.find({ Rider_id: req.params.id })
-            .populate("user_id", "name contact") 
-            .populate("vehicle_id", "vehicle_number vehicle_type"); 
+            .populate("user_id", "name contact")
+            .populate("vehicle_id", "vehicle_number vehicle_type perKm_price");
 
-        if (!bookings || bookings.length === 0) {
-            return resp.status(404).json({ message: "Booking not found" });
-        }
 
+        // console.log(bookings)
         resp.status(200).json(bookings);
     } catch (error) {
-        console.error("Error fetching bookings:", error); 
+        console.error("Error fetching bookings:", error);
         resp.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };

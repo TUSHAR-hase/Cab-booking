@@ -11,14 +11,15 @@ const addressSchema = new mongoose.Schema({
     },
     pincode: {
         type: Number,
-        min: 6,
-        max: 6,
         required: true,
     },
     longitude: {
         type: Number,
     },
     latitude: {
+        type: Number
+    },
+    averageRating: {
         type: Number
     }
 });

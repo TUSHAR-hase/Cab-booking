@@ -9,7 +9,7 @@ export default function RiderSignup() {
     phone: "",
     address: "",
     password: "",
-    conformpassword: "",
+    confirm_password: "",
     licence_number: "",
     
   });
@@ -100,6 +100,7 @@ export default function RiderSignup() {
             ))}
             <button
               type="submit"
+
               className="w-full py-3.5 bg-red-500 rounded-lg text-white font-semibold transform transition-all hover:scale-[1.02] hover:bg-red-600 active:scale-95 shadow-lg"
             >
               Sign Up
@@ -110,7 +111,7 @@ export default function RiderSignup() {
             Already have an account?{" "}
             <span
               className="text-red-400 cursor-pointer hover:underline"
-              onClick={() => navigate("/riderlogin")}
+              onClick={() => navigate("/booking/riderlogin")}
             >
               Login here
             </span>

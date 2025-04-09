@@ -119,54 +119,59 @@ const ConfirmBookingPage = () => {
 
       if (!bookingResponse.ok) throw new Error("Booking creation failed");
       const bookingData = await bookingResponse.json();
+      if(bookingResponse.ok){
+        alert("Your Booking is successfully done")
+        navigate("/userdashboard")
 
-      // Initialize Razorpay
-      const razorpayLoaded = await initializeRazorpay();
-      if (!razorpayLoaded) throw new Error("Razorpay SDK failed to load");
+      }
 
-      // Create payment order
-      const orderResponse = await axios.post(`${BASE_URL}/create-order`, {
-        amount: vehicleDetails.perKm_price * 100, // Convert to paise
-      });
+      // // Initialize Razorpay
+      // const razorpayLoaded = await initializeRazorpay();
+      // if (!razorpayLoaded) throw new Error("Razorpay SDK failed to load");
 
-      if (!orderResponse.data.success) throw new Error("Order creation failed");
+      // // Create payment order
+      // const orderResponse = await axios.post(`${BASE_URL}/create-order`, {
+      //   amount: vehicleDetails.perKm_price * 100, // Convert to paise
+      // });
 
-      // Razorpay options
-      const options = {
-        key: "rzp_test_Y8cefy5g53d5Se",
-        amount: orderResponse.data.order.amount,
-        currency: "INR",
-        order_id: orderResponse.data.order.id,
-        name: "Booking Hub",
-        description: `Booking for ${formData.from} to ${formData.to}`,
-        prefill: userDetails,
-        theme: { color: "#3399cc" },
-        handler: async (response) => {
-          try {
-            const verificationResponse = await axios.post(
-              `${BASE_URL}/verify-payment`,
-              response
-            );
-            if (verificationResponse.data.success) {
-              navigate(`/bookingsuccess/${userDetails.id}`, { state: { booking: bookingData } });
-            } else {
-              throw new Error("Payment verification failed");
-            }
-          } catch (error) {
-            console.error("Verification error:", error);
-            setError("Payment verification failed");
-          }
-        },
-        modal: {
-          ondismiss: () => setLoading(false),
-        },
-      };
+      // if (!orderResponse.data.success) throw new Error("Order creation failed");
 
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
+      // // Razorpay options
+      // const options = {
+      //   key: "rzp_test_Y8cefy5g53d5Se",
+      //   amount: orderResponse.data.order.amount,
+      //   currency: "INR",
+      //   order_id: orderResponse.data.order.id,
+      //   name: "Booking Hub",
+      //   description: `Booking for ${formData.from} to ${formData.to}`,
+      //   prefill: userDetails,
+      //   theme: { color: "#3399cc" },
+      //   handler: async (response) => {
+      //     try {
+      //       const verificationResponse = await axios.post(
+      //         `${BASE_URL}/verify-payment`,
+      //         response
+      //       );
+      //       if (verificationResponse.data.success) {
+      //         navigate(`/bookingsuccess/${userDetails.id}`, { state: { booking: bookingData } });
+      //       } else {
+      //         throw new Error("Payment verification failed");
+      //       }
+      //     } catch (error) {
+      //       console.error("Verification error:", error);
+      //       setError("Payment verification failed");
+      //     }
+      //   },
+      //   modal: {
+      //     ondismiss: () => setLoading(false),
+      //   },
+      // };
+
+      // const paymentObject = new window.Razorpay(options);
+      // paymentObject.open();
     } catch (error) {
       console.error("Payment error:", error);
-      setError(error.message || "Payment processing failed");
+      setError(error.message || "Booking processing failed");
     } finally {
       setLoading(false);
     }
@@ -247,7 +252,7 @@ const ConfirmBookingPage = () => {
                 : "bg-red-500/50"
             }`}
           >
-            {loading ? "Processing..." : "Proceed to Payment"}
+            {loading ? "Processing..." : "Proceed to Booking"}
           </button>
         </div>
       </div>

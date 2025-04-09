@@ -17,6 +17,7 @@ import {
   X,
   Edit,
 } from "lucide-react";
+import { complateBooking } from "../../../../../backend/src/controller/Cars/booking_control";
 
 const ActionButtons = ({ onConfirm, onCancel, onComplete }) => (
   <div className="mt-4 flex justify-end gap-2">
@@ -173,6 +174,7 @@ const RiderDashboard = () => {
         `${BASE_URL}/api/Rv/booking/getbooking/${rider_id}`
       );
       const data = await res.json();
+      console.log(data)
       if (!data || data.length === 0) {
         console.log("No bookings found");
         setRequestBookings([]);
@@ -181,10 +183,17 @@ const RiderDashboard = () => {
       } else {
         console.log("Fetched requests:", data);
         const pendingBookings = data.filter((b) => b.status === "pending");
-        const confirmedBookings = data.filter((b) => b.status === "accepted");
+        // const confirmedBookings = data.filter((b) => b.status === "accepted");
         setCompletedBookings(data.filter((b) => b.status === "completed"));
         setRequestBookings(pendingBookings);
+        const confirmedBookings = data.filter(
+          (b) => b.status === "accepted" && b.user_id !== null
+        );
+        // setConfirmedBookings(confirmedBookings);
+        
         setConfirmedBookings(confirmedBookings);
+
+        console.log(confirmedBookings)
       }
     } catch (error) {
       console.error("Error fetching bookings:", error);
@@ -364,6 +373,7 @@ const RiderDashboard = () => {
           ) : (
             <div className="space-y-4">
               {requestBookings.map((booking) => (
+
                 <motion.div
                   key={booking._id}
                   className="p-4 bg-gray-800/100 rounded-lg border-l-4 border-yellow-500"
@@ -421,7 +431,7 @@ const RiderDashboard = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {confirmedBookings.map((booking) => (
+              {confirmedBookings?.map((booking) => (
                 <motion.div
                   key={booking._id}
                   className="p-4 bg-gray-800/100 rounded-lg border-l-4 border-green-500 mb-4"
@@ -444,7 +454,7 @@ const RiderDashboard = () => {
                     </div>
                   </div>
                   <ActionButtons
-                    onComplete={() => handleComplete(booking._id)}
+                    onComplete={() => navigate(`/complaterider/${booking.user_id.email}/${booking._id}`)}
                   />
                 </motion.div>
               ))}
@@ -517,11 +527,10 @@ const RiderDashboard = () => {
             Your Vehicles
           </h2>
           <motion.button
-            className={`px-6 py-3 ${
-              vehicles.length === 0
+            className={`px-6 py-3 ${vehicles.length === 0
                 ? "bg-gray-500 hidden"
                 : "bg-red-500 hover:bg-red-600"
-            } text-white rounded-lg transition-all flex items-center gap-2`}
+              } text-white rounded-lg transition-all flex items-center gap-2`}
             whileHover={vehicles.length === 0 ? {} : { scale: 1.05 }}
             whileTap={vehicles.length === 0 ? {} : { scale: 0.95 }}
             onClick={
@@ -565,10 +574,11 @@ const RiderDashboard = () => {
                 <div className="border-b  border-gray-700">
                   <img
                     src={
-                      vehicle.image && vehicle.image.trim()
-                        ? vehicle.image
-                        : "https://via.placeholder.com/400x250/1a1a1a/666666?text=No+Image"
+                      vehicle.vehicle_image
+                        ? `${BASE_URL}/${vehicle.vehicle_image.replace(/\\/g, '/')}`
+                        : "https://cdn.pixabay.com/photo/2017/01/20/00/30/taxi-1999478_960_720.jpg"
                     }
+
                     alt={vehicle.vehicle_number}
                     className="w-full h-40 object-cover"
                   />

@@ -100,6 +100,31 @@ export const rejectBooking = async (req, resp) => {
         resp.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
+export const paidBooking = async (req, resp) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return resp.status(400).json({ message: "Booking ID is required" });
+        }
+
+        const updatedBooking = await booking.findByIdAndUpdate(
+            id,
+            { 
+                payment_status: "paid" },
+            { new: true }
+        );
+
+        if (!updatedBooking) {
+            return resp.status(404).json({ message: "Booking not found" });
+        }
+
+        resp.status(200).json({ message: "Booking paid", booking: updatedBooking });
+    } catch (error) {
+        console.error("Error rejecting booking:", error);
+        resp.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
 
 export const getbooking = async (req, res) => {
     try {
@@ -139,8 +164,8 @@ export const getbookingByid = async (req, resp) => {
         }
 
         const bookings = await booking.find({ Rider_id: req.params.id })
-            .populate("user_id", "name contact")
-            .populate("vehicle_id", "vehicle_number vehicle_type perKm_price");
+            .populate("user_id")
+            .populate("vehicle_id");
 
 
         // console.log(bookings)

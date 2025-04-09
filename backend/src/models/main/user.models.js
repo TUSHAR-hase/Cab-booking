@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    
     gender: {
         type: String,
         required: true
@@ -17,6 +18,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true
+    },
+    key: {
+        type: Number,
     },
     otp: {
         type: Number,

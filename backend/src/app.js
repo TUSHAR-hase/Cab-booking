@@ -4,6 +4,7 @@ import crypto from "crypto";
 import fs from 'fs';
 import path from 'path';
 
+
 const uploadsDir = path.join(process.cwd(), 'uploads', 'vehicles');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -14,7 +15,8 @@ import cookieParser from "cookie-parser"
 import { userRouter } from "./routes/main/userRoutes.js";
 import vehicleapi from "./routes/Cabs/vehicle_routes.js"
 import Riderapi from "./routes/Cabs/Rider_routes.js"
-import booking from "./routes/Cabs/booking.js"
+import Booking from "./routes/Cabs/booking.js"
+import { booking } from "./models/Cabs/cab_booking_model.js";
 import Razorpay from "razorpay";
 import { flightRouter } from "./routes/flight/flight.route.js";
 import dotenv from "dotenv";
@@ -35,7 +37,7 @@ app.use("/api/user", userRouter)
 
 //------------CAB ROUTES-------------------------------------
 app.use("/api/Rv/vehicle", vehicleapi)
-app.use("/api/Rv/booking", booking)
+app.use("/api/Rv/booking", Booking)
 app.use("/api/Rv/Rider", Riderapi)
 
 //------------FLIGHT ROUTES-------------------------------------
@@ -79,6 +81,21 @@ app.post("/create-order", async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+app.patch("/update-payment-status/:id", async (req, res) => {
+  const { bookingId } = req.params;
+  try {
+    const updatedBooking = await booking.findByIdAndUpdate(
+      bookingId,
+      { payment_status: "paid", updated_at: Date.now() },
+      { new: true }
+    );
+    res.status(200).json({ success: true, booking: updatedBooking });
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    res.status(500).json({ success: false, message: "Failed to update payment status" });
+  }
+});
+
 
 // ✅ Verify Payment Signature
 app.post("/verify-payment", async (req, res) => {

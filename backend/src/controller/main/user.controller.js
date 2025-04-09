@@ -11,6 +11,8 @@ const registerUser = async (req, res) => {
   const smtpPass = process.env.SMTP_PASSWORD;
   const { name, gender, contact, email, type, password } = req.body;
   const otp = Math.floor(Math.random() * 10000);
+  const key = Math.floor(Math.random() * 10000);
+
 
   const hashedPAssword = await bcrypt.hash(password, 10);
 
@@ -105,6 +107,7 @@ const registerUser = async (req, res) => {
     contact,
     email,
     otp,
+    key,
     type,
     isVerifiedOtp: false,
     password: hashedPAssword
@@ -277,9 +280,9 @@ export const getbookingByid = async (req, resp) => {
     }
 
     const bookings = await booking.find({ user_id: req.params.id })
-      .populate("Rider_id", "phone")
+      .populate("Rider_id")
 
-      .populate("vehicle_id", "vehicle_number vehicle_type");
+      .populate("vehicle_id");
 
     if (!bookings || bookings.length === 0) {
       return resp.status(404).json({ message: "Booking not found" });

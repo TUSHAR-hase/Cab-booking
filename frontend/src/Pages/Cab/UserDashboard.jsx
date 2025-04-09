@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
+
 import { jwtDecode } from "jwt-decode";
 import {
   CalendarDays,
@@ -32,10 +34,21 @@ const UserDashboard = () => {
   const [hotels, setHotels] = useState([]);
   const [id, setuserId] = useState(null);
   const [cabs, setCabs] = useState([]);
+    const [vehicleDetails, setVehicleDetails] = useState({
+      rider_id: "",
+      perKm_price: 0,
+    });
+    const [userDetails, setUserDetails] = useState({
+      id: "",
+      name: "",
+      email: "",
+      contact: "",
+    });
   const [transactions, setTransactions] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showHotelModal, setShowHotelModal] = useState(false);
+  const [key, setkey] = useState();
   const [selectedHotelBooking, setSelectedHotelBooking] = useState(null);
   const [activeTab, setActiveTab] = useState("cabs");
   const [user, setUser] = useState({
@@ -43,8 +56,112 @@ const UserDashboard = () => {
     email: "johndoe@example.com",
     profilePic: "",
   });
+    useEffect(() => {
+      const initializeUser = async () => {
+        try {
+          const token = localStorage.getItem("token");
+          if (!token) {
+            navigate("/login");
+            return;
+          }
+  
+          const decoded = jwtDecode(token);
+          setUserDetails({
+            id: decoded.user._id,
+            name: decoded.user.name,
+            email: decoded.user.email,
+            contact: decoded.user.contact,
+          });
+  
+         
+        } catch (error) {
+          console.error("Initialization error:", error);
+          // setError("Failed to initialize page");
+        }
+      };
+  
+      initializeUser();
+    }, []);
+     
   const [editedUser, setEditedUser] = useState(user);
+  const initializeRazorpay = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
 
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayment=async(id,price,from,to)=>{
+   // Initialize Razorpay
+      const razorpayLoaded = await initializeRazorpay();
+      if (!razorpayLoaded) throw new Error("Razorpay SDK failed to load");
+
+      // Create payment order
+      const orderResponse = await axios.post(`${BASE_URL}/create-order`, {
+        amount: price * 100, // Convert to paise
+      });
+
+      if (!orderResponse.data.success) throw new Error("Order creation failed");
+
+      // Razorpay options
+      const options = {
+        key: "rzp_test_Y8cefy5g53d5Se",
+        amount: orderResponse.data.order.amount,
+        currency: "INR",
+        order_id: orderResponse.data.order.id,
+        name: "Booking Hub",
+        description: `Booking for ${from} to ${to}`,
+        prefill: userDetails,
+        theme: { color: "#3399cc" },
+        handler: async (response) => {
+          try {
+            const verificationResponse = await axios.post(
+              `${BASE_URL}/verify-payment`,
+              response
+            );
+        
+            if (verificationResponse.data.success) {
+              // ✅ Update payment status in DB
+              await axios.patch(`${BASE_URL}/update-payment-status/${id}`);
+        
+              // ✅ Redirect after successful payment and DB update
+               try {
+                    await fetch(`${BASE_URL}/api/Rv/booking/paidbooking/${id}`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ 
+                        payment_status: "paid" }),
+                    });
+                  
+                  } catch (error) {
+                    console.error("Error rejecting booking:", error);
+                  }
+              navigate(`/userdashboard`, {
+                state: { booking: bookingData }
+              });
+            } else {
+              throw new Error("Payment verification failed");
+            }
+          } catch (error) {
+            console.error("Verification error:", error);
+            // setError("Payment verification failed");
+          }
+        }
+,        
+        modal: {
+          ondismiss: () => setLoading(false),
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+  }
   // Dummy data
   const dummyNotifications = [
     { id: 1, message: "Your cab booking has been confirmed", type: "success", createdAt: new Date(Date.now() - 1000 * 60 * 5) },
@@ -65,6 +182,8 @@ const UserDashboard = () => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
+        console.log(decoded.user)
+        setkey(decoded.user.key)
         setuserId(decoded.user._id);
         setUser({
           name: decoded.user.name || "User",
@@ -93,11 +212,14 @@ const UserDashboard = () => {
       const data = await res.json();
       if (data && data.length > 0) {
         setCabs(data);
+        // console.log(cabs)
+
       }
     } catch (error) {
       console.error("Error fetching cab bookings:", error);
     }
   };
+  console.log(cabs)
 
   const getHotelBookings = async () => {
     try {
@@ -240,12 +362,33 @@ const UserDashboard = () => {
               </p>
             </div>
           </div>
+          <div className="ml-8 mr-8 text-sm flex item-center text-gray-500">
+           
+            {(booking.status === "accepted") &&
+              booking.payment_status === "unpaid" ? (
+
+              <button
+                className="bg-red-500 text-white px-4  rounded hover:bg-gray-600 transition"
+                onClick={() => handlePayment(booking._id,booking.vehicle_id.perKm_price,booking.source_location.address,booking.destination_location.address)}
+              >
+                Complate Payment
+              </button>
+            ) : booking.payment_status === "paid" ? (
+              <span className="text-green-600 font-semibold">
+                Payment Completed
+              </span>
+            ) : (
+              <span className="text-gray-600">-</span>
+            )}
+          </div>
+
           <div className="flex items-center gap-1 bg-gray-800 px-2 py-1 rounded-full">
             {getStatusIcon(booking.status)}
             <span className="text-xs capitalize">
               {booking.status || "Pending"}
             </span>
           </div>
+
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
@@ -257,8 +400,9 @@ const UserDashboard = () => {
           </div>
           <div className="flex items-center gap-2">
             <DollarSign size={14} className="text-green-400" />
-            <span className="font-medium">₹{booking.fare || "0"}</span>
+            <span className="font-medium">₹{booking.vehicle_id?.perKm_price * 8 || "0"}</span>
           </div>
+
         </div>
       </div>
     </motion.div>
@@ -307,7 +451,6 @@ const UserDashboard = () => {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {/* <DollarSign size={14} className="text-green-400" /> */}
             <span className="font-medium">₹{booking.totalAmount || "0"}</span>
           </div>
         </div>
@@ -345,6 +488,9 @@ const UserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-black text-gray-200 p-4 md:p-8 font-[Poppins]">
+      <h2 className="text-2xl font-bold text-red-500 mb-4 flex items-center gap-2">
+        Key:{key}
+      </h2>
       {/* User Profile */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -428,7 +574,7 @@ const UserDashboard = () => {
                     icon={<Car size={48} />}
                     message="No cab bookings yet"
                     actionText="Book a Cab Now"
-                    action={() => window.location.href = '/book-cab'}
+                    action={() => window.location.href = '/booking/cab'}
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -452,7 +598,7 @@ const UserDashboard = () => {
                     icon={<Hotel size={48} />}
                     message="No hotel bookings yet"
                     actionText="Book a Hotel Now"
-                    action={() => window.location.href = '/hotels'}
+                    action={() => window.location.href = '/booking/hotel'}
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -529,8 +675,8 @@ const UserDashboard = () => {
 
       {/* Hotel Booking Details Modal */}
       {showHotelModal && selectedHotelBooking && (
-        <div className="fixed inset-0 flex justify-center items-center bg-opacity-50 backdrop-blur-sm z-50">
-          <div className="bg-black p-6 rounded-xl shadow-lg max-w-4xl w-full border-2 border-red-600">
+        <div className="fixed inset-0 flex justify-center items-center bg-opacity-50 backdrop-blur-sm z-50 p-4">
+          <div className="bg-black p-6 rounded-xl shadow-lg max-w-4xl w-full border-2 border-red-600 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-2xl font-bold text-red-500">Booking Details</h2>
               <button

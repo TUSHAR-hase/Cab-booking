@@ -22,6 +22,7 @@ import HotelSearch from "./Pages/Hotel/HotelSearch.jsx";
 import HotelDetails from "./Pages/Hotel/HotelDetails.jsx";
 import HotelReviewPage from "./Pages/Hotel/HotelReviews.jsx";
 import Register from "./Pages/Main/Register.jsx";
+
 import OtpPage from "./Pages/Main/Otp.jsx";
 import Login from "./Pages/Main/Login.jsx";
 import AirlineOwnerRegistration from "./Pages/Flight/AirLineRegistartion.jsx";
@@ -34,7 +35,7 @@ import RoomAdd from "./Pages/Hotel/Owner//Dashboard/RoomAdd.jsx";
 import HotelAdminPanel from "./Pages/Hotel/Owner/Dashboard/AdminPanel.jsx";
 import HotelDashboard from "./Pages/Hotel/Owner/Dashboard/HotelDashboard.jsx";
 import RoomDashboard from "./Pages/Hotel/Owner/Dashboard/RoomDashboard.jsx";
-
+import Complateverify from "./Pages/Cab/Rider/complaterideotpverify.jsx"
 import CabDetails from "./Pages/Cab/CabDetails.jsx";
 import CabReviewPage from "./Pages/Cab/CabReview.jsx";
 import BookingSuccess from "./Pages/Cab/BookingSuccess.jsx";
@@ -44,6 +45,7 @@ import RiderDashboard from "./Pages/Cab/Rider/RiderDashbord.jsx";
 import Riderlogin from "./Pages/Cab/Rider/Riderlogin.jsx";
 import ConfirmBooking from "./Pages/Cab/ConfrimBooking";
 import RiderSignup from "./Pages/Cab/Rider/RiderSignup.jsx";
+
 import ForgotPassword from "./Pages/Cab/ForgetPassword.jsx";
 import FLightOtpPage from "./Pages/Flight/Otp.jsx";
 import RiderProfile from "./Pages/Cab/Rider/RiderProfile.jsx";
@@ -229,6 +231,8 @@ function App() {
         <Route path="/booking/riderlogin" element={<Riderlogin />} />
         <Route path="/forgetpassword" element={<ForgotPassword />} />
         <Route path="/otprider/:email" element={<OtpVerified />} />
+        <Route path="/complaterider/:email/:id" element={< Complateverify/>} />
+
         <Route path="/riderprofile" element={<RiderProfile />} />
         <Route path="/bookingsuccess/:id" element={<BookingSuccess />} />
 

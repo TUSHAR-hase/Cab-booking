@@ -17,6 +17,7 @@ import {
   X,
   Edit,
 } from "lucide-react";
+import { complateBooking } from "../../../../../backend/src/controller/Cars/booking_control";
 
 const ActionButtons = ({ onConfirm, onCancel, onComplete }) => (
   <div className="mt-4 flex justify-end gap-2">
@@ -51,7 +52,7 @@ const ActionButtons = ({ onConfirm, onCancel, onComplete }) => (
           whileTap={{ scale: 0.95 }}
         >
           <CheckCircle size={16} />
-          Complete  
+          Complete
         </motion.button>
       )}
     </AnimatePresence>
@@ -173,6 +174,7 @@ const RiderDashboard = () => {
         `${BASE_URL}/api/Rv/booking/getbooking/${rider_id}`
       );
       const data = await res.json();
+      console.log(data)
       if (!data || data.length === 0) {
         console.log("No bookings found");
         setRequestBookings([]);
@@ -181,10 +183,17 @@ const RiderDashboard = () => {
       } else {
         console.log("Fetched requests:", data);
         const pendingBookings = data.filter((b) => b.status === "pending");
-        const confirmedBookings = data.filter((b) => b.status === "accepted");
+        // const confirmedBookings = data.filter((b) => b.status === "accepted");
         setCompletedBookings(data.filter((b) => b.status === "completed"));
         setRequestBookings(pendingBookings);
+        const confirmedBookings = data.filter(
+          (b) => b.status === "accepted" && b.user_id !== null
+        );
+        // setConfirmedBookings(confirmedBookings);
+
         setConfirmedBookings(confirmedBookings);
+
+        console.log(confirmedBookings)
       }
     } catch (error) {
       console.error("Error fetching bookings:", error);
@@ -365,6 +374,7 @@ const RiderDashboard = () => {
           ) : (
             <div className="space-y-4">
               {requestBookings.map((booking) => (
+
                 <motion.div
                   key={booking._id}
                   className="p-4 bg-gray-800/100 rounded-lg border-l-4 border-yellow-500"
@@ -405,32 +415,52 @@ const RiderDashboard = () => {
             </div>
             <h2 className="text-xl font-semibold">Confirmed Rides</h2>
           </div>
-          
-          {confirmedBookings.map((booking) => (
-            <motion.div
-              key={booking._id}
-              className="p-4 bg-gray-800/100 rounded-lg border-l-4 border-green-500 mb-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold">{booking.user_id?.name}</h3>
-                  <div className="text-sm text-gray-400 mt-2">
-                    <p>
-                      {booking.source_location.address} →{" "}
-                      {booking.destination_location.address}
-                    </p>
-                    <p className="mt-1 flex items-center gap-2">
-                      <Calendar size={14} />
-                      {new Date(booking.pickup_time).toLocaleString()}
-                    </p>
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="h-20 bg-gray-700/50 rounded-lg animate-pulse"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                />
+              ))}
+            </div>
+          ) : confirmedBookings.length === 0 ? (
+            <div className="p-4 text-center text-gray-400 rounded-lg bg-gray-700/20">
+              No Confirm Requests
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {confirmedBookings?.map((booking) => (
+                <motion.div
+                  key={booking._id}
+                  className="p-4 bg-gray-800/100 rounded-lg border-l-4 border-green-500 mb-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{booking.user_id?.name}</h3>
+                      <div className="text-sm text-gray-400 mt-2">
+                        <p>
+                          {booking.source_location.address} →{" "}
+                          {booking.destination_location.address}
+                        </p>
+                        <p className="mt-1 flex items-center gap-2">
+                          <Calendar size={14} />
+                          {new Date(booking.pickup_time).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <ActionButtons onComplete={() => handleComplete(booking._id)} />
-            </motion.div>
-          ))}
+                  <ActionButtons
+                    onComplete={() => navigate(`/complaterider/${booking.user_id.email}/${booking._id}`)}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Completed Bookings */}
@@ -441,7 +471,7 @@ const RiderDashboard = () => {
             </div>
             <h2 className="text-xl font-semibold">Completed Rides</h2>
           </div>
-          
+
           {completedBookings.map((booking) => (
             <motion.div
               key={booking._id}
@@ -479,72 +509,112 @@ const RiderDashboard = () => {
             Your Vehicles
           </h2>
           <motion.button
-            className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all flex items-center gap-2"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/booking/addingcab")}
+            className={`px-6 py-3 ${vehicles.length === 0
+              ? "bg-gray-500 hidden"
+              : "bg-red-500 hover:bg-red-600"
+              } text-white rounded-lg transition-all flex items-center gap-2`}
+            whileHover={vehicles.length === 0 ? {} : { scale: 1.05 }}
+            whileTap={vehicles.length === 0 ? {} : { scale: 0.95 }}
+            onClick={
+              vehicles.length === 0
+                ? undefined
+                : () => navigate("/booking/addingcab")
+            }
+            disabled={vehicles.length === 0}
           >
             <Plus size={20} />
             Add Vehicle
           </motion.button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
-          {vehicles.map((vehicle) => (
-            <motion.div
-              key={vehicle._id}
-              className="p-6 rounded-xl bg-gray-800/100 border border-gray-700 hover:border-red-500 transition-colors"
-              whileHover={{ y: -5 }}
+        {vehicles.length === 0 ? (
+          <div className="p-8 text-center bg-[#1a1a1a] text-gray-400 rounded-xl  border border-gray-700">
+            <Car size={48} className="mx-auto mb-4 text-gray-600 hover:text-red-500 cursor-pointer" />
+            {/* <h3 className="text-lg mb-2">No vehicles added yet</h3> */}
+            <p className="mb-4">
+              Add your first vehicle to start accepting rides
+            </p>
+            <motion.button
+              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center justify-center gap-2 mx-auto cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/booking/addingcab")}
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 hover:bg-red-500/10 rounded-full">
-                  <Car size={24} className="text-red-400" />
+              <Plus size={18} className="relative top-[1px] " />
+              <span>Add Vehicle</span>
+            </motion.button>
+          </div>
+         ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {vehicles.map((vehicle) => (
+              <motion.div
+                key={vehicle._id}
+                className="rounded-xl bg-gray-800 border border-gray-700 hover:border-red-500 
+            transition-colors overflow-hidden"
+                whileHover={{ y: -5 }}
+              >
+                {/* Vehicle Image */}
+                <div className="border-b  border-gray-700">
+                  <img
+                    src={
+                      vehicle.vehicle_image
+                        ? `${BASE_URL}/${vehicle.vehicle_image.replace(/\\/g, '/')}`
+                        : "https://cdn.pixabay.com/photo/2017/01/20/00/30/taxi-1999478_960_720.jpg"
+                    }
+                    alt={vehicle.vehicle_number}
+                    className="w-full h-40 object-cover"
+                  />
                 </div>
-                <h3 className="text-lg font-semibold">
-                  {vehicle.vehicle_number}
-                </h3>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm text-gray-400">
-                <div className="flex items-center gap-2">
-                  <Users size={16} />
-                  {vehicle.seating_capacity} Seats
+                {/* Vehicle Header */}
+                <div className=" py-3 flex items-center gap-4">
+                  <div className="p-3 hover:bg-red-500/10 rounded-full">
+                    <Car size={24} className="text-red-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">
+                    {vehicle.vehicle_number}
+                  </h3>
                 </div>
-                <div className="flex items-center gap-2">
-                  <IndianRupee size={16} />
-                  {vehicle.perKm_price}/km
-                </div>
-                <div className="flex items-center gap-2">
-                  <ZapOff size={16} />
-                  {vehicle.vehicle_type}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar size={16} />
-                  {vehicle.vehicle_model}
-                </div>
-              </div>
 
-              <div className="flex gap-3 mt-6 justify-end">
-                <motion.button
-                  onClick={() => showUpdateForm(vehicle)}
-                  className="px-4 py-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <Edit size={16} />
-                  Edit
-                </motion.button>
-                <motion.button
-                  onClick={() => deleteVehicle(vehicle._id)}
-                  className="px-4 py-2 bg-red-500/60 hover:bg-red-500/60 text-white rounded-lg flex items-center gap-2 text-sm"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <Trash2 size={16} />
-                  Remove
-                </motion.button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                <div className="grid grid-cols-2 gap-3 text-sm text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <Users size={16} />
+                    {vehicle.seating_capacity} Seats
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <IndianRupee size={16} />
+                    {vehicle.perKm_price}/km
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ZapOff size={16} />
+                    {vehicle.vehicle_type}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} />
+                    {vehicle.vehicle_model}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6 justify-end">
+                  <motion.button
+                    onClick={() => showUpdateForm(vehicle)}
+                    className="px-4 py-2 bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <Edit size={16} />
+                    Edit
+                  </motion.button>
+                  <motion.button
+                    onClick={() => deleteVehicle(vehicle._id)}
+                    className="px-4 py-2 bg-red-500/60 hover:bg-red-500/60 text-white rounded-lg flex items-center gap-2 text-sm"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <Trash2 size={16} />
+                    Remove
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </div>)}
       </div>
 
       {/* Update Vehicle Modal */}

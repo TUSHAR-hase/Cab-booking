@@ -1,4 +1,5 @@
-import mongoose from  "mongoose";
+import mongoose from "mongoose";
+
 const cab_booking_model = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     vehicle_id: { type: mongoose.Schema.Types.ObjectId, ref: "Vehicles", required: true },
@@ -17,4 +18,4 @@ const cab_booking_model = new mongoose.Schema({
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now }
 });
- export const booking =mongoose.models.Booking|| mongoose.model('Booking', cab_booking_model);
+export const booking =mongoose.model('Booking', cab_booking_model)||mongoose.models.Booking;

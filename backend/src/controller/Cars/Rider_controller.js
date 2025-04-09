@@ -5,6 +5,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import {ApiResponse} from "../../utils/apiResponse.js"
 import jwt from "jsonwebtoken";
+import { User } from "../../models/main/user.models.js";
 const genarate_token =user=>{ 
   return jwt.sign({ id:user._id,role:user.role}, process.env.SECRET_KEY, {
   expiresIn: "5d",
@@ -165,7 +166,37 @@ export const delate_Rider = async (req, res) => {
         res.status(500).json(error)
     }
 }
-
+export const complate_Otp = async (req, res) => {
+    const SECRET_KEY = process.env.SECRET_KEY;
+    const { email, otp } = req.body;
+  
+    const user = await User.findOne({ email });
+   
+    
+    if (!user) {
+      return res.status(404).json(new ApiResponse(404, null, "User not found"));
+    }
+  
+    // if (user.isVerifiedOtp) {
+    //   return res
+    //     .status(400)
+    //     .json(new ApiResponse(400, null, "User already verified"));
+    // }
+  
+    if (user.key !== otp) {
+      return res.status(400).json(new ApiResponse(400, null, "Invalid OTP"));
+    }
+  
+    // user.isVerifiedOtp = true;
+    await user.save();
+    const updatedUser = await User.findOne({ email }); // Double-check
+    console.log("Updated User:", updatedUser);
+    const token = jwt.sign({ user }, SECRET_KEY);
+  
+    res
+      .status(200)
+      .json(new ApiResponse(200, token, "Rider verified successfully"));
+  };
 export const verifyOtp = async (req, res) => {
   const SECRET_KEY = process.env.SECRET_KEY;
   const { email, otp } = req.body;

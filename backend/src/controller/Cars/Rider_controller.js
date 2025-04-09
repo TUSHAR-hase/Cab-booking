@@ -342,9 +342,6 @@ export const loginrider = async (req, res) => {
       }
       console.log("Password match:", isValidPassword);
       console.log(password.trim())
-      if(!isValidPassword){
-        return res.status(500).json({ message: "Enter valid detail" });
-      }
       const token = genarate_token(user);
       return res.status(200).json({ message: "Login successful", user, token });
 

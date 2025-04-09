@@ -75,7 +75,7 @@ console.log(bookingDetails)
                     <p className="font-bold text-white text-lg">{bookingDetails?.Rider_id?.name}</p>
                     <div className="flex items-center mt-1">
                       <span className="bg-black text-red-600 text-sm px-2.5 py-0.5 rounded-full flex items-center border border-red-600">
-                       4.5 ★{/*  //{bookingDetails.Rider_id.rating} */}
+                        {/* ★ {bookingDetails.Rider_id.rating} */}
                       </span>
                       <span className="ml-3 text-sm text-gray-400">{bookingDetails?.Rider_id?.vehicle_number}</span>
                     </div>

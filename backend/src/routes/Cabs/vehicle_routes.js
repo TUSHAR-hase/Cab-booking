@@ -1,7 +1,7 @@
 import express from "express"
 import multer from "multer";
 import path from "path";
-import fs from "fs"
+import fs from "fs"
 import { getvehicle,getvehicleByid,delate_vehicle,update_vehicle,create_vehicle,getvehicleByriderid } from "../../controller/Cars/vehicle_controller.js"
 
 const router = express.Router()

@@ -42,6 +42,7 @@ app.use("/api/Rv/Rider", Riderapi)
 
 //------------FLIGHT ROUTES-------------------------------------
 app.use("/api/flightadmin", flightRouter);
+app.use("/api/flight", flightBookingRouter);
 
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 //------------HOTEL ROUTES-------------------------------------
@@ -55,6 +56,7 @@ import { hotelRouter } from "./routes/hotels/hotel.routes.js"
 app.use("/api/hotel", hotelRouter)
 
 import { hotelBookingRouter } from "./routes/hotels/hotelBooking.routes.js";
+import { flightBookingRouter } from "./routes/flight/flightBooking.route.js";
 app.use("/api/booking", hotelBookingRouter)
 
 // ------------------------------------------------------------

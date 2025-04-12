@@ -5,112 +5,133 @@ import {
   PlaneTakeoff,
   PlaneLanding,
   Timer,
-  Users,
-  CheckCircle,
-  CalendarDays,
-  AlarmClock,
-  MapPin,
   BadgePercent,
+  CalendarDays,
 } from "lucide-react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 const FlightDetails = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const from = searchParams.get("from") || "Mumbai";
   const to = searchParams.get("to") || "Delhi";
   const date = searchParams.get("date") || "2025-02-20";
-
+  const [selectedClass, setSelectedClass] = useState(null);
   const [flights, setFlights] = useState([]);
   const [filter, setFilter] = useState("price-low");
+  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     const link = document.createElement("link");
-    link.href = "https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap";
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }, []);
 
   useEffect(() => {
-    const dummyFlights = [
-      {
-        id: 1,
-        airline: "Air India",
-        price: 5000,
-        class: "Economy",
-        duration: "2h 30m",
-        discount: "10% OFF",
-        departureStation: "Mumbai",
-        departureTime: "10:00 AM",
-        arrivalTime: "12:30 PM",
-        totalSeats: 150,
-        remainingSeats: 50,
-      },
-      {
-        id: 2,
-        airline: "IndiGo",
-        price: 4000,
-        class: "Business",
-        duration: "1h 50m",
-        discount: "15% OFF",
-        departureStation: "Delhi",
-        departureTime: "12:30 PM",
-        arrivalTime: "2:20 PM",
-        totalSeats: 180,
-        remainingSeats: 80,
-      },
-      {
-        id: 3,
-        airline: "Vistara",
-        price: 7000,
-        class: "Economy",
-        duration: "2h 10m",
-        discount: "5% OFF",
-        departureStation: "Bangalore",
-        departureTime: "3:15 PM",
-        arrivalTime: "5:25 PM",
-        totalSeats: 160,
-        remainingSeats: 60,
-      },
-    ];
-  
-    let sortedFlights = [...dummyFlights];
-  
-    if (filter === "price-low") {
-      sortedFlights.sort((a, b) => a.price - b.price);
-    } else if (filter === "price-high") {
-      sortedFlights.sort((a, b) => b.price - a.price);
-    } else if (filter === "duration-short") {
-      sortedFlights.sort((a, b) => {
-        const timeA = parseDuration(a.duration);
-        const timeB = parseDuration(b.duration);
-        return timeA - timeB;
-      });
-    } else if (filter === "duration-long") {
-      sortedFlights.sort((a, b) => {
-        const timeA = parseDuration(a.duration);
-        const timeB = parseDuration(b.duration);
-        return timeB - timeA;
-      });
-    } else if (filter === "seats-more") {
-      sortedFlights.sort((a, b) => b.remainingSeats - a.remainingSeats);
-    } else if (filter === "seats-less") {
-      sortedFlights.sort((a, b) => a.remainingSeats - b.remainingSeats);
-    }
-  
-    setFlights(sortedFlights);
-  }, [filter]);
-  
-  // Helper function to convert "2h 30m" into total minutes
+    // Fetch initial flights data
+    const fetchFlights = async () => {
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/flight/search-flight?departure_station=${from}&destination_station=${to}&departure_time=${date}`
+      ); // Replace with your actual API endpoint
+      setFlights(response.data.data);
+    };
+
+    fetchFlights();
+  }, []);
+
   const parseDuration = (duration) => {
     const parts = duration.match(/(\d+)h\s*(\d*)m?/);
     const hours = parts ? parseInt(parts[1]) : 0;
     const minutes = parts && parts[2] ? parseInt(parts[2]) : 0;
     return hours * 60 + minutes;
   };
-  
+
+  const handleBookNow = (flight) => {
+    setSelectedFlight(flight);
+    setShowDialog(true);
+  };
+
+  const handleClassSelection = async (classType) => {
+    // Check seat availability for selected class
+    if (selectedFlight.seatsByClass[classType].available === 0) {
+      alert(`Sorry, no seats available for ${classType} class!`);
+    }
+
+    // If seats are available, proceed with the booking
+    console.log(`Booking ${classType} class for ${selectedFlight}`);
+
+    console.log(selectedFlight);
+
+    // You can add logic here to handle the booking process
+
+    if (Cookies.get("token")) {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/flight/book-flight`,
+        {
+          schedule_id: selectedFlight.scheduleId,
+          classType,
+          date,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("token")}`,
+            ContentType: "application/json",
+          },
+        }
+      );
+
+      console.log(response.data);
+
+      const order = response.data.data.order;
+
+      if (response.data.statusCode === 201) {
+        const options = {
+          key: "rzp_test_ChC1v5xGnKuucU", // from Razorpay Dashboard
+          amount: order.amount,
+          currency: order.currency,
+          name: "Booking Hub",
+          description: "Payment for flight booking",
+          order_id: order.id,
+          handler: function (response) {
+            alert(
+              `Booking successful! Payment ID: ${response.razorpay_payment_id}`
+            );
+            // Optionally send response to backend to verify payment
+          },
+          prefill: {
+            name: "John Doe",
+            email: "john@example.com",
+            contact: "9999999999",
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        console.log(rzp);
+        console.log(options);
+        rzp.open();
+      } else {
+        alert(response.data.message);
+      }
+    } else {
+      navigate("/login");
+    }
+
+    setSelectedClass(classType);
+    setShowDialog(false);
+  };
 
   return (
     <div className="min-h-screen w-full bg-black text-white font-[Poppins]">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -125,134 +146,133 @@ const FlightDetails = () => {
         </p>
       </motion.div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap justify-center items-center gap-6 mb-8">
-  {/* Price Filters */}
-  <button
-    onClick={() => setFilter("price-low")}
-    className={`px-6 py-3 text-lg rounded-lg transition-all duration-300 ${
-      filter === "price-low"
-        ? "bg-red-500 text-black shadow-md"
-        : "bg-gray-800 text-white hover:bg-red-500 hover:text-black"
-    }`}
-  >
-    Price Low to High
-  </button>
-  <button
-    onClick={() => setFilter("price-high")}
-    className={`px-6 py-3 text-lg rounded-lg transition-all duration-300 ${
-      filter === "price-high"
-        ? "bg-red-500 text-black shadow-md"
-        : "bg-gray-800 text-white hover:bg-red-500 hover:text-black"
-    }`}
-  >
-    Price High to Low
-  </button>
-
-  {/* Duration Filters */}
-  <button
-    onClick={() => setFilter("duration-short")}
-    className={`px-6 py-3 text-lg rounded-lg transition-all duration-300 ${
-      filter === "duration-short"
-        ? "bg-red-500 text-black shadow-md"
-        : "bg-gray-800 text-white hover:bg-red-500 hover:text-black"
-    }`}
-  >
-    Shortest Duration
-  </button>
-  <button
-    onClick={() => setFilter("duration-long")}
-    className={`px-6 py-3 text-lg rounded-lg transition-all duration-300 ${
-      filter === "duration-long"
-        ? "bg-red-500 text-black shadow-md"
-        : "bg-gray-800 text-white hover:bg-red-500 hover:text-black"
-    }`}
-  >
-    Longest Duration
-  </button>
-
-  {/* Seat Availability Filters */}
-  <button
-    onClick={() => setFilter("seats-more")}
-    className={`px-6 py-3 text-lg rounded-lg transition-all duration-300 ${
-      filter === "seats-more"
-        ? "bg-red-500 text-black shadow-md"
-        : "bg-gray-800 text-white hover:bg-red-500 hover:text-black"
-    }`}
-  >
-    More Seats First
-  </button>
-  <button
-    onClick={() => setFilter("seats-less")}
-    className={`px-6 py-3 text-lg rounded-lg transition-all duration-300 ${
-      filter === "seats-less"
-        ? "bg-red-500 text-black shadow-md"
-        : "bg-gray-800 text-white hover:bg-red-500 hover:text-black"
-    }`}
-  >
-    Less Seats First
-  </button>
-</div>
-
+      {/* Filter Buttons */}
+      <div className="flex flex-wrap justify-center gap-4 mb-6 px-4">
+        {[
+          { label: "Price (Low)", value: "price-low" },
+          { label: "Price (High)", value: "price-high" },
+          { label: "Duration (Short)", value: "duration-short" },
+          { label: "Duration (Long)", value: "duration-long" },
+          { label: "Seats (More)", value: "seats-more" },
+          { label: "Seats (Less)", value: "seats-less" },
+        ].map((btn) => (
+          <button
+            key={btn.value}
+            onClick={() => setFilter(btn.value)}
+            className={`px-4 py-2 rounded-full border transition-all ${
+              filter === btn.value
+                ? "bg-red-500 text-white border-red-600"
+                : "bg-transparent text-gray-400 border-gray-600 hover:bg-gray-800"
+            }`}
+          >
+            {btn.label}
+          </button>
+        ))}
+      </div>
 
       {/* Flight Cards */}
       <div className="px-6 md:px-16 py-10">
-  {flights.map((flight) => (
-    <motion.div
-      key={flight.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-[#1a1a1a] p-8 md:p-10 rounded-2xl shadow-lg mb-8 transition-all hover:scale-[1.02] hover:shadow-2xl border border-gray-800"
-    >
-      {/* Flight Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-4xl font-bold text-white tracking-wide">{flight.airline}</h2>
-        <p className="text-red-400 font-semibold flex items-center gap-2 bg-red-900 bg-opacity-30 px-4 py-2 rounded-lg text-lg">
-          <BadgePercent size={24} /> {flight.discount}
-        </p>
+        {flights.map((flight) => (
+          <motion.div
+            key={flight.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-[#1a1a1a] p-8 md:p-10 rounded-2xl shadow-lg mb-8 hover:scale-[1.02] hover:shadow-2xl border border-gray-800"
+          >
+            <div className="flex justify-between items-center">
+              <h2 className="text-4xl font-bold">{flight.airline}</h2>
+              <p className="text-red-400 font-semibold flex items-center gap-2 bg-red-900 bg-opacity-30 px-4 py-2 rounded-lg text-lg">
+                <BadgePercent size={24} /> {flight.discount}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 text-gray-300 text-lg">
+              <div className="flex items-center gap-4">
+                <PlaneTakeoff size={30} className="text-red-500" />
+                <span className="font-medium">
+                  Departure: <strong>{flight.departureTime}</strong>
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <PlaneLanding size={30} className="text-red-500" />
+                <span className="font-medium">
+                  Arrival: <strong>{flight.arrivalTime}</strong>
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <Timer size={30} className="text-red-500" />
+                <span className="font-medium">
+                  Duration: <strong>{flight.duration}</strong>
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 text-gray-200">
+              <h3 className="text-xl font-bold">Available Seats:</h3>
+              <ul className="space-y-4 mt-4">
+                {["economy", "business", "first"].map((classType) => (
+                  <li key={classType} className="flex justify-between">
+                    <span className="font-medium capitalize">
+                      {classType} class
+                    </span>
+                    <span
+                      className={`text-lg ${
+                        flight.seatsByClass[classType].available > 0
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {flight.seatsByClass[classType].available} seats available
+                    </span>
+                    <span className="text-lg text-red-500 font-semibold">
+                      ₹{flight.seatsByClass[classType].price}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex justify-center gap-6 mt-8">
+              <button
+                onClick={() => handleBookNow(flight)}
+                className="bg-red-500 text-white rounded-xl py-2 px-6 font-semibold text-lg transition-all hover:bg-red-600"
+              >
+                Book Now
+              </button>
+            </div>
+          </motion.div>
+        ))}
       </div>
 
-      {/* Flight Details */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 text-gray-300 text-lg">
-        <div className="flex items-center gap-4">
-          <PlaneTakeoff size={30} className="text-red-500" />
-          <span className="font-medium">Departure: <strong>{flight.departureTime}</strong></span>
+      {/* Booking Dialog */}
+      {showDialog && selectedFlight && (
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-xl text-black w-96">
+            <h2 className="text-3xl font-semibold mb-4">
+              Select a Class for Booking
+            </h2>
+            <div className="space-y-4">
+              {["economy", "business", "first"].map((classType) => (
+                <button
+                  key={classType}
+                  onClick={() => handleClassSelection(classType)}
+                  className="w-full text-center bg-red-500 text-white py-3 rounded-lg text-xl hover:bg-red-600"
+                >
+                  {classType.charAt(0).toUpperCase() + classType.slice(1)} - ₹
+                  {selectedFlight.seatsByClass[classType].price}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowDialog(false)}
+              className="mt-4 w-full text-center text-gray-400 py-2 rounded-lg hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <PlaneLanding size={30} className="text-red-500" />
-          <span className="font-medium">Arrival: <strong>{flight.arrivalTime}</strong></span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Timer size={30} className="text-red-500" />
-          <span className="font-medium">Duration: <strong>{flight.duration}</strong></span>
-        </div>
-        <div className="flex items-center gap-4">
-          <MapPin size={30} className="text-red-500" />
-          <span className="font-medium">From: <strong>{flight.departureStation}</strong></span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Users size={30} className="text-red-500" />
-          <span className="font-medium">Total Seats: <strong>{flight.totalSeats}</strong></span>
-        </div>
-        <div className="flex items-center gap-4">
-          <CheckCircle size={30} className="text-red-500" />
-          <span className="font-medium">Available: <strong>{flight.remainingSeats}</strong></span>
-        </div>
-      </div>
-
-      {/* Price & Booking */}
-      <div className="flex justify-between items-center mt-8">
-        <p className="text-3xl font-extrabold text-red-500 tracking-wide">₹{flight.price}</p>
-        <button className="px-10 py-3 bg-red-500 text-black text-lg font-semibold rounded-xl hover:bg-red-600 transition-all shadow-md hover:shadow-lg active:scale-95">
-          Book Now
-        </button>
-      </div>
-    </motion.div>
-  ))}
-</div>
-
-
+      )}
     </div>
   );
 };

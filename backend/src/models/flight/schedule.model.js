@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 const ScheduleSchema = new mongoose.Schema({
+    flight_admin_id: { type: mongoose.Schema.Types.ObjectId, ref: 'FlightAdmin' },
     flight_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Flight' },
     departure_station: String,
     destination_station: String,

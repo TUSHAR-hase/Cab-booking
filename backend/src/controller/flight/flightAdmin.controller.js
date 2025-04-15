@@ -2,6 +2,7 @@ import { Flight } from "../../models/flight/flightSchema.model.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { Schedule } from "../../models/flight/schedule.model.js";
 import { FlightAdmin } from "../../models/flight/flightAdmin.modle.js";
+import { FlightBooking } from "../../models/flight/flightBooking.model.js";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
@@ -120,7 +121,7 @@ const registerOwner = async (req, res) => {
       mobile,
       gender,
       airline_name: airlineName,
-      isApproved: false,
+      isApproved: true,
       otp,
       isVerifiedOtp: false,
     });
@@ -301,6 +302,8 @@ const addFlight = async (req, res) => {
       gate_number,
     } = req.body;
 
+    const user = req.user;
+
     const departure_satation = route.split("-")[0].trim();
     const destination_station = route.split("-")[1].trim();
 
@@ -308,6 +311,7 @@ const addFlight = async (req, res) => {
     let existingFlight = await Flight.findOne({ flightNo });
     if (existingFlight) {
       const newSchedule = new Schedule({
+        flight_admin_id: user.user._id,
         flight_id: existingFlight._id,
         departure_station: departure_satation,
         destination_station: destination_station,
@@ -351,6 +355,7 @@ const addFlight = async (req, res) => {
 
     // Create a schedule for the flight
     const newSchedule = new Schedule({
+      flight_admin_id: user.user._id,
       flight_id: savedFlight._id,
       departure_station: departure_satation,
       destination_station: destination_station,
@@ -484,7 +489,8 @@ const deleteFlight = async (req, res) => {
 
 const getFlights = async (req, res) => {
   try {
-    const schedules = await Schedule.find().populate("flight_id");
+    const flight_admin_id= req.user.user._id;
+    const schedules = await Schedule.find({flight_admin_id}).populate("flight_id");
 
     const flightsData = schedules.map((schedule) => {
       const departureDateTime = new Date(schedule.departure_time);
@@ -728,7 +734,50 @@ const deleteSchedule = async (req, res) => {
   }
 };
 
+
+const getBookingsForAdmin = async (req, res) => {
+  const flight_admin_id = req.user.user._id;
+
+  try {
+    const bookings = await FlightBooking.find()
+      .populate('flight_id')
+      .populate('schedule_id')
+      .lean();
+
+    const filteredBookings = bookings.filter(
+      booking => booking.schedule_id?.flight_admin_id?.toString() === flight_admin_id.toString()
+    );
+
+    const formatted = [];
+    let idCounter = 1;
+
+    filteredBookings.forEach(booking => {
+      booking.passenger_detail.forEach(passenger => {
+        formatted.push({
+          id: idCounter++,
+          flightNumber: booking.flight_id.flightNo,
+          passengerName: passenger.name,
+          bookingDate: new Date(booking.date).toISOString().split('T')[0],
+          seatNumber: passenger.seatNumber,
+          fare: booking.price,
+          status: booking.booking_status,
+          from: booking.schedule_id.departure_station,
+          to: booking.schedule_id.destination_station,
+          departureTime: booking.schedule_id.departure_time
+        });
+      });
+    });
+
+    res.status(200).json(new ApiResponse(200, formatted, 'Bookings fetched successfully'));
+  } catch (err) {
+    console.error('Error fetching bookings:', err);
+    res.status(500).json(new ApiResponse(500, err, 'Error fetching bookings'));
+  }
+};
+
+
 export {
+  getBookingsForAdmin,
   loginOwner,
   addFlight,
   getFlights,

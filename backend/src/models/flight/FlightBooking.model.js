@@ -8,8 +8,8 @@ const FlightBookingSchema = new mongoose.Schema({
     date: Date,
     booking_status: String, // Confirmed, Pending, Canceled
     luggage_details: String,
-    passenger_detail: String,
-    seat_number: String,
+    passenger_detail: [],
+    booked_seat: Number,
     price: Number,
     payment_id: String,
 });

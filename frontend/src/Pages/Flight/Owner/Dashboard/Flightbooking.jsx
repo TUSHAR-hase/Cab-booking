@@ -1,94 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { Search, Calendar, User, Package, BarChart2, Filter, Plane, Clock } from "lucide-react";
+import Cookies from "js-cookie";
+import axios from "axios";
 
 const FlightBooking = () => {
   // Sample data for flight bookings
-  const [bookings, setBookings] = useState([
-    {
-      id: 1,
-      flightNumber: "AI-101",
-      passengerName: "Rahul Sharma",
-      bookingDate: "2025-03-25",
-      seatNumber: "14A",
-      fare: 7850,
-      status: "Confirmed",
-      from: "Delhi",
-      to: "Mumbai",
-      departureTime: "10:30 AM"
-    },
-    {
-      id: 2,
-      flightNumber: "AI-101",
-      passengerName: "Priya Patel",
-      bookingDate: "2025-03-24",
-      seatNumber: "15B",
-      fare: 7850,
-      status: "Confirmed",
-      from: "Delhi",
-      to: "Mumbai",
-      departureTime: "10:30 AM"
-    },
-    {
-      id: 3,
-      flightNumber: "SG-202",
-      passengerName: "Amit Kumar",
-      bookingDate: "2025-03-25",
-      seatNumber: "4C",
-      fare: 16500,
-      status: "Confirmed",
-      from: "Bangalore",
-      to: "Kolkata",
-      departureTime: "2:45 PM"
-    },
-    {
-      id: 4,
-      flightNumber: "6E-303",
-      passengerName: "Neha Singh",
-      bookingDate: "2025-03-26",
-      seatNumber: "8D",
-      fare: 9200,
-      status: "Waiting",
-      from: "Chennai",
-      to: "Hyderabad",
-      departureTime: "6:15 PM"
-    },
-    {
-      id: 5,
-      flightNumber: "SG-202",
-      passengerName: "Vikram Mehta",
-      bookingDate: "2025-03-25",
-      seatNumber: "5A",
-      fare: 16500,
-      status: "Confirmed",
-      from: "Bangalore",
-      to: "Kolkata",
-      departureTime: "2:45 PM"
-    },
-    {
-      id: 6,
-      flightNumber: "AI-101",
-      passengerName: "Sneha Reddy",
-      bookingDate: "2025-03-26",
-      seatNumber: "16F",
-      fare: 7850,
-      status: "Confirmed",
-      from: "Delhi",
-      to: "Mumbai",
-      departureTime: "10:30 AM"
-    },
-    {
-      id: 7,
-      flightNumber: "6E-303",
-      passengerName: "Rajesh Khanna",
-      bookingDate: "2025-03-27",
-      seatNumber: "10E",
-      fare: 9200,
-      status: "Confirmed",
-      from: "Chennai",
-      to: "Hyderabad",
-      departureTime: "6:15 PM"
+  const [bookings, setBookings] = useState([]);
+
+  useEffect(() => {
+   const fetchBookings = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/flightadmin/bookings`, { headers: { Authorization: `Bearer ${Cookies.get("token")}` } });
+      setBookings(response.data.data);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
     }
-  ]);
+   }
+
+   fetchBookings();
+  }, []);
 
   // State for search and filters
   const [searchTerm, setSearchTerm] = useState("");

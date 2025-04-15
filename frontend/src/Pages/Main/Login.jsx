@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Mail, Lock, LogIn } from "lucide-react";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,24 +17,51 @@ const Login = () => {
 
     if (!email || !password) {
       setErrorMessage("Both email and password are required.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Both email and password are required!',
+        confirmButtonColor: '#ef4444',
+      });
       return;
     }
 
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/login`, { email, password });
       if (response.data.message === "Login successful") {
-        console.log(response.data)
-        alert("")
-        Cookies.set("token", response.data.data);
-        localStorage.setItem("token",response.data.data)
-        window.location.href = "http://localhost:5173/";
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Successful!',
+          text: 'You have been logged in successfully.',
+          confirmButtonColor: '#ef4444',
+          timer: 1500,
+          showConfirmButton: false
+        }).then(() => {
+          Cookies.set("token", response.data.data);
+          localStorage.setItem("token", response.data.data);
+          window.location.href = "http://localhost:5173/";
+        });
       }
     } catch (error) {
       if (error.response.data.message === "User not verified") {
-        navigate("/otp/" + email);
+        Swal.fire({
+          icon: 'info',
+          title: 'Account Not Verified',
+          text: 'Redirecting to verification page...',
+          confirmButtonColor: '#ef4444',
+          timer: 1500,
+          showConfirmButton: false
+        }).then(() => {
+          navigate("/otp/" + email);
+        });
       } else {
         setErrorMessage("Enter valid credentials");
-        alert("Enter valid credentials");
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: 'Please check your email and password and try again.',
+          confirmButtonColor: '#ef4444',
+        });
       }
     }
     setErrorMessage("");
@@ -85,4 +113,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Login; 

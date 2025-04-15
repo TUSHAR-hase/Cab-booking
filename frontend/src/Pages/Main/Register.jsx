@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { User, Mail, Lock, Phone, Users, UserPlus } from "lucide-react";
+import Swal from "sweetalert2";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -11,26 +12,58 @@ const Register = () => {
   const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const type="customer";
+  const type = "customer";
   const [error, setError] = useState("");
+
+  const showErrorAlert = (message) => {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: message,
+      confirmButtonColor: "#ef4444",
+      background: "#000",
+      color: "#fff",
+    });
+  };
+
+  const showSuccessAlert = (message) => {
+    Swal.fire({
+      icon: "success",
+      title: "Success",
+      text: message,
+      confirmButtonColor: "#ef4444",
+      background: "#000",
+      color: "#fff",
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !gender || !contact || !email || !password) {
       setError("All fields are required");
+      showErrorAlert("All fields are required");
       return;
     }
 
     const userData = { name, gender, contact, email, type, password };
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/register`, userData);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/user/register`,
+        userData
+      );
       if (response.data.statusCode === 201) {
-        navigate("/otp/" + email);
+        showSuccessAlert("Registration successful! Redirecting to OTP verification...");
+        setTimeout(() => {
+          navigate("/otp/" + email);
+        }, 1500);
       } else {
         setError(response.data.message);
+        showErrorAlert(response.data.message);
       }
     } catch (err) {
-      setError("Error occurred during registration");
+      const errorMessage = err.response?.data?.message || "Error occurred during registration";
+      setError(errorMessage);
+      showErrorAlert(errorMessage);
     }
   };
 
@@ -51,28 +84,46 @@ const Register = () => {
           {/* Name */}
           <div className="flex items-center bg-black border border-red-500 rounded-lg px-4 py-2 sm:py-3">
             <User size={22} className="text-red-500 mr-3" />
-            <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-transparent text-white focus:outline-none text-base sm:text-lg" />
+            <input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-transparent text-white focus:outline-none text-base sm:text-lg"
+            />
           </div>
 
           {/* Gender */}
           <div className="flex items-center bg-black border border-red-500 rounded-lg px-4 py-2 sm:py-3">
             <Users size={22} className="text-red-500 mr-3" />
-            <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full bg-black text-gray-400 focus:outline-none text-base sm:text-lg">
-              <option value="" disabled className="bg-black text-white">Select Gender</option>
-              <option value="male" className="bg-black text-white">Male</option>
-              <option value="female" className="bg-black text-white">Female</option>
-              <option value="other" className="bg-black text-white">Other</option>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className="w-full bg-black text-gray-400 focus:outline-none text-base sm:text-lg"
+            >
+              <option value="" disabled className="bg-black text-white">
+                Select Gender
+              </option>
+              <option value="male" className="bg-black text-white">
+                Male
+              </option>
+              <option value="female" className="bg-black text-white">
+                Female
+              </option>
+              <option value="other" className="bg-black text-white">
+                Other
+              </option>
             </select>
           </div>
 
           {/* Contact */}
           <div className="flex items-center bg-black border border-red-500 rounded-lg px-4 py-2 sm:py-3">
             <Phone size={22} className="text-red-500 mr-3" />
-            <input 
-              type="number" 
-              placeholder="Contact" 
-              value={contact} 
-              onChange={(e) => setContact(e.target.value)} 
+            <input
+              type="number"
+              placeholder="Contact"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
               className="w-full bg-transparent text-white focus:outline-none text-base sm:text-lg appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-moz-appearance]:textfield"
             />
           </div>
@@ -80,13 +131,25 @@ const Register = () => {
           {/* Email */}
           <div className="flex items-center bg-black border border-red-500 rounded-lg px-4 py-2 sm:py-3">
             <Mail size={22} className="text-red-500 mr-3" />
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-transparent text-white focus:outline-none text-base sm:text-lg" />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-transparent text-white focus:outline-none text-base sm:text-lg"
+            />
           </div>
 
           {/* Password */}
           <div className="flex items-center bg-black border border-red-500 rounded-lg px-4 py-2 sm:py-3">
             <Lock size={22} className="text-red-500 mr-3" />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-transparent text-white focus:outline-none text-base sm:text-lg" />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-transparent text-white focus:outline-none text-base sm:text-lg"
+            />
           </div>
 
           {/* Register Button */}

@@ -10,6 +10,15 @@ const registerUser = async (req, res) => {
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASSWORD;
   const { name, gender, contact, email, type, password } = req.body;
+
+  const existedUser = await User.findOne({ email })
+
+  if (existedUser) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, null, "User already exists"));
+  }
+
   const otp = Math.floor(Math.random() * 10000);
   const key = Math.floor(Math.random() * 10000);
 

@@ -12,7 +12,7 @@ const verifyUser = asyncHandler(async (req, res, next) => {
             throw new ApiError(401, "Unauthorized request")
         }
 
-        const decodedinfo = await jwt.verify(token, process.env.JWT_TOKEN_SECRET)
+        const decodedinfo = await jwt.verify(token, process.env.SECRET_KEY)
 
         // const owner = await HotelOwner.findById(decodedinfo?._id)
 
@@ -39,7 +39,7 @@ const verifyAdmin = asyncHandler(async (req, res, next) => {
             throw new ApiError(401, "Unauthorized request")
         }
 
-        const decodedinfo = await jwt.verify(token, process.env.JWT_TOKEN_SECRET)
+        const decodedinfo = await jwt.verify(token, process.env.SECRET_KEY)
 
 
         if (decodedinfo.user && decodedinfo.user.type !== "admin") {

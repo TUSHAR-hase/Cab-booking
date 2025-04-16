@@ -38,7 +38,7 @@ const Navbar = () => {
     if (ridertoken) {
       setIsRider(true);
       setIsLoggedIn(true);
-    } else if (token || usertoken) {
+    } else if (token) {
       setIsLoggedIn(true);
       setIsRider(false);
 
@@ -206,7 +206,7 @@ const Navbar = () => {
             </Link>
             <Link
               to="/register"
-              className="flex items-center space-x-2 bg-gray-500 text-black px-4 py-2 rounded-lg hover:bg-gray-300 transition-all duration-300 shadow-md"
+              className="flex items-center space-x-2 bg-red-500 text-black px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 shadow-md"
             >
               <UserPlus size={18} /> <span>Register</span>
             </Link>

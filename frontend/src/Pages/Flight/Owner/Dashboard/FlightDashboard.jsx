@@ -1,79 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Edit, Trash2, Eye, Clock, XCircle } from "lucide-react";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const FlightDashboard = () => {
   const navigate = useNavigate();
 
   // Updated flight data with status field
-  const [flights, setFlights] = useState([
-    { 
-      id: 1, 
-      flightNumber: "AI-101", 
-      airline: "Air India", 
-      classType: "Economy", 
-      price: 7500,
-      departureTime: "10:30 AM",
-      arrivalTime: "12:45 PM",
-      from: "Delhi",
-      to: "Mumbai",
-      status: "Active"
-    },
-    { 
-      id: 2, 
-      flightNumber: "SG-202", 
-      airline: "SpiceJet", 
-      classType: "Business", 
-      price: 15000,
-      departureTime: "2:45 PM",
-      arrivalTime: "5:15 PM",
-      from: "Bangalore",
-      to: "Kolkata",
-      status: "Active"
-    },
-    { 
-      id: 3, 
-      flightNumber: "6E-303", 
-      airline: "IndiGo", 
-      classType: "Premium Economy", 
-      price: 9000,
-      departureTime: "6:15 PM",
-      arrivalTime: "8:45 PM",
-      from: "Chennai",
-      to: "Hyderabad",
-      status: "Active"
-    },
-  ]);
+  const [flights, setFlights] = useState([]);
+
+  useEffect(() => {
+    const fetchFlights = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/flightadmin/get-flight`,
+          {
+            headers: {
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          }
+        );
+        setFlights(response.data.data);
+      } catch (error) {
+        console.error("Error fetching flights:", error);
+      }
+    };
+
+    fetchFlights();
+  }, []);
 
   // State for dialog
   const [showDialog, setShowDialog] = useState(false);
-  const [dialogType, setDialogType] = useState(''); // 'delete', 'updateTime', or 'cancel'
+  const [dialogType, setDialogType] = useState(""); // 'delete', 'updateTime', or 'cancel'
   const [selectedFlight, setSelectedFlight] = useState(null);
-  
+
   // Form state for time update
   const [formData, setFormData] = useState({
-    departureTime: '',
-    arrivalTime: '',
-    from: '',
-    to: ''
+    departureTime: "",
+    arrivalTime: "",
+    from: "",
+    to: "",
   });
 
   // Open dialog for delete confirmation
   const openDeleteDialog = (flight) => {
     setSelectedFlight(flight);
-    setDialogType('delete');
+    setDialogType("delete");
     setShowDialog(true);
   };
 
   // Open dialog for time update
   const openTimeUpdateDialog = (flight) => {
     setSelectedFlight(flight);
-    setDialogType('updateTime');
+    setDialogType("updateTime");
     setFormData({
       departureTime: flight.departureTime,
       arrivalTime: flight.arrivalTime,
       from: flight.from,
-      to: flight.to
+      to: flight.to,
     });
     setShowDialog(true);
   };
@@ -81,24 +66,55 @@ const FlightDashboard = () => {
   // Open dialog for flight cancellation
   const openCancelFlightDialog = (flight) => {
     setSelectedFlight(flight);
-    setDialogType('cancel');
+    setDialogType("cancel");
     setShowDialog(true);
   };
 
   // Handle delete
-  const deleteFlight = () => {
-    setFlights(flights.filter((flight) => flight.id !== selectedFlight.id));
+  const deleteFlight = async() => {
+
+    const response = await axios.delete(
+      `${import.meta.env.VITE_API_URL}/api/flightadmin/delete-flight/${selectedFlight.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      }
+    )
+    if (response.data.statusCode == 200) {
+      alert("Flight deleted successfully!");
+      setFlights(flights.filter((flight) => flight.id !== selectedFlight.id));
     setShowDialog(false);
+    }
+    
   };
 
   // Handle flight cancellation
-  const cancelFlight = () => {
-    setFlights(flights.map(flight => 
-      flight.id === selectedFlight.id 
-        ? { ...flight, status: "Cancelled" } 
-        : flight
-    ));
-    setShowDialog(false);
+  const cancelFlight = async() => {
+    const response = await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/flightadmin/cancel-flight`,
+      {
+        id: selectedFlight.id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    if (response.data.statusCode == 200) {
+      alert("Flight cancelled successfully!");
+      setFlights(
+        flights.map((flight) =>
+          flight.id === selectedFlight.id
+            ? { ...flight, status: "Cancelled" }
+            : flight
+        )
+      );
+      setShowDialog(false);
+    }
+    
   };
 
   // Handle form input changes
@@ -106,24 +122,45 @@ const FlightDashboard = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
   // Handle time update
-  const updateFlightTime = () => {
-    setFlights(flights.map(flight => 
-      flight.id === selectedFlight.id 
-        ? { 
-            ...flight, 
-            departureTime: formData.departureTime,
-            arrivalTime: formData.arrivalTime,
-            from: formData.from,
-            to: formData.to
-          } 
-        : flight
-    ));
-    setShowDialog(false);
+  const updateFlightTime = async () => {
+    const response = await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/flightadmin/update-flight`,
+      {
+        id: selectedFlight.id,
+        departureTime: formData.departureTime,
+        arrivalTime: formData.arrivalTime,
+        from: formData.from,
+        to: formData.to,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data.statusCode == 200) {
+      setFlights(
+        flights.map((flight) =>
+          flight.id === selectedFlight.id
+            ? {
+                ...flight,
+                departureTime: formData.departureTime,
+                arrivalTime: formData.arrivalTime,
+                from: formData.from,
+                to: formData.to,
+              }
+            : flight
+        )
+      );
+      setShowDialog(false);
+    }
   };
 
   // Close dialog
@@ -152,11 +189,9 @@ const FlightDashboard = () => {
         <table className="w-full text-left">
           <thead>
             <tr className="bg-red-600 text-white">
-              <th className="p-4 font-semibold">Airline</th>
+              <th className="p-4 font-semibold">Flight Name</th>
               <th className="p-4 font-semibold">Flight No.</th>
               <th className="p-4 font-semibold">Route</th>
-              <th className="p-4 font-semibold">Class</th>
-              <th className="p-4 font-semibold">Price</th>
               <th className="p-4 font-semibold">Departure</th>
               <th className="p-4 font-semibold">Arrival</th>
               <th className="p-4 font-semibold">Status</th>
@@ -165,25 +200,36 @@ const FlightDashboard = () => {
           </thead>
           <tbody>
             {flights.map((flight, index) => (
-              <tr 
-                key={flight.id} 
+              <tr
+                key={flight.id}
                 className={`${
-                  flight.status === "Cancelled" 
-                    ? 'bg-red-900/30' 
-                    : index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750'
+                  flight.status === "Cancelled"
+                    ? "bg-red-900/30"
+                    : index % 2 === 0
+                    ? "bg-gray-800"
+                    : "bg-gray-750"
                 } hover:bg-gray-700 transition duration-200`}
               >
-                <td className="p-4">{flight.airline}</td>
+                <td className="p-4 font-mono">{flight.flightName}</td>
                 <td className="p-4 font-mono">{flight.flightNumber}</td>
-                <td className="p-4">{flight.from} → {flight.to}</td>
-                <td className="p-4">{flight.classType}</td>
-                <td className="p-4">₹ {flight.price.toLocaleString()}</td>
-                <td className="p-4">{flight.departureTime}</td>
-                <td className="p-4">{flight.arrivalTime}</td>
                 <td className="p-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    flight.status === "Active" ? "bg-green-600" : "bg-red-600"
-                  }`}>
+                  {flight.from} → {flight.to}
+                </td>
+                <td className="p-4">
+                  {" "}
+                  {flight.departureDate} {flight.departureTime}
+                </td>
+                <td className="p-4">
+                  {flight.arrivalDate} {flight.arrivalTime}
+                </td>
+                <td className="p-4">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      flight.status === "On-Time"
+                        ? "bg-green-600"
+                        : "bg-red-600"
+                    }`}
+                  >
                     {flight.status}
                   </span>
                 </td>
@@ -196,7 +242,7 @@ const FlightDashboard = () => {
                   >
                     <Clock size={18} />
                   </button>
-                  {flight.status === "Active" && (
+                  {flight.status === "On-Time" && (
                     <button
                       onClick={() => openCancelFlightDialog(flight)}
                       className="bg-orange-600 hover:bg-orange-700 text-white p-2 rounded-lg transition duration-200"
@@ -228,11 +274,15 @@ const FlightDashboard = () => {
       {showDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-xl p-6 shadow-2xl max-w-md w-full">
-            {dialogType === 'delete' && (
+            {dialogType === "delete" && (
               <>
-                <h3 className="text-xl font-bold text-red-500 mb-4">Confirm Deletion</h3>
+                <h3 className="text-xl font-bold text-red-500 mb-4">
+                  Confirm Deletion
+                </h3>
                 <p className="mb-6">
-                  Are you sure you want to delete flight {selectedFlight.flightNumber} from {selectedFlight.from} to {selectedFlight.to}?
+                  Are you sure you want to delete flight{" "}
+                  {selectedFlight.flightNumber} from {selectedFlight.from} to{" "}
+                  {selectedFlight.to}?
                 </p>
                 <div className="flex justify-end space-x-4">
                   <button
@@ -251,14 +301,20 @@ const FlightDashboard = () => {
               </>
             )}
 
-            {dialogType === 'cancel' && (
+            {dialogType === "cancel" && (
               <>
-                <h3 className="text-xl font-bold text-orange-500 mb-4">Cancel Flight</h3>
+                <h3 className="text-xl font-bold text-orange-500 mb-4">
+                  Cancel Flight
+                </h3>
                 <p className="mb-6">
-                  Are you sure you want to cancel flight {selectedFlight.flightNumber} from {selectedFlight.from} to {selectedFlight.to}?
+                  Are you sure you want to cancel flight{" "}
+                  {selectedFlight.flightNumber} from {selectedFlight.from} to{" "}
+                  {selectedFlight.to}?
                 </p>
                 <p className="mb-6 text-yellow-400 text-sm">
-                  <strong>Note:</strong> Cancelling a flight will notify all passengers who have booked tickets. This action cannot be easily reversed.
+                  <strong>Note:</strong> Cancelling a flight will notify all
+                  passengers who have booked tickets. This action cannot be
+                  easily reversed.
                 </p>
                 <div className="flex justify-end space-x-4">
                   <button
@@ -277,13 +333,21 @@ const FlightDashboard = () => {
               </>
             )}
 
-            {dialogType === 'updateTime' && (
+            {dialogType === "updateTime" && (
               <>
-                <h3 className="text-xl font-bold text-purple-500 mb-4">Update Flight Details</h3>
+                <h3 className="text-xl font-bold text-purple-500 mb-4">
+                  Update Flight Details
+                </h3>
                 <p className="mb-4 text-gray-400">
-                  Flight: {selectedFlight.flightNumber} - {selectedFlight.airline}
+                  Flight: {selectedFlight.flightNumber} -{" "}
+                  {selectedFlight.airline}
                 </p>
-                <form onSubmit={(e) => { e.preventDefault(); updateFlightTime(); }}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    updateFlightTime();
+                  }}
+                >
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div>
                       <label className="block text-gray-400 mb-1">From</label>
@@ -308,7 +372,9 @@ const FlightDashboard = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-400 mb-1">Departure Time</label>
+                      <label className="block text-gray-400 mb-1">
+                        Departure Time
+                      </label>
                       <input
                         type="text"
                         name="departureTime"
@@ -320,7 +386,9 @@ const FlightDashboard = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-400 mb-1">Arrival Time</label>
+                      <label className="block text-gray-400 mb-1">
+                        Arrival Time
+                      </label>
                       <input
                         type="text"
                         name="arrivalTime"

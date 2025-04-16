@@ -18,7 +18,7 @@ const FlightSearch = () => {
 
   const handleSearch = () => {
     if (from && to && date) {
-      navigate(`/flights?from=${from}&to=${to}&date=${date}`);
+      navigate(`/booking/flightdetails?from=${from}&to=${to}&date=${date}`);
     }
   };
 

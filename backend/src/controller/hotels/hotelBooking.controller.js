@@ -159,6 +159,7 @@ const checkRoomAvailability = asyncHandler(async (req, res) => {
     try {
         const { roomId, startDate, endDate } = req.body;
 
+        console.log(req.body);
 
         const conflictingBookings = await HotelBooking.find({
             room: roomId,

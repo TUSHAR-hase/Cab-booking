@@ -399,14 +399,14 @@ const HotelDetailsPage = () => {
 
       // Create payment order
       const orderResponse = await axios.post(`${import.meta.env.VITE_API_URL}/create-order`, {
-        amount: totalAmount , // Convert to paise
+        amount: totalAmount, // Convert to paise
       });
 
       if (!orderResponse.data.success) throw new Error('Order creation failed');
 
       // Razorpay options
       const options = {
-        key: "rzp_test_Y8cefy5g53d5Se", // Replace with your Razorpay Key ID
+        key: "rzp_test_ChC1v5xGnKuucU", // Replace with your Razorpay Key ID
         amount: orderResponse.data.order.amount,
         currency: "INR",
         order_id: orderResponse.data.order.id,

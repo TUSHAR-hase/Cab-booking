@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { KeyRound } from 'lucide-react';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const FLightOtpPage = () => {
+    const navigate = useNavigate();
     const { email } = useParams();
     const [otp, setOtp] = useState(['', '', '', '']);
 
@@ -33,8 +36,9 @@ const FLightOtpPage = () => {
                 );
 
                 if (response.data.message === "User verified successfully") {
+                    Cookies.set('token', response.data.data);
                     alert("OTP verified successfully! Waiting for admin approval.");
-                    window.location.href = "http://localhost:5173/";
+                    navigate("/");
                 }
             } catch (error) {
                 console.error('Error occurred:', error.response || error);

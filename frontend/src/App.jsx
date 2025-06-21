@@ -58,7 +58,7 @@ import SuperLayout from "./Pages/Super/SuperLayout.jsx";
 import FlightAdmin from "./Pages/Super/FlightAdmin.jsx";
 import SuperHotelAdmin from "./Pages/Super/SuperHotelAdmin.jsx";
 import About from "./Pages/Main/About.jsx";
-import Contact from "./Pages/Main/contact.jsx";
+import Contact from "./Pages/Main/Contact.jsx";
 import RateStay from "./Pages/Hotel/RateStay.jsx";
 import RatingThankYou from "./Pages/Hotel/RatingThankYou.jsx";
 import HotelBookingManagement from "./Pages/Hotel/Owner/Dashboard/HotelBooking.jsx";

@@ -24,10 +24,7 @@ dotenv.config();
 import "./services/hotel/completeBookingCron.js"
 const app = express()
 
-app.use(cors({
-  origin: 'http://localhost:5173',  // Specify the exact origin of your front-end
-  credentials: true,               // Allow credentials (cookies, authorization headers)
-}));
+app.use(cors());
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"))

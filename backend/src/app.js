@@ -24,7 +24,10 @@ dotenv.config();
 import "./services/hotel/completeBookingCron.js"
 const app = express()
 
-app.use(cors());
+app.use(cors({
+  origin:"https://cab-booking-23fu7sl2d-tushar-hases-projects.vercel.app",
+  credentials: true
+}));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"))
